@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 public class PlannerEndpointsApplication {
+
 	/**
 	 * Runs application
 	 * @param args arguments
@@ -15,5 +16,6 @@ public class PlannerEndpointsApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(PlannerEndpointsApplication.class, args);
 	}
+
 
 }
