@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * Application class
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "pl.poznan.put")
 public class PlannerEndpointsApplication {
 
 	/**
