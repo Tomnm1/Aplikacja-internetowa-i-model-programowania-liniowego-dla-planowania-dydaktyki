@@ -10,10 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import pl.poznan.put.xml_reader.XmlReaderService;
 import pl.poznan.put.xml_reader.model.plan.Plan;
-import pl.poznan.put.xml_reader.model.worker.Worker;
 
 import java.io.File;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/xml")

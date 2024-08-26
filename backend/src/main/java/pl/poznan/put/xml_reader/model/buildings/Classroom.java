@@ -2,6 +2,8 @@ package pl.poznan.put.xml_reader.model.buildings;
 
 import jakarta.xml.bind.annotation.*;
 
+import java.util.List;
+
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "sala")
 public class Classroom {
@@ -27,7 +29,7 @@ public class Classroom {
     private String isDidactic;
 
     @XmlElement(name = "atrybutSali")
-    private String classroomAttribute;
+    private List<ClassroomAttribute> classroomAttributes;
 
     public void setId(int id) {
         this.id = id;
@@ -45,8 +47,8 @@ public class Classroom {
         return area;
     }
 
-    public String getClassroomAttribute() {
-        return classroomAttribute;
+    public List<ClassroomAttribute> getClassroomAttributes() {
+        return classroomAttributes;
     }
 
     public String getNumber() {
@@ -61,8 +63,8 @@ public class Classroom {
         this.capacity = capacity;
     }
 
-    public void setClassroomAttribute(String classroomAttribute) {
-        this.classroomAttribute = classroomAttribute;
+    public void setClassroomAttributes(List<ClassroomAttribute> classroomAttributes) {
+        this.classroomAttributes = classroomAttributes;
     }
 
     public void setIsDidactic(String didactic) {
