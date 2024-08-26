@@ -1,4 +1,4 @@
-package pl.poznan.put.xml_reader.model;
+package pl.poznan.put.xml_reader.model.worker;
 
 import jakarta.xml.bind.annotation.*;
 

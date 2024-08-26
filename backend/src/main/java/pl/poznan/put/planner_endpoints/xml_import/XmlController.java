@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import pl.poznan.put.xml_reader.XmlReaderService;
-import pl.poznan.put.xml_reader.model.Worker;
+import pl.poznan.put.xml_reader.model.plan.Plan;
+import pl.poznan.put.xml_reader.model.worker.Worker;
 
 import java.io.File;
 import java.util.List;
@@ -26,12 +27,12 @@ public class XmlController {
     }
 
     @PostMapping("/importXml")
-    public ResponseEntity<List<Worker>> importXml(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Plan> importXml(@RequestParam("file") MultipartFile file) {
         try {
             File xmlFile = File.createTempFile("temp", null);
             file.transferTo(xmlFile);
-            List<Worker> workers = xmlReaderService.getWorkersFromXml(xmlFile);
-            return ResponseEntity.ok(workers);
+            Plan plan = xmlReaderService.getPlanFromXml(xmlFile);
+            return ResponseEntity.ok(plan);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

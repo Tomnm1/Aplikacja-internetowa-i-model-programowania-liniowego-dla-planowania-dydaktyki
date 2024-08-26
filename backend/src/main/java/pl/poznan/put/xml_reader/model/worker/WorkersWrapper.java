@@ -1,4 +1,4 @@
-package pl.poznan.put.xml_reader.model;
+package pl.poznan.put.xml_reader.model.worker;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -14,7 +14,7 @@ public class WorkersWrapper {
     @XmlElement(name = "pracownik")
     private List<Worker> workers;
 
-    public List<Worker> getPracownicy() {
+    public List<Worker> getWorkers() {
         return workers;
     }
 
