@@ -5,6 +5,8 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import pl.poznan.put.xml_reader.model.buildings.BuildingsWrapper;
+import pl.poznan.put.xml_reader.model.subject_groups.SubjectGroupsWrapper;
+import pl.poznan.put.xml_reader.model.subjects.DidacticCycles;
 import pl.poznan.put.xml_reader.model.worker.WorkersWrapper;
 
 @XmlRootElement(name = "plan")
@@ -15,6 +17,29 @@ public class Plan {
 
     @XmlElement(name = "budynki")
     private BuildingsWrapper buildings;
+
+    @XmlElement(name = "cykleDydaktyczne")
+    private DidacticCycles didacticCycles;
+
+    @XmlElement(name = "grupyPrzedmiotow")
+    private SubjectGroupsWrapper subjectGroupWrapper;
+
+    // Getter i Setter
+    public SubjectGroupsWrapper getSubjectGroupWrapper() {
+        return subjectGroupWrapper;
+    }
+
+    public void setSubjectGroupWrapper(SubjectGroupsWrapper subjectGroupWrapper) {
+        this.subjectGroupWrapper = subjectGroupWrapper;
+    }
+
+    public DidacticCycles getDidacticCycles() {
+        return didacticCycles;
+    }
+
+    public void setDidacticCycles(DidacticCycles didacticCycles) {
+        this.didacticCycles = didacticCycles;
+    }
 
     public WorkersWrapper getWorkers() {
         return workers;
