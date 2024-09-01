@@ -30,7 +30,7 @@ const Topper = () => {
                     </h3>
 
                 </div>
-                <div className={"bg-white p-4"}>
+                <div className={"bg-white p-3.5"}>
                     <div className={"text-gray-500"}>
                         <PersonIcon/>
                     </div>

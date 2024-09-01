@@ -20,7 +20,7 @@ const routes = [
     },
     {
         name: "Sale",
-        link: "/",
+        link: "/sale",
         icon: <RoomPreferencesIcon/>,
     },
 ]

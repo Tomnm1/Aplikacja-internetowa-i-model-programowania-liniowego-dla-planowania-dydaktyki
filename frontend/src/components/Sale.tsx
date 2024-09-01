@@ -1,5 +1,12 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+// Sale.tsx
+import * as React from 'react';
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Close';
+
 import {
     GridRowModes,
     DataGrid,
@@ -9,58 +16,51 @@ import {
     GridRowId,
     GridRowModel,
     GridEventListener,
-    GridRowModesModel,
-    GridToolbar,
+    GridRowModesModel, GridToolbar,
 } from '@mui/x-data-grid';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Close';
-import ConfirmationDialog from "../utils/ConfirmationDialog.tsx";
-import { RootState } from '../app/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../app/store';
 import {
-    setRows,
+    addClassroom,
+    updateClassroom,
+    deleteClassroom,
     setRowModesModel,
-    addEmployee,
-    updateEmployee,
-    deleteEmployee,
-    setSelectedRow,
-    clearSelectedRow,
-} from '../app/slices/employeesSlice';
+} from '../app/slices/classroomSlice';
+import ConfirmationDialog from '../utils/ConfirmationDialog';
+import {useState} from "react";
 
-const roles = ['Market', 'Finance', 'Development'];
+const floors = ['First Floor', 'Second Floor', 'Third Floor'];
 
-function TopToolbar() {
-    const dispatch = useDispatch();
+const TopToolbar = () => {
+    const dispatch = useDispatch<AppDispatch>();
 
     const handleClick = () => {
-        const id = String(Math.random());
-        const newEmployee = { id, name: '', age: '', joinDate: new Date(), role: '', isNew: true };
-        dispatch(addEmployee(newEmployee));
-        dispatch(setRowModesModel((oldModel: GridRowModesModel) => ({
-            ...oldModel,
+        const id = String(Date.now());
+        const newClassroom = { id, name: '', capacity: '', floor: '', isNew: true };
+        dispatch(addClassroom(newClassroom));
+        dispatch(setRowModesModel({
             [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
-        })));
+        }));
     };
 
     return (
         <GridToolbarContainer>
             <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-                Dodaj pracownika
+                Dodaj salę
             </Button>
             <GridToolbar />
         </GridToolbarContainer>
     );
-}
+};
 
-const Pracownicy: React.FC = () => {
-    const dispatch = useDispatch();
-    const rows = useSelector((state: RootState) => state.employees.rows);
-    const rowModesModel = useSelector((state: RootState) => state.employees.rowModesModel);
-    const selectedRowName = useSelector((state: RootState) => state.employees.selectedRowName);
-    const [isDialogOpen, setDialogOpen] = React.useState(false);
+const Sale: React.FC = () => {
+    const dispatch = useDispatch<AppDispatch>();
+    const rows = useSelector((state: RootState) => state.classroom.rows);
+    const rowModesModel = useSelector((state: RootState) => state.classroom.rowModesModel);
+
+    const [isDialogOpen, setDialogOpen] = useState(false);
+    const [selectedRowId, setSelectedRowId] = useState<GridRowId | null>(null);
+    const [selectedRowName, setSelectedRowName] = useState<string | null>(null);
 
     const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -78,18 +78,18 @@ const Pracownicy: React.FC = () => {
 
     const handleDeleteClick = (id: GridRowId) => () => {
         const rowToDelete = rows.find((row) => row.id === id);
-        if (rowToDelete) {
-            dispatch(setSelectedRow({ id, name: rowToDelete.name }));
-            setDialogOpen(true);
-        }
+        setSelectedRowId(id);
+        setSelectedRowName(rowToDelete?.name || '');
+        setDialogOpen(true);
     };
 
     const handleDialogClose = (confirmed: boolean) => {
-        if (confirmed) {
-            dispatch(deleteEmployee());
+        if (confirmed && selectedRowId) {
+            dispatch(deleteClassroom(selectedRowId));
         }
         setDialogOpen(false);
-        dispatch(clearSelectedRow());
+        setSelectedRowId(null);
+        setSelectedRowName(null);
     };
 
     const handleCancelClick = (id: GridRowId) => () => {
@@ -98,9 +98,9 @@ const Pracownicy: React.FC = () => {
             [id]: { mode: GridRowModes.View, ignoreModifications: true },
         }));
 
-        const editedRow = rows.find((row) => row.id === id);
+        const editedRow = rows.find((row: { id: GridRowId; }) => row.id === id);
         if (editedRow?.isNew) {
-            dispatch(setRows(rows.filter((row) => row.id !== id)));
+            dispatch(deleteClassroom(id));
         }
     };
 
@@ -108,8 +108,12 @@ const Pracownicy: React.FC = () => {
         const updatedRow = {
             ...newRow,
             isNew: false,
+            id: newRow.id as GridRowId,
+            name: newRow.name as string,
+            capacity: newRow.capacity as number,
+            floor: newRow.floor as string,
         };
-        dispatch(updateEmployee(updatedRow as never));
+        dispatch(updateClassroom(updatedRow));
         return updatedRow;
     };
 
@@ -118,30 +122,23 @@ const Pracownicy: React.FC = () => {
     };
 
     const columns = [
-        { field: 'name', headerName: 'Name', width: 180, editable: true },
+        { field: 'name', headerName: 'Nazwa', width: 180, editable: true },
         {
-            field: 'age',
-            headerName: 'Age',
+            field: 'capacity',
+            headerName: 'Pojemność',
             type: 'number',
-            width: 80,
+            width: 120,
             align: 'left',
             headerAlign: 'left',
             editable: true,
         },
         {
-            field: 'joinDate',
-            headerName: 'Join date',
-            type: 'date',
+            field: 'floor',
+            headerName: 'Piętro',
             width: 180,
             editable: true,
-        },
-        {
-            field: 'role',
-            headerName: 'Department',
-            width: 220,
-            editable: true,
             type: 'singleSelect',
-            valueOptions: roles,
+            valueOptions: floors,
         },
         {
             field: 'actions',
@@ -188,7 +185,6 @@ const Pracownicy: React.FC = () => {
             },
         },
     ];
-    // todo zmiana dencity w zaleznosci od rozdzielczosci
 
     return (
         <>
@@ -206,12 +202,11 @@ const Pracownicy: React.FC = () => {
                 open={isDialogOpen}
                 onClose={handleDialogClose}
                 title={"Potwierdzenie"}
-                content={`Czy na pewno chcesz usunąć rekord ${selectedRowName}`}
+                content={`Czy na pewno chcesz usunąć salę ${selectedRowName}`}
                 action={"Potwierdź"}
             />
         </>
     );
 };
 
-export default Pracownicy;
-
+export default Sale;

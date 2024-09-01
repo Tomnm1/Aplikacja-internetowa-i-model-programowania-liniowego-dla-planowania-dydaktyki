@@ -3,8 +3,8 @@ import React from 'react';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import Home from './Home';
 import Pracownicy from './Pracownicy';
-import Contact from "./Contant.tsx";
 import Layout from "./Layout.tsx";
+import Sale from "./Sale.tsx";
 
 const App: React.FC = () => {
     return (
@@ -13,7 +13,7 @@ const App: React.FC = () => {
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/pracownicy" element={<Pracownicy />} />
-                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/sale" element={<Sale />} />
                 </Routes>
             </Layout>
         </Router>
