@@ -45,7 +45,7 @@ jobs:
 
       - name: Create the database schema
         run: |
-          psql -h localhost -U postgres -d inz -f ./DevOps_is_my_passion.sql
+          pg_restore  -h localhost -U postgres -d inz -f ./DevOps_is_my_passion.sql
         env:
           PGPASSWORD: test
       - name: Build Backend (Java)
@@ -57,15 +57,18 @@ jobs:
           npm install
           npm run build
 
-      - name: Package Frontend
+      - name: Package Frontend and SQL schema
         run: |
           cd frontend
           tar -czvf frontend-build.tar.gz build/
+          cd ..
+          tar -czvf database-schema.tar.gz DevOps_is_my_passion.sql
 
-      - name: Upload backend and frontend artifacts
+      - name: Upload backend, frontend, and database artifacts
         uses: actions/upload-artifact@v3
         with:
           name: application-artifacts
           path: |
             backend/target/*.jar
             frontend/frontend-build.tar.gz
+            database-schema.tar.gz
