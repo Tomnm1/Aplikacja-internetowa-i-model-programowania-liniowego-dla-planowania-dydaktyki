@@ -1,74 +1,45 @@
 name: Build and Deploy
+
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16.3
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: inz
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres" 
-          --health-interval 10s 
-          --health-timeout 5s 
-          --health-retries 5
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Frontend build
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          distribution: 'temurin'
+          node-version: '22.2.0'
+
+      - name: Install dependencies for frontend
+        run: cd frontend && npm install
+
+      - name: Build frontend
+        run: cd frontend && npm run build
+
+      # Backend build
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
           java-version: '21'
 
-      - name: Install PostgreSQL client
-        run: sudo apt-get install postgresql-client
+      - name: Build backend
+        run: cd backend && mvn clean package
 
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
-            echo "Waiting for PostgreSQL to be ready..."
-            sleep 3
-          done
-
-      - name: Create the database schema
-        run: |
-          pg_restore -h localhost -U postgres -d inz ./DevOps_is_my_passion.sql
-        env:
-          PGPASSWORD: test
-      - name: Build Backend (Java)
-        run: ./mvnw clean package -DskipTests
-
-      - name: Build Frontend (React)
-        run: |
-          cd frontend
-          npm install
-          npm run build
-
-      - name: Package Frontend and SQL schema
-        run: |
-          cd frontend
-          tar -czvf frontend-build.tar.gz build/
-          cd ..
-          tar -czvf database-schema.tar.gz DevOps_is_my_passion.sql
-
-      - name: Upload backend, frontend, and database artifacts
-        uses: actions/upload-artifact@v3
+      # Save build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
         with:
-          name: application-artifacts
+          name: build-artifacts
           path: |
+            frontend/build
             backend/target/*.jar
-            frontend/frontend-build.tar.gz
-            database-schema.tar.gz
