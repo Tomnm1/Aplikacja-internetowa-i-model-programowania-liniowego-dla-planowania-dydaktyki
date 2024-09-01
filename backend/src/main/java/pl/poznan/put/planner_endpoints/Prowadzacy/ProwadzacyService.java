@@ -90,6 +90,5 @@ public class ProwadzacyService {
     public void deleteAllProwadzacy(){
         prowadzacyRepository.deleteAll();
     }
-
     // Tu będzie więcej...
 }
