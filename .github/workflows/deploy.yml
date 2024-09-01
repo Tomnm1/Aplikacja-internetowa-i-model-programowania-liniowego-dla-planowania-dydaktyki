@@ -34,7 +34,7 @@ jobs:
           java-version: '21'
 
       - name: Install PostgreSQL client
-        run: sudo apt-get install postgresql-client
+        run: sudo apt-get install postgresql-client-16
 
       - name: Wait for PostgreSQL to be ready
         run: |
