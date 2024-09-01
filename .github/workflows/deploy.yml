@@ -45,7 +45,7 @@ jobs:
 
       - name: Create the database schema
         run: |
-          pg_restore  -h localhost -U postgres -d inz -f ./DevOps_is_my_passion.sql
+          pg_restore  -h localhost -U postgres -d inz ./DevOps_is_my_passion.sql
         env:
           PGPASSWORD: test
       - name: Build Backend (Java)
