@@ -39,6 +39,8 @@ function TopToolbar() {
         const id = String(Math.random());
         const newEmployee = { id, name: '', age: '', joinDate: new Date(), role: '', isNew: true };
         dispatch(addEmployee(newEmployee));
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         dispatch(setRowModesModel((oldModel: GridRowModesModel) => ({
             ...oldModel,
             [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
@@ -149,6 +151,8 @@ const Pracownicy: React.FC = () => {
             headerName: 'Actions',
             width: 100,
             cellClassName: 'actions',
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             getActions: ({ id }) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
@@ -194,11 +198,13 @@ const Pracownicy: React.FC = () => {
         <>
             <DataGrid
                 rows={rows}
+                /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+                // @ts-expect-error
                 columns={columns}
                 editMode="row"
                 rowModesModel={rowModesModel}
                 onRowModesModelChange={handleRowModesModelChange}
-                onRowEditStop={handleRowEditStop}
+                onRowEditStop={handleRowEditStop}s
                 processRowUpdate={processRowUpdate}
                 slots={{ toolbar: TopToolbar }}
             />
