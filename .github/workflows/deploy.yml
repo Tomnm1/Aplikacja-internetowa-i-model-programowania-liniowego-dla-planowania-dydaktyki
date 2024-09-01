@@ -34,7 +34,7 @@ jobs:
           java-version: '21'
 
       - name: Install PostgreSQL client
-        run: sudo apt-get install postgresql-client-16
+        run: sudo apt-get install postgresql-client
 
       - name: Wait for PostgreSQL to be ready
         run: |
@@ -45,7 +45,7 @@ jobs:
 
       - name: Create the database schema
         run: |
-          pg_restore  -h localhost -U postgres -d inz ./DevOps_is_my_passion.sql
+          pg_restore -h localhost -U postgres -d inz ./DevOps_is_my_passion.sql
         env:
           PGPASSWORD: test
       - name: Build Backend (Java)
