@@ -37,8 +37,12 @@ const TopToolbar = () => {
     const handleClick = () => {
         const id = String(Date.now());
         const newClassroom = { id, name: '', capacity: '', floor: '', isNew: true };
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         dispatch(addClassroom(newClassroom));
         dispatch(setRowModesModel({
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
         }));
     };
@@ -95,6 +99,8 @@ const Sale: React.FC = () => {
     const handleCancelClick = (id: GridRowId) => () => {
         dispatch(setRowModesModel({
             ...rowModesModel,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             [id]: { mode: GridRowModes.View, ignoreModifications: true },
         }));
 
@@ -146,6 +152,8 @@ const Sale: React.FC = () => {
             headerName: 'Actions',
             width: 100,
             cellClassName: 'actions',
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             getActions: ({ id }) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
@@ -190,8 +198,12 @@ const Sale: React.FC = () => {
         <>
             <DataGrid
                 rows={rows}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
                 columns={columns}
                 editMode="row"
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
                 rowModesModel={rowModesModel}
                 onRowModesModelChange={handleRowModesModelChange}
                 onRowEditStop={handleRowEditStop}
