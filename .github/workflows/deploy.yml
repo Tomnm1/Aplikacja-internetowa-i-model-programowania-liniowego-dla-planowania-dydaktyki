@@ -13,7 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Frontend build
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
@@ -25,7 +24,6 @@ jobs:
       - name: Build frontend
         run: cd frontend && npm run build
 
-      # Backend build
       - name: Set up Java
         uses: actions/setup-java@v2
         with:
@@ -33,9 +31,8 @@ jobs:
           java-version: '21'
 
       - name: Build backend
-        run: cd backend && mvn clean package
+        run: cd backend && mvn clean package -X
 
-      # Save build artifacts
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
         with:
