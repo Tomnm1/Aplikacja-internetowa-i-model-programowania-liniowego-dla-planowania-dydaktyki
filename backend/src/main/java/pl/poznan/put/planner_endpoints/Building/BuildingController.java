@@ -1,5 +1,4 @@
-package pl.poznan.put.planner_endpoints.Subject;
-
+package pl.poznan.put.planner_endpoints.Building;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -14,78 +13,79 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Controller for Subject resource
+ * Controller for Building resource
  */
-@RestController // TODO use http response builders to create success and fail responses
-@RequestMapping("/subjects")
-public class SubjectController {
+@RestController
+@RequestMapping("/buildings")
+public class BuildingController {
     @Autowired
-    private SubjectService subjectService;
+    private BuildingService BuildingService;
 
-    @Operation(summary = "Return all Subjects")
+    @Operation(summary = "Return all Buildings")
     @GetMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    array = @ArraySchema(schema = @Schema(implementation = Subject.class))
+                    array = @ArraySchema(schema = @Schema(implementation = Building.class))
             )
     })
-    public List<Subject> getAllSubject() {
-        return subjectService.getAllSubject();
+    public List<Building> getAllBuildings() {
+        return BuildingService.getAllBuildings();
     }
 
-    @Operation(summary = "Return Subject by id")
+    @Operation(summary = "Return Buildings by id")
     @GetMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Subject.class)
+                    schema = @Schema(implementation = Building.class)
             )
     })
-    public Optional<Subject> getSubjectByID(@PathVariable("id") Integer id) {
-        return subjectService.getSubjectByID(id);
+    public Optional<Building> getBuildingByID(@PathVariable("id") String id) {
+        return BuildingService.getBuildingByID(id);
     }
 
-    @Operation(summary = "Create Subject from provided JSON")
+    @Operation(summary = "Create Buildings from provided JSON")
     @PostMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Subject.class)
+                    schema = @Schema(implementation = Building.class)
             )
     })
     // TODO add check to fail if entity already exists
-    public Subject createSubject(@RequestBody Subject subject){
-        return subjectService.createSubject(subject);
+    public Building createBuilding(@RequestBody Building Building){
+        return BuildingService.createBuilding(Building);
     }
 
-    @Operation(summary = "Update specified Subject from provided JSON")
+    @Operation(summary = "Update specified Buildings from provided JSON")
     @PutMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Subject.class)
+                    schema = @Schema(implementation = Building.class)
             )
     })
-    public Subject updateSubjectByID(@PathVariable("id") Integer id, @RequestBody Subject subjectParams){
-        return subjectService.updateSubjectByID(id, subjectParams);
+    public Building updateBuildingByID(@PathVariable("id") String id, @RequestBody Building BuildingParams){
+        return BuildingService.updateBuildingByID(id, BuildingParams);
     }
 
-    @Operation(summary = "Delete all Subjects")
+    @Operation(summary = "Delete all Buildings")
     @DeleteMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(schema = @Schema(hidden = true))
     })
-    public void deleteAllSubjects() {
-        subjectService.deleteAllSubjects();
+    public void deleteAllBuilding() {
+        BuildingService.deleteAllBuildings();
     }
 
-    @Operation(summary = "Delete specified Subject")
+    @Operation(summary = "Delete specified Building")
     @DeleteMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(schema = @Schema(hidden = true))
     })
-    public void deleteSubject(@PathVariable("id") Integer id) {
-        subjectService.deleteSubjectByID(id);
+    public void deleteBuilding(@PathVariable("id") String id) {
+        BuildingService.deleteBuildingByID(id);
     }
 }
+

@@ -3,8 +3,8 @@ package pl.poznan.put.planner_endpoints.Room;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
-import org.springframework.data.domain.Persistable;
 import pl.poznan.put.planner_endpoints.Building.Building;
+import pl.poznan.put.planner_endpoints.Employee.Employee;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,7 @@ public class Room {
     @Column(name = "numer")
     public Integer number;
     @Id
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
     @JoinColumn(name = "budynek")
     public Building building;
     @Column(name = "pietro")
@@ -29,8 +29,9 @@ public class Room {
     public Integer numOfSeats;
     @Column(name = "typ")
     public String type;
-    @Column(name = "opiekun")
-    public Integer caretaker;
+    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @JoinColumn(name = "opiekun")
+    public Employee caretaker;
     @Type(JsonType.class)
     @Column(name = "wyposazenie", columnDefinition = "json")
     public Map<String, Boolean> equipment = new HashMap<>();;

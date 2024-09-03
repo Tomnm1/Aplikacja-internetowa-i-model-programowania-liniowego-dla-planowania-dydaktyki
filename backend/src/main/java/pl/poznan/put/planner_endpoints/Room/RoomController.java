@@ -1,7 +1,6 @@
 package pl.poznan.put.planner_endpoints.Room;
 
 
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -9,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,6 +50,12 @@ public class RoomController {
 
     @Operation(summary = "Create Room from provided JSON")
     @PostMapping
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = Room.class))
+            )
+    })
     public Room createRoom(@RequestBody Room room){
         // TODO add check to fail if entity already exists
         return roomService.createRoom(room);
@@ -59,18 +63,30 @@ public class RoomController {
 
     @Operation(summary = "Update specified Room from provided JSON")
     @PutMapping("/{building}/{number}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = Room.class))
+            )
+    })
     public Room updateRoomByID(@PathVariable("building") String building, @PathVariable("number") Integer number, @RequestBody Room roomParams){
         return roomService.updateRoomByID(new RoomCompositeKey(building, number), roomParams);
     }
 
     @Operation(summary = "Delete all rooms")
     @DeleteMapping
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(schema = @Schema(hidden = true))
+    })
     public void deleteAllRooms() {
         roomService.deleteAllRooms();
     }
 
     @Operation(summary = "Delete specified room")
     @DeleteMapping("/{building}/{number}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(schema = @Schema(hidden = true))
+    })
     public void deleteRoom(@PathVariable("building") String building, @PathVariable("number") Integer number) {
         roomService.deleteRoomByID(new RoomCompositeKey(building, number));
     }

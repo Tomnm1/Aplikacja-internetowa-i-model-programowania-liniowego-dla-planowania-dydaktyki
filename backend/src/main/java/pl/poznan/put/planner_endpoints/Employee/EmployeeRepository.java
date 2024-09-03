@@ -1,4 +1,4 @@
-package pl.poznan.put.planner_endpoints.Employees;
+package pl.poznan.put.planner_endpoints.Employee;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

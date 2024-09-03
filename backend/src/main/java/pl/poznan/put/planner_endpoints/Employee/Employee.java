@@ -1,4 +1,4 @@
-package pl.poznan.put.planner_endpoints.Employees;
+package pl.poznan.put.planner_endpoints.Employee;
 
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;

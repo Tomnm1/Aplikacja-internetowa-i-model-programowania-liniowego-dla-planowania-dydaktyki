@@ -13,5 +13,5 @@ import jakarta.persistence.Table;
 public class Building {
     @Id
     @Column(name = "budynek")
-    public String building; // TODO refactor to use relationships
+    public String building;
 }
