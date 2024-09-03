@@ -3,8 +3,10 @@ package pl.poznan.put.planner_endpoints.Employee;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
+import pl.poznan.put.planner_endpoints.JoinTables.Employees_Subjects;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,4 +29,6 @@ public class Employee {
     @Type(JsonType.class)
     public Map<String, String> preferences = new HashMap<>();
     // jak będzie uspecifikowane dokładnie: @Convert(converter = prefConverter.class)
+    @OneToMany(mappedBy = "employee") // Bidirectional
+    List<Employees_Subjects> employees_subjectsList;
 }

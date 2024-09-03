@@ -3,9 +3,12 @@ package pl.poznan.put.planner_endpoints.Room;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * Composite key class for Room entity
+ */
 public class RoomCompositeKey implements Serializable {
-    private Integer number;
-    private String building;
+    public Integer number;
+    public String building;
 
     public RoomCompositeKey(){}
 
