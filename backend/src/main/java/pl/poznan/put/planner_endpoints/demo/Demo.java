@@ -1,4 +1,4 @@
-package pl.poznan.put.planner_endpoints.demo;
+package pl.poznan.put.planner_endpoints.Demo;
 
 /**
  * Simple resource class for demonstration
