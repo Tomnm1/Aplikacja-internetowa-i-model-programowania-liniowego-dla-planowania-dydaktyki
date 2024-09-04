@@ -1,6 +1,7 @@
 package pl.poznan.put.planner_endpoints.Subject;
 
 import jakarta.persistence.*;
+import pl.poznan.put.planner_endpoints.Course.Course;
 
 /**
  * Data model for subjects table
@@ -22,6 +23,7 @@ public class Subject {
     public Boolean elective;
     @Column(name = "planowany")
     public Boolean planned;
-    @Column(name = "kierunek")
-    public /*Course*/Integer course; // TODO refactor to use relationships
+    @JoinColumn(name = "kierunek")
+    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    public Course course;
 }

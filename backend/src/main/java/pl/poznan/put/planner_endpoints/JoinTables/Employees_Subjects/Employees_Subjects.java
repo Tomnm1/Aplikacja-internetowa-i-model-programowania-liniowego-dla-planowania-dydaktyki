@@ -1,4 +1,4 @@
-package pl.poznan.put.planner_endpoints.JoinTables;
+package pl.poznan.put.planner_endpoints.JoinTables.Employees_Subjects;
 
 import jakarta.persistence.*;
 import pl.poznan.put.planner_endpoints.Employee.Employee;
@@ -16,7 +16,7 @@ public class Employees_Subjects {
     @JoinColumn(name = "przedmiot")
     public SubjectType subjectType;
     @Id
-    @ManyToOne(cascade = CascadeType.PERSIST) // Bidirectional
+    @ManyToOne(cascade = CascadeType.PERSIST, optional = false) // Bidirectional
     @JoinColumn(name = "prowadzacy")
     public Employee employee;
     @Column(name = "liczba_grup")

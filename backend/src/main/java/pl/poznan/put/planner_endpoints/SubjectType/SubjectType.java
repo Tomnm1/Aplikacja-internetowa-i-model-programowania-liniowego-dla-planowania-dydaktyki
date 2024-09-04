@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import pl.poznan.put.planner_endpoints.Subject.Subject;
 
 @Entity
-@Table(name = "formy przedmiotow")
+@Table(name = "formy_przedmiotow")
 public class SubjectType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,7 +3,7 @@ package pl.poznan.put.planner_endpoints.Employee;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
-import pl.poznan.put.planner_endpoints.JoinTables.Employees_Subjects;
+import pl.poznan.put.planner_endpoints.JoinTables.Employees_Subjects.Employees_Subjects;
 
 import java.util.HashMap;
 import java.util.List;

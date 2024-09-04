@@ -1,4 +1,4 @@
 /**
- * This is a demo package
+ * This is a Demo package
  */
-package pl.poznan.put.planner_endpoints.demo;
+package pl.poznan.put.planner_endpoints.Demo;
