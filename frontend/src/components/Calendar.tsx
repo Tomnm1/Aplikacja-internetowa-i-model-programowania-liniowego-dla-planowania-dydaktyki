@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {CalendarViewProps, Schedule} from "../utils/Interfaces.ts";
 import Draggable, {DraggableData, DraggableEvent} from 'react-draggable';
 import Select from 'react-select';
@@ -25,8 +25,10 @@ const Calendar: React.FC<CalendarViewProps> = ({teachers, groups, rooms, hours, 
         setDragging(false); // Koniec dragowania
     };
 
-    setActiveSchedules(schedules);
+    useEffect(() => {
+        setActiveSchedules(schedules);
 
+    }, []);
     const filteredSchedules = activeSchedules.filter(schedule =>
         (selectedTeachers.length === 0 || schedule.teacherIds.some(id => selectedTeachers.includes(id))) &&
         (selectedRooms.length === 0 || selectedRooms.includes(schedule.roomId)) &&
