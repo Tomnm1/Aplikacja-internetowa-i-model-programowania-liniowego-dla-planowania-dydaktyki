@@ -3,7 +3,6 @@ import {CalendarViewProps, Schedule} from "../utils/Interfaces.ts";
 import Draggable, {DraggableData, DraggableEvent} from 'react-draggable';
 import Select from 'react-select';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 //type AxisType = 'hours' | 'rooms' | 'groups' | 'teachers';
 
 const Calendar: React.FC<CalendarViewProps> = ({teachers, groups, rooms, hours, schedules}) => {
