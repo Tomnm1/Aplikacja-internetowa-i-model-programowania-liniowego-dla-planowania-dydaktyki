@@ -1,4 +1,4 @@
-// Sale.tsx
+// Classrooms.tsx
 import * as React from 'react';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
@@ -57,7 +57,7 @@ const TopToolbar = () => {
     );
 };
 
-const Sale: React.FC = () => {
+const Classrooms: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const rows = useSelector((state: RootState) => state.classroom.rows);
     const rowModesModel = useSelector((state: RootState) => state.classroom.rowModesModel);
@@ -221,4 +221,4 @@ const Sale: React.FC = () => {
     );
 };
 
-export default Sale;
+export default Classrooms;

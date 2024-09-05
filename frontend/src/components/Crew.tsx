@@ -57,7 +57,7 @@ function TopToolbar() {
     );
 }
 
-const Pracownicy: React.FC = () => {
+const Crew: React.FC = () => {
     const dispatch = useDispatch();
     const rows = useSelector((state: RootState) => state.employees.rows);
     const rowModesModel = useSelector((state: RootState) => state.employees.rowModesModel);
@@ -219,5 +219,5 @@ const Pracownicy: React.FC = () => {
     );
 };
 
-export default Pracownicy;
+export default Crew;
 

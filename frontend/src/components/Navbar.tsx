@@ -6,6 +6,7 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import {CalendarMonth, DesignServices} from "@mui/icons-material";
 
 const routes = [
     {
@@ -15,14 +16,25 @@ const routes = [
     },
     {
         name: "Pracownicy",
-        link: "/pracownicy",
+        link: "/crew",
         icon: <BadgeIcon />
     },
     {
         name: "Sale",
-        link: "/sale",
+        link: "/classrooms",
         icon: <RoomPreferencesIcon/>,
     },
+    {
+        name: "Kalendarz",
+        link: "/calendar",
+        icon: <CalendarMonth/>,
+    },    {
+        name: "Dezyderaty",
+        link: "/desiderata",
+        icon: <DesignServices/>,
+    },
+
+
 ]
 const Navbar: React.FC = () => {
     const [showMenu, setShowMenu] = useState<boolean>(true);

@@ -1,19 +1,9 @@
 // classroomSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { GridRowId } from '@mui/x-data-grid';
+import {ClassroomRow, ClassroomState} from "../../utils/Interfaces.ts";
 
-interface ClassroomRow {
-    id: GridRowId;
-    name: string;
-    capacity: number;
-    floor: string;
-    isNew: boolean;
-}
 
-interface ClassroomState {
-    rows: ClassroomRow[];
-    rowModesModel: Record<GridRowId, { mode: string }>;
-}
 
 const initialState: ClassroomState = {
     rows: [
