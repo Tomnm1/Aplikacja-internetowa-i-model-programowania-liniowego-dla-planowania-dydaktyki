@@ -48,7 +48,7 @@
 			<version>2.6.0</version>
 		</dependency>
 
-		<!-- Postgres -->
+		<!-- Postgres & Hibernate JPA-->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -62,7 +62,20 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>io.hypersistence</groupId>
+			<artifactId>hypersistence-utils-hibernate-63</artifactId>
+			<version>3.8.2</version>
+		</dependency>
+    
+		<!-- https://mvnrepository.com/artifact/com.google.ortools/ortools-java -->
+		<dependency>
+			<groupId>com.google.ortools</groupId>
+			<artifactId>ortools-java</artifactId>
+			<version>9.9.3963</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

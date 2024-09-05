@@ -1,4 +1,4 @@
-package pl.poznan.put.planner_endpoints.demo;
+package pl.poznan.put.planner_endpoints.Demo;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Simple demo REST controller
+ * Simple Demo REST controller
  */
 @RestController
 public class DemoController {
@@ -29,7 +29,7 @@ public class DemoController {
      * @return response (text and sequence number)
      */
     @Operation(summary = "Return query param as response + sequence number")
-    @GetMapping("/demo")
+    @GetMapping("/Demo")
     public Demo getDemo(@RequestParam(value = "text", defaultValue = "") String text) {
         return new Demo(String.format(getTemplate, text), counter.incrementAndGet());
     }
@@ -40,7 +40,7 @@ public class DemoController {
      * @return response (text and sequence number)
      */
     @Operation(summary = "Return raw body as response + sequence number")
-    @PostMapping("/demo")
+    @PostMapping("/Demo")
     public Demo postDemo(@RequestBody String text) {
         return new Demo(String.format(postTemplate, text), counter.incrementAndGet());
     }
