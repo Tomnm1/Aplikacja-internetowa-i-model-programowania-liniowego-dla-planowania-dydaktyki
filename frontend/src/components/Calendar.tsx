@@ -1,11 +1,13 @@
 import React, {useState} from 'react';
 import {CalendarViewProps, Schedule} from "../utils/Interfaces.ts";
-import Draggable from 'react-draggable';
+import Draggable, {DraggableData, DraggableEvent} from 'react-draggable';
 import Select from 'react-select';
 
-type AxisType = 'hours' | 'rooms' | 'groups' | 'teachers';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+//type AxisType = 'hours' | 'rooms' | 'groups' | 'teachers';
 
-const Calendar: React.FC<CalendarViewProps> = ({ teachers, groups, rooms, hours, schedules }) => {
+const Calendar: React.FC<CalendarViewProps> = ({teachers, groups, rooms, hours, schedules}) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [activeSchedules, setActiveSchedules] = useState<Schedule[]>(schedules);
     const [selectedTeachers, setSelectedTeachers] = useState<number[]>([]);
     const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
@@ -14,12 +16,12 @@ const Calendar: React.FC<CalendarViewProps> = ({ teachers, groups, rooms, hours,
     const [dragging, setDragging] = useState<boolean>(false); // Do obsługi stylizacji podczas dragowania
 
     // Przetworzenie nauczycieli/grup/sal/godzin do formatów akceptowanych przez react-select
-    const teacherOptions = teachers.map(teacher => ({ value: teacher.id, label: teacher.name }));
-    const roomOptions = rooms.map(room => ({ value: room.id, label: room.name }));
-    const hourOptions = hours.map(hour => ({ value: hour.id, label: hour.timeRange }));
-    const groupOptions = groups.map(group => ({ value: group.id, label: group.name }));
+    const teacherOptions = teachers.map(teacher => ({value: teacher.id, label: teacher.name}));
+    const roomOptions = rooms.map(room => ({value: room.id, label: room.name}));
+    const hourOptions = hours.map(hour => ({value: hour.id, label: hour.timeRange}));
+    const groupOptions = groups.map(group => ({value: group.id, label: group.name}));
 
-    const handleStopDrag = (e: any, data: any, scheduleId: number) => {
+    const handleStopDrag = (_e: DraggableEvent, data: DraggableData, scheduleId: number) => {
         console.log(`Przeciągnięto plan ${scheduleId} na pozycję X: ${data.x}, Y: ${data.y}`);
         setDragging(false); // Koniec dragowania
     };
@@ -33,9 +35,9 @@ const Calendar: React.FC<CalendarViewProps> = ({ teachers, groups, rooms, hours,
     );
 
     const findTeacherById = (id: number) => teachers.find(t => t.id === id)?.name || '';
-    const findRoomById = (id: number) => rooms.find(r => r.id === id)?.name || '';
+    //const findRoomById = (id: number) => rooms.find(r => r.id === id)?.name || '';
     const findGroupById = (id: number) => groups.find(g => g.id === id)?.name || '';
-    const findHourById = (id: number) => hours.find(h => h.id === id)?.timeRange || '';
+   // const findHourById = (id: number) => hours.find(h => h.id === id)?.timeRange || '';
 
     return (
         <div className="flex flex-col h-full w-full p-4">
