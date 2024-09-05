@@ -25,7 +25,8 @@ const Calendar: React.FC<CalendarViewProps> = ({teachers, groups, rooms, hours, 
         setDragging(false); // Koniec dragowania
     };
 
-    // Filtrowanie planu
+    setActiveSchedules(schedules);
+
     const filteredSchedules = activeSchedules.filter(schedule =>
         (selectedTeachers.length === 0 || schedule.teacherIds.some(id => selectedTeachers.includes(id))) &&
         (selectedRooms.length === 0 || selectedRooms.includes(schedule.roomId)) &&
