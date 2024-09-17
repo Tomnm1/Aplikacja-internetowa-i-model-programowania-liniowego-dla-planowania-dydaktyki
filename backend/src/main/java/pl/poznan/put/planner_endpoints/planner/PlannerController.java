@@ -26,6 +26,17 @@ public class PlannerController {
             ArrayList<String> rooms = new ArrayList<>(
                     List.of("142", "143")
             );
+            ArrayList<String> teachers = new ArrayList<>(
+                    List.of("AD", "RW", "RK")
+            );
+
+            Map<String, List<String>> subjectsToTeachers = new HashMap<>();
+            subjectsToTeachers.put("PTC", List.of("RW", "RK"));
+            subjectsToTeachers.put("Prr", List.of("RW"));
+            subjectsToTeachers.put("Prz", List.of("AD", "RW"));
+            subjectsToTeachers.put("SK1", List.of("AD"));
+            subjectsToTeachers.put("ASK", List.of("RK"));
+            subjectsToTeachers.put("SBD", List.of("RK", "AD"));
 
             Map<String, List<String>> roomToSubjects = new HashMap<>();
             roomToSubjects.put("142", List.of("PTC", "Prr", "Prz"));
@@ -39,7 +50,7 @@ public class PlannerController {
                             "Pt 08:00", "Pt 09:45")
             );
 
-            Planner planner = new Planner(groups, subjects, rooms, timeSlots, roomToSubjects);
+            Planner planner = new Planner(groups, subjects, rooms, timeSlots, roomToSubjects, subjectsToTeachers, teachers);
 
             List<String[]> optimizedSchedule = planner.optimizeSchedule();
 
@@ -57,7 +68,7 @@ public class PlannerController {
         // Print header
         System.out.print("    Time |");
         for (int g = 0; g < numGroups; ++g) {
-            System.out.print("------" + groups.get(g) + "----|");
+            System.out.print("-------" + groups.get(g) + "------|");
         }
         System.out.println();
 
@@ -68,7 +79,7 @@ public class PlannerController {
                 if (schedule.get(t)[g] != null) {
                     System.out.print(schedule.get(t)[g] + "|");
                 } else {
-                    System.out.print("------------|");
+                    System.out.print("---------------|");
                 }
             }
             System.out.println();

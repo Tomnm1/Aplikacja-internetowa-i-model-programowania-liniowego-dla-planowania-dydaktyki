@@ -14,14 +14,18 @@ public class Planner {
     private final ArrayList<String> rooms;
     private final ArrayList<String> timeSlots;
     private final Map<String, List<String>> roomToSubjects;
+    private final Map<String, List<String>> subjectsToTeachers;
+    private final ArrayList<String> teachers;
 
     private final int numGroups;
     private final int numRooms;
     private final int numSubjects;
     private final int numTimeSlots;
+    private final int numTeachers;
 
     public Planner(ArrayList<String> groups, ArrayList<String> subjects, ArrayList<String> rooms,
-                   ArrayList<String> timeSlots, Map<String, List<String>> roomToSubjects) {
+                   ArrayList<String> timeSlots, Map<String, List<String>> roomToSubjects,
+                   Map<String, List<String>> subjectsToTeachers, ArrayList<String> teachers) {
         Loader.loadNativeLibraries();
 
         this.groups = groups;
@@ -29,23 +33,28 @@ public class Planner {
         this.rooms = rooms;
         this.timeSlots = timeSlots;
         this.roomToSubjects = roomToSubjects;
+        this.subjectsToTeachers = subjectsToTeachers;
+        this.teachers = teachers;
 
         this.numGroups = groups.size();
         this.numSubjects = subjects.size();
         this.numRooms = rooms.size();
         this.numTimeSlots = timeSlots.size();
+        this.numTeachers = teachers.size();
     }
 
     public List<String[]> optimizeSchedule() {
         CpModel model = new CpModel();
 
-        // Variables - dana grupa g, w danej sali s, o danym czasie t, ma przedmiot p
-        Literal[][][][] x = new Literal[numGroups][numRooms][numTimeSlots][numSubjects];
+        // Variables - dana grupa g, w danej sali s, o danym czasie t, ma przedmiot p z nauczycielem n
+        Literal[][][][][] x = new Literal[numGroups][numRooms][numTimeSlots][numSubjects][numTeachers];
         for (int g = 0; g < numGroups; ++g) {
             for (int s = 0; s < numRooms; ++s) {
                 for (int t = 0; t < numTimeSlots; ++t) {
                     for (int p = 0; p < numSubjects; ++p) {
-                        x[g][s][t][p] = model.newBoolVar("x_" + g + "_" + s + "_" + t + "_" + p);
+                        for (int n = 0; n < numTeachers; ++n){
+                            x[g][s][t][p][n] = model.newBoolVar("x_" + g + "_" + s + "_" + t + "_" + p + "_" + n);
+                        }
                     }
                 }
             }
@@ -58,7 +67,9 @@ public class Planner {
                 LinearExprBuilder roomConstraint = LinearExpr.newBuilder();
                 for (int g = 0; g < numGroups; ++g) {
                     for (int p = 0; p < numSubjects; ++p) {
-                        roomConstraint.addTerm(x[g][s][t][p], 1);
+                        for (int n = 0; n < numTeachers; ++n) {
+                            roomConstraint.addTerm(x[g][s][t][p][n], 1);
+                        }
                     }
                 }
                 model.addLessOrEqual(roomConstraint, 1);
@@ -71,7 +82,9 @@ public class Planner {
                 List<Literal> groupSubjectConstraint = new ArrayList<>();
                 for (int s = 0; s < numRooms; ++s) {
                     for (int t = 0; t < numTimeSlots; ++t) {
-                        groupSubjectConstraint.add(x[g][s][t][p]);
+                        for (int n =0; n < numTeachers; ++n) {
+                            groupSubjectConstraint.add(x[g][s][t][p][n]);
+                        }
                     }
                 }
                 model.addExactlyOne(groupSubjectConstraint);
@@ -87,7 +100,42 @@ public class Planner {
                     for (int p = 0; p < numSubjects; ++p) {
                         String subject = subjects.get(p);
                         if (!allowedSubjects.contains(subject)) {
-                            model.addEquality(x[g][s][t][p], 0); //ograniczenie wykluczające
+                            for (int n = 0; n < numTeachers; ++n) {
+                                model.addEquality(x[g][s][t][p][n], 0); // Ograniczenie wykluczające
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Ograniczenie: nauczyciel może prowadzić tylko jeden przedmiot w jednym czasie.
+        for (int n = 0; n < numTeachers; ++n) {
+            for (int t = 0; t < numTimeSlots; ++t) {
+                LinearExprBuilder teacherConstraint = LinearExpr.newBuilder();
+                for (int g = 0; g < numGroups; ++g) {
+                    for (int s = 0; s < numRooms; ++s) {
+                        for (int p = 0; p < numSubjects; ++p) {
+                            teacherConstraint.addTerm(x[g][s][t][p][n], 1);
+                        }
+                    }
+                }
+                model.addLessOrEqual(teacherConstraint, 1);
+            }
+        }
+
+        // 5. Ograniczenie: nauczyciel może prowadzić tylko przypisane mu przedmioty.
+        for (int p = 0; p < numSubjects; ++p) {
+            String subject = subjects.get(p);
+            List<String> allowedTeachers = subjectsToTeachers.get(subject);
+            for (int n = 0; n < numTeachers; ++n) {
+                String teacher = teachers.get(n);
+                if (!allowedTeachers.contains(teacher)) {
+                    for (int g = 0; g < numGroups; ++g) {
+                        for (int s = 0; s < numRooms; ++s) {
+                            for (int t = 0; t < numTimeSlots; ++t) {
+                                model.addEquality(x[g][s][t][p][n], 0); // Nauczyciel nie może prowadzić tego przedmiotu
+                            }
                         }
                     }
                 }
@@ -110,8 +158,10 @@ public class Planner {
             for (int g = 0; g < numGroups; ++g) {
                 for (int s = 0; s < numRooms; ++s) {
                     for (int p = 0; p < numSubjects; ++p) {
-                        if (solver.booleanValue(x[g][s][t][p])) {
-                            row[g] = "Room " + rooms.get(s) + " " + subjects.get(p);
+                        for (int n = 0; n < numTeachers; ++n) {
+                            if (solver.booleanValue(x[g][s][t][p][n])) {
+                                row[g] = "Room " + rooms.get(s) + " " + subjects.get(p) + " " + teachers.get(n);
+                            }
                         }
                     }
                 }
