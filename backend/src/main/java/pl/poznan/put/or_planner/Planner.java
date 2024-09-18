@@ -9,13 +9,13 @@ import java.util.Map;
 
 public class Planner {
 
-    private final ArrayList<String> groups;
-    private final ArrayList<String> subjects;
-    private final ArrayList<String> rooms;
-    private final ArrayList<String> timeSlots;
+    private final List<String> groups;
+    private final List<String> subjects;
+    private final List<String> rooms;
+    private final List<String> timeSlots;
     private final Map<String, List<String>> roomToSubjects;
     private final Map<String, List<String>> subjectsToTeachers;
-    private final ArrayList<String> teachers;
+    private final List<String> teachers;
 
     private final int numGroups;
     private final int numRooms;
@@ -23,9 +23,9 @@ public class Planner {
     private final int numTimeSlots;
     private final int numTeachers;
 
-    public Planner(ArrayList<String> groups, ArrayList<String> subjects, ArrayList<String> rooms,
-                   ArrayList<String> timeSlots, Map<String, List<String>> roomToSubjects,
-                   Map<String, List<String>> subjectsToTeachers, ArrayList<String> teachers) {
+    public Planner(List<String> groups, List<String> subjects, List<String> rooms,
+                   List<String> timeSlots, Map<String, List<String>> roomToSubjects,
+                   Map<String, List<String>> subjectsToTeachers, List<String> teachers) {
         Loader.loadNativeLibraries();
 
         this.groups = groups;
