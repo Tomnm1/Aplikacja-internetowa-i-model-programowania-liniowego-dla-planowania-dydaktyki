@@ -7,12 +7,12 @@ public class PlannerData {
     private List<String> groups;
     private List<String> subjects;
     private List<String> rooms;
+    private List<String> teachers;
     private List<String> timeSlots;
     private Map<String, List<String>> roomToSubjects;
     private Map<String, List<String>> subjectsToTeachers;
-    private List<String> teachers;
+    private Map<String, List<String>> groupsToSubjects;
 
-    // Getters and setters
     public List<String> getGroups() {
         return groups;
     }
@@ -68,4 +68,7 @@ public class PlannerData {
     public void setTeachers(List<String> teachers) {
         this.teachers = teachers;
     }
+
+    public void setGroupsToSubjects(Map<String, List<String>> groupsToSubjects){ this.groupsToSubjects = groupsToSubjects; }
+    public Map<String, List<String>> getGroupsToSubjects() { return groupsToSubjects; }
 }

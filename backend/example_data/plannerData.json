@@ -2,13 +2,20 @@
   "groups": ["L1", "L2", "L3", "L4"],
   "subjects": ["PTC", "Prr", "Prz", "SK1", "ASK", "SBD"],
   "rooms": ["142", "143"],
+  "teachers": ["AD", "RW", "RK"],
   "timeSlots": [
     "Pn 08:00", "Pn 09:45", "Pn 11:45",
     "Wt 08:00", "Wt 09:45", "Wt 11:45",
     "Śr 08:00", "Śr 09:45", "Śr 11:45",
     "Cz 08:00", "Cz 09:45", "Cz 11:45",
-    "Pt 08:00", "Pt 09:45"
+    "Pt 08:00", "Pt 09:45", "Pt 11:45"
   ],
+  "groupsToSubjects": {
+    "L1": ["PTC", "Prr", "Prz", "SK1"],
+    "L2": ["SK1", "ASK", "SBD"],
+    "L3": ["PTC", "Prr", "Prz", "SK1", "ASK", "SBD"],
+    "L4": ["PTC", "Prr", "Prz", "SK1", "ASK", "SBD"]
+  },
   "roomToSubjects": {
     "142": ["PTC", "Prr", "Prz"],
     "143": ["Prz", "SK1", "ASK", "SBD"]
@@ -20,6 +27,5 @@
     "SK1": ["AD"],
     "ASK": ["RK"],
     "SBD": ["RK", "AD"]
-  },
-  "teachers": ["AD", "RW", "RK"]
+  }
 }

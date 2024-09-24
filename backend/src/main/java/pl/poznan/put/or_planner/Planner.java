@@ -92,16 +92,16 @@ public class Planner {
         }
 
         // 3. Ograniczenie: przedmioty mogą odbywać sie w określonych salach
-        for (int g = 0; g < numGroups; ++g) {
-            for (int s = 0; s < numRooms; ++s) {
-                String room = rooms.get(s);
-                List<String> allowedSubjects = roomToSubjects.get(room);
-                for (int t = 0; t < numTimeSlots; ++t) {
-                    for (int p = 0; p < numSubjects; ++p) {
-                        String subject = subjects.get(p);
-                        if (!allowedSubjects.contains(subject)) {
+        for (int s = 0; s < numRooms; ++s) {
+            String room = rooms.get(s);
+            List<String> allowedSubjects = roomToSubjects.get(room);
+            for (int p = 0; p < numSubjects; ++p) {
+                String subject = subjects.get(p);
+                if (!allowedSubjects.contains(subject)) {
+                    for (int t = 0; t < numTimeSlots; ++t) {
+                        for (int g = 0; g < numGroups; ++g) {
                             for (int n = 0; n < numTeachers; ++n) {
-                                model.addEquality(x[g][s][t][p][n], 0); // Ograniczenie wykluczające
+                            model.addEquality(x[g][s][t][p][n], 0); // Ograniczenie wykluczające
                             }
                         }
                     }
