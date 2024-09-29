@@ -16,6 +16,7 @@ public class Planner {
     private final Map<String, List<String>> roomToSubjects;
     private final Map<String, List<String>> subjectsToTeachers;
     private final List<String> teachers;
+    private final Map<String, List<String>> groupsToSubjects;
 
     private final int numGroups;
     private final int numRooms;
@@ -25,7 +26,8 @@ public class Planner {
 
     public Planner(List<String> groups, List<String> subjects, List<String> rooms,
                    List<String> timeSlots, Map<String, List<String>> roomToSubjects,
-                   Map<String, List<String>> subjectsToTeachers, List<String> teachers) {
+                   Map<String, List<String>> subjectsToTeachers, List<String> teachers,
+                   Map<String, List<String>> groupsToSubjects) {
         Loader.loadNativeLibraries();
 
         this.groups = groups;
@@ -35,6 +37,7 @@ public class Planner {
         this.roomToSubjects = roomToSubjects;
         this.subjectsToTeachers = subjectsToTeachers;
         this.teachers = teachers;
+        this.groupsToSubjects = groupsToSubjects;
 
         this.numGroups = groups.size();
         this.numSubjects = subjects.size();
@@ -76,18 +79,23 @@ public class Planner {
             }
         }
 
-        // 2. Ograniczenie: każda grupa musi mieć każdy przedmiot w jednym czasie i jednej sali.
+        // 2. Ograniczenie: każda grupa musi mieć określone przedmioty w jednym czasie i jednej sali.
         for (int g = 0; g < numGroups; ++g) {
+            String group = groups.get(g);
+            List<String> requiredSubjects = groupsToSubjects.get(group);
             for (int p = 0; p < numSubjects; ++p) {
-                List<Literal> groupSubjectConstraint = new ArrayList<>();
-                for (int s = 0; s < numRooms; ++s) {
-                    for (int t = 0; t < numTimeSlots; ++t) {
-                        for (int n =0; n < numTeachers; ++n) {
-                            groupSubjectConstraint.add(x[g][s][t][p][n]);
+                String subject = subjects.get(p);
+                if(requiredSubjects.contains(subject)) {
+                    List<Literal> groupSubjectConstraint = new ArrayList<>();
+                    for (int s = 0; s < numRooms; ++s) {
+                        for (int t = 0; t < numTimeSlots; ++t) {
+                            for (int n = 0; n < numTeachers; ++n) {
+                                groupSubjectConstraint.add(x[g][s][t][p][n]);
+                            }
                         }
                     }
+                    model.addExactlyOne(groupSubjectConstraint);
                 }
-                model.addExactlyOne(groupSubjectConstraint);
             }
         }
 

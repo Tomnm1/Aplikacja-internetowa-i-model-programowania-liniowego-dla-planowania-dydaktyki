@@ -25,8 +25,11 @@ public class PlannerController {
             Map<String, List<String>> roomToSubjects = plannerData.getRoomToSubjects();
             Map<String, List<String>> subjectsToTeachers = plannerData.getSubjectsToTeachers();
             List<String> teachers = plannerData.getTeachers();
+            Map<String, List<String>> groupsToSubjects = plannerData.getGroupsToSubjects();
+            Map<String, String> subjectFrequency = plannerData.getSubjectFrequency();
 
-            Planner planner = new Planner(groups, subjects, rooms, timeSlots, roomToSubjects, subjectsToTeachers, teachers);
+            Planner planner = new Planner(groups, subjects, rooms, timeSlots, roomToSubjects,
+                    subjectsToTeachers, teachers, groupsToSubjects);
 
             List<String[]> optimizedSchedule = planner.optimizeSchedule();
 
@@ -43,14 +46,13 @@ public class PlannerController {
         int numGroups = groups.size();
         int numTimeSlots = timeSlots.size();
 
-        // Print header
+        System.out.println("Pierwszy slot - tydzień parzysty \nDrugi slot tydzień nieparzysty");
         System.out.print("    Time |");
         for (int g = 0; g < numGroups; ++g) {
             System.out.print("-------" + groups.get(g) + "------|");
         }
         System.out.println();
 
-        // Print table content
         for (int t = 0; t < numTimeSlots; ++t) {
             System.out.print(timeSlots.get(t) + " |");
             for (int g = 0; g < numGroups; ++g) {
@@ -59,6 +61,11 @@ public class PlannerController {
                 } else {
                     System.out.print("---------------|");
                 }
+//                if (schedule.get(t + numTimeSlots)[g] != null) {
+//                    System.out.print(schedule.get(t + numTimeSlots)[g] + "|");
+//                } else {
+//                    System.out.print("---------------|");
+//                }
             }
             System.out.println();
         }
