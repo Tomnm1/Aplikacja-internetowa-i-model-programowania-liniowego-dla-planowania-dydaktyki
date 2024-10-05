@@ -7,6 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Weź se wyloguj
+ * if(Objects.equals(groups.get(g), "L1") && Objects.equals(subjects.get(p), "PTC"))
+ *                                     System.out.println("wykluczam kombinację: " + groups.get(g) + " " + rooms.get(s) +
+ *                                         " " + timeSlots.get(t) + " " + subjects.get(p) + " " + teachers.get(n));
+ */
 public class Planner {
 
     private final List<String> groups;
@@ -56,15 +62,18 @@ public class Planner {
                 for (int t = 0; t < numTimeSlots; ++t) {
                     for (int p = 0; p < numSubjects; ++p) {
                         for (int n = 0; n < numTeachers; ++n){
-                            x[g][s][t][p][n] = model.newBoolVar("x_" + g + "_" + s + "_" + t + "_" + p + "_" + n);
+                            x[g][s][t][p][n] = model.newBoolVar("x_" + groups.get(g) + "_" + rooms.get(s) + "_"
+                                    + timeSlots.get(t) + "_" + subjects.get(p) + "_" + teachers.get(n));
                         }
                     }
                 }
             }
         }
 
+        // późniejsze wykluczanie jest skomplikowane (chyba). dlatego lepiej dodawać przypisania na wcześniejszym etapie, przy budowaniu ograniczeń. Update 05.10 chyba  jednak nie
         // Constraints
         // 1. Ograniczenie: każda sala może być zajęta tylko przez jedną grupę w danym czasie.
+        System.out.println("Ograniczenie 1 <=1");
         for (int s = 0; s < numRooms; ++s) {
             for (int t = 0; t < numTimeSlots; ++t) {
                 LinearExprBuilder roomConstraint = LinearExpr.newBuilder();
@@ -76,10 +85,12 @@ public class Planner {
                     }
                 }
                 model.addLessOrEqual(roomConstraint, 1);
+                System.out.println("Dodaję kombinację: " + rooms.get(s) + " " + timeSlots.get(t));
             }
         }
 
         // 2. Ograniczenie: każda grupa musi mieć określone przedmioty w jednym czasie i jednej sali.
+        System.out.println("Ograniczenie 2 ==1");
         for (int g = 0; g < numGroups; ++g) {
             String group = groups.get(g);
             List<String> requiredSubjects = groupsToSubjects.get(group);
@@ -100,6 +111,7 @@ public class Planner {
         }
 
         // 3. Ograniczenie: przedmioty mogą odbywać sie w określonych salach
+        System.out.println("Ograniczenie 3");
         for (int s = 0; s < numRooms; ++s) {
             String room = rooms.get(s);
             List<String> allowedSubjects = roomToSubjects.get(room);
@@ -109,7 +121,7 @@ public class Planner {
                     for (int t = 0; t < numTimeSlots; ++t) {
                         for (int g = 0; g < numGroups; ++g) {
                             for (int n = 0; n < numTeachers; ++n) {
-                            model.addEquality(x[g][s][t][p][n], 0); // Ograniczenie wykluczające
+                                model.addEquality(x[g][s][t][p][n], 0); // Ograniczenie wykluczające
                             }
                         }
                     }
@@ -118,6 +130,7 @@ public class Planner {
         }
 
         // 4. Ograniczenie: nauczyciel może prowadzić tylko jeden przedmiot w jednym czasie.
+        System.out.println("Ograniczenie 4 <= 1");
         for (int n = 0; n < numTeachers; ++n) {
             for (int t = 0; t < numTimeSlots; ++t) {
                 LinearExprBuilder teacherConstraint = LinearExpr.newBuilder();
@@ -133,6 +146,7 @@ public class Planner {
         }
 
         // 5. Ograniczenie: nauczyciel może prowadzić tylko przypisane mu przedmioty.
+        System.out.println("Ograniczenie 5");
         for (int p = 0; p < numSubjects; ++p) {
             String subject = subjects.get(p);
             List<String> allowedTeachers = subjectsToTeachers.get(subject);
@@ -147,6 +161,22 @@ public class Planner {
                         }
                     }
                 }
+            }
+        }
+
+        // 6. Ograniczenie: dana grupa może mieć tylko jedne zajęcia w jednym slocie czasowym
+        System.out.println("Ograniczenie 6: Grupa może mieć tylko jedne zajęcia w danym czasie.");
+        for (int g = 0; g < numGroups; ++g) {
+            for (int t = 0; t < numTimeSlots; ++t) {
+                LinearExprBuilder groupConstraint = LinearExpr.newBuilder();
+                for (int s = 0; s < numRooms; ++s) {
+                    for (int p = 0; p < numSubjects; ++p) {
+                        for (int n = 0; n < numTeachers; ++n) {
+                            groupConstraint.addTerm(x[g][s][t][p][n], 1);
+                        }
+                    }
+                }
+                model.addLessOrEqual(groupConstraint, 1);
             }
         }
 
@@ -168,6 +198,8 @@ public class Planner {
                     for (int p = 0; p < numSubjects; ++p) {
                         for (int n = 0; n < numTeachers; ++n) {
                             if (solver.booleanValue(x[g][s][t][p][n])) {
+//                                System.out.println("Wiersz planu: " + groups.get(g) + " " + rooms.get(s) +
+//                                        " " + timeSlots.get(t) + " " + subjects.get(p) + " " + teachers.get(n));
                                 row[g] = "Room " + rooms.get(s) + " " + subjects.get(p) + " " + teachers.get(n);
                             }
                         }
