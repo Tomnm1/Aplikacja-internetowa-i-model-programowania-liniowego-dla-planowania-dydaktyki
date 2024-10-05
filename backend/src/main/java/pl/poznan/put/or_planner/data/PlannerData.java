@@ -12,6 +12,7 @@ public class PlannerData {
     private Map<String, List<String>> roomToSubjects;
     private Map<String, List<String>> subjectsToTeachers;
     private Map<String, List<String>> groupsToSubjects;
+    private Map<String, String> subjectFrequency;
 
     public List<String> getGroups() {
         return groups;
@@ -71,4 +72,10 @@ public class PlannerData {
 
     public void setGroupsToSubjects(Map<String, List<String>> groupsToSubjects){ this.groupsToSubjects = groupsToSubjects; }
     public Map<String, List<String>> getGroupsToSubjects() { return groupsToSubjects; }
+
+    public Map<String, String> getSubjectFrequency() { return subjectFrequency; }
+
+    public void setSubjectFrequency(Map<String, String> subjectFrequency) {
+        this.subjectFrequency = subjectFrequency;
+    }
 }

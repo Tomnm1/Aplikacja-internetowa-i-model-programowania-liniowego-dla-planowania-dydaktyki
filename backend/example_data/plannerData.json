@@ -1,6 +1,6 @@
 {
   "groups": ["L1", "L2", "L3", "L4"],
-  "subjects": ["PTC", "Prr", "Prz", "SK1", "ASK", "SBD"],
+  "subjects": ["PTC", "Prr", "Prz", "SK1", "ASK", "SBD", "ABC"],
   "rooms": ["142", "143"],
   "teachers": ["AD", "RW", "RK"],
   "timeSlots": [
@@ -11,13 +11,13 @@
     "Pt 08:00", "Pt 09:45", "Pt 11:45"
   ],
   "groupsToSubjects": {
-    "L1": ["PTC", "Prr", "Prz", "SK1"],
-    "L2": ["SK1", "ASK", "SBD"],
-    "L3": ["PTC", "Prr", "Prz", "SK1", "ASK", "SBD"],
-    "L4": ["PTC", "Prr", "Prz", "SK1", "ASK", "SBD"]
+    "L1": ["PTC", "Prr", "Prz", "SK1", "ABC"],
+    "L2": ["SK1", "ASK", "SBD", "ABC"],
+    "L3": ["PTC", "Prr", "Prz", "SK1", "ASK", "SBD", "ABC"],
+    "L4": ["PTC", "Prr", "Prz", "SK1", "ASK", "SBD", "ABC"]
   },
   "roomToSubjects": {
-    "142": ["PTC", "Prr", "Prz"],
+    "142": ["PTC", "Prr", "Prz", "ABC"],
     "143": ["Prz", "SK1", "ASK", "SBD"]
   },
   "subjectsToTeachers": {
@@ -26,6 +26,15 @@
     "Prz": ["AD", "RW"],
     "SK1": ["AD"],
     "ASK": ["RK"],
-    "SBD": ["RK", "AD"]
+    "SBD": ["RK", "AD"],
+    "ABC": ["AD"]
+  },
+  "subjectFrequency": {
+    "PTC": "even_weeks",
+    "Prr": "even_weeks",
+    "Prz": "even_weeks",
+    "SK1": "even_weeks",
+    "ASK": "even_weeks",
+    "SBD": "even_weeks"
   }
 }
