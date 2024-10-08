@@ -23,6 +23,7 @@ public class Planner {
     private final Map<String, List<String>> subjectsToTeachers;
     private final List<String> teachers;
     private final Map<String, List<String>> groupsToSubjects;
+    private final Map<String, String> subjectFrequency;
 
     private final int numGroups;
     private final int numRooms;
@@ -30,10 +31,14 @@ public class Planner {
     private final int numTimeSlots;
     private final int numTeachers;
 
+    private final List<String> evenTimeSlots;  // Tygodnie parzyste
+    private final List<String> oddTimeSlots;   // Tygodnie nieparzyste
+
+
     public Planner(List<String> groups, List<String> subjects, List<String> rooms,
                    List<String> timeSlots, Map<String, List<String>> roomToSubjects,
                    Map<String, List<String>> subjectsToTeachers, List<String> teachers,
-                   Map<String, List<String>> groupsToSubjects) {
+                   Map<String, List<String>> groupsToSubjects, Map<String, String> subjectFrequency) {
         Loader.loadNativeLibraries();
 
         this.groups = groups;
@@ -44,25 +49,38 @@ public class Planner {
         this.subjectsToTeachers = subjectsToTeachers;
         this.teachers = teachers;
         this.groupsToSubjects = groupsToSubjects;
+        this.subjectFrequency = subjectFrequency;
 
         this.numGroups = groups.size();
         this.numSubjects = subjects.size();
         this.numRooms = rooms.size();
         this.numTimeSlots = timeSlots.size();
         this.numTeachers = teachers.size();
+
+        this.evenTimeSlots = new ArrayList<>();
+        this.oddTimeSlots = new ArrayList<>();
+
+        for (String slot : timeSlots) {
+            evenTimeSlots.add(slot + "_even");
+            oddTimeSlots.add(slot + "_odd");
+        }
+
     }
 
     public List<String[]> optimizeSchedule() {
         CpModel model = new CpModel();
 
         // Variables - dana grupa g, w danej sali s, o danym czasie t, ma przedmiot p z nauczycielem n
-        Literal[][][][][] x = new Literal[numGroups][numRooms][numTimeSlots][numSubjects][numTeachers];
+        Literal[][][][][] xEven = new Literal[numGroups][numRooms][evenTimeSlots.size()][numSubjects][numTeachers];
+        Literal[][][][][] xOdd = new Literal[numGroups][numRooms][oddTimeSlots.size()][numSubjects][numTeachers];
         for (int g = 0; g < numGroups; ++g) {
             for (int s = 0; s < numRooms; ++s) {
                 for (int t = 0; t < numTimeSlots; ++t) {
                     for (int p = 0; p < numSubjects; ++p) {
                         for (int n = 0; n < numTeachers; ++n){
-                            x[g][s][t][p][n] = model.newBoolVar("x_" + groups.get(g) + "_" + rooms.get(s) + "_"
+                            xEven[g][s][t][p][n] = model.newBoolVar("xEven_" + groups.get(g) + "_" + rooms.get(s) + "_"
+                                    + timeSlots.get(t) + "_" + subjects.get(p) + "_" + teachers.get(n));
+                            xOdd[g][s][t][p][n] = model.newBoolVar("xOdd_" + groups.get(g) + "_" + rooms.get(s) + "_"
                                     + timeSlots.get(t) + "_" + subjects.get(p) + "_" + teachers.get(n));
                         }
                     }
@@ -76,15 +94,18 @@ public class Planner {
         System.out.println("Ograniczenie 1 <=1");
         for (int s = 0; s < numRooms; ++s) {
             for (int t = 0; t < numTimeSlots; ++t) {
-                LinearExprBuilder roomConstraint = LinearExpr.newBuilder();
+                LinearExprBuilder roomConstraintEven = LinearExpr.newBuilder();
+                LinearExprBuilder roomConstraintOdd = LinearExpr.newBuilder();
                 for (int g = 0; g < numGroups; ++g) {
                     for (int p = 0; p < numSubjects; ++p) {
                         for (int n = 0; n < numTeachers; ++n) {
-                            roomConstraint.addTerm(x[g][s][t][p][n], 1);
+                            roomConstraintEven.addTerm(xEven[g][s][t][p][n], 1);
+                            roomConstraintOdd.addTerm(xOdd[g][s][t][p][n], 1);
                         }
                     }
                 }
-                model.addLessOrEqual(roomConstraint, 1);
+                model.addLessOrEqual(roomConstraintEven, 1);
+                model.addLessOrEqual(roomConstraintOdd, 1);
                 System.out.println("Dodaję kombinację: " + rooms.get(s) + " " + timeSlots.get(t));
             }
         }
@@ -96,16 +117,38 @@ public class Planner {
             List<String> requiredSubjects = groupsToSubjects.get(group);
             for (int p = 0; p < numSubjects; ++p) {
                 String subject = subjects.get(p);
+                String frequency = subjectFrequency.get(subject);
+
                 if(requiredSubjects.contains(subject)) {
-                    List<Literal> groupSubjectConstraint = new ArrayList<>();
-                    for (int s = 0; s < numRooms; ++s) {
-                        for (int t = 0; t < numTimeSlots; ++t) {
-                            for (int n = 0; n < numTeachers; ++n) {
-                                groupSubjectConstraint.add(x[g][s][t][p][n]);
+                    if (frequency.equals("weekly")) {
+                        for (int s = 0; s < numRooms; ++s) {
+                            for (int t = 0; t < numTimeSlots; ++t) {
+                                for (int n = 0; n < numTeachers; ++n) {
+                                    model.addEquality(xEven[g][s][t][p][n], xOdd[g][s][t][p][n]);
+                                }
                             }
                         }
                     }
-                    model.addExactlyOne(groupSubjectConstraint);
+
+                    if (frequency.equals("even_weeks")) {
+                        for (int s = 0; s < numRooms; ++s) {
+                            for (int t = 0; t < numTimeSlots; ++t) {
+                                for (int n = 0; n < numTeachers; ++n) {
+                                    model.addEquality(xOdd[g][s][t][p][n], 0);  // Zajęcia nie mogą być w tygodniach nieparzystych
+                                }
+                            }
+                        }
+                    }
+
+                    if (frequency.equals("odd_weeks")) {
+                        for (int s = 0; s < numRooms; ++s) {
+                            for (int t = 0; t < numTimeSlots; ++t) {
+                                for (int n = 0; n < numTeachers; ++n) {
+                                    model.addEquality(xEven[g][s][t][p][n], 0);  // Zajęcia nie mogą być w tygodniach parzystych
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -121,7 +164,8 @@ public class Planner {
                     for (int t = 0; t < numTimeSlots; ++t) {
                         for (int g = 0; g < numGroups; ++g) {
                             for (int n = 0; n < numTeachers; ++n) {
-                                model.addEquality(x[g][s][t][p][n], 0); // Ograniczenie wykluczające
+                                model.addEquality(xEven[g][s][t][p][n], 0); // Ograniczenie wykluczające
+                                model.addEquality(xOdd[g][s][t][p][n], 0); // Ograniczenie wykluczające
                             }
                         }
                     }
@@ -133,15 +177,18 @@ public class Planner {
         System.out.println("Ograniczenie 4 <= 1");
         for (int n = 0; n < numTeachers; ++n) {
             for (int t = 0; t < numTimeSlots; ++t) {
-                LinearExprBuilder teacherConstraint = LinearExpr.newBuilder();
+                LinearExprBuilder teacherConstraintEven = LinearExpr.newBuilder();
+                LinearExprBuilder teacherConstraintOdd = LinearExpr.newBuilder();
                 for (int g = 0; g < numGroups; ++g) {
                     for (int s = 0; s < numRooms; ++s) {
                         for (int p = 0; p < numSubjects; ++p) {
-                            teacherConstraint.addTerm(x[g][s][t][p][n], 1);
+                            teacherConstraintEven.addTerm(xEven[g][s][t][p][n], 1);
+                            teacherConstraintOdd.addTerm(xOdd[g][s][t][p][n], 1);
                         }
                     }
                 }
-                model.addLessOrEqual(teacherConstraint, 1);
+                model.addLessOrEqual(teacherConstraintEven, 1);
+                model.addLessOrEqual(teacherConstraintOdd, 1);
             }
         }
 
@@ -156,7 +203,8 @@ public class Planner {
                     for (int g = 0; g < numGroups; ++g) {
                         for (int s = 0; s < numRooms; ++s) {
                             for (int t = 0; t < numTimeSlots; ++t) {
-                                model.addEquality(x[g][s][t][p][n], 0); // Nauczyciel nie może prowadzić tego przedmiotu
+                                model.addEquality(xEven[g][s][t][p][n], 0);
+                                model.addEquality(xOdd[g][s][t][p][n], 0);
                             }
                         }
                     }
@@ -168,15 +216,71 @@ public class Planner {
         System.out.println("Ograniczenie 6: Grupa może mieć tylko jedne zajęcia w danym czasie.");
         for (int g = 0; g < numGroups; ++g) {
             for (int t = 0; t < numTimeSlots; ++t) {
-                LinearExprBuilder groupConstraint = LinearExpr.newBuilder();
+                LinearExprBuilder groupConstraintEven = LinearExpr.newBuilder();
+                LinearExprBuilder groupConstraintOdd = LinearExpr.newBuilder();
                 for (int s = 0; s < numRooms; ++s) {
                     for (int p = 0; p < numSubjects; ++p) {
                         for (int n = 0; n < numTeachers; ++n) {
-                            groupConstraint.addTerm(x[g][s][t][p][n], 1);
+                            groupConstraintEven.addTerm(xEven[g][s][t][p][n], 1);
+                            groupConstraintOdd.addTerm(xOdd[g][s][t][p][n], 1);
                         }
                     }
                 }
-                model.addLessOrEqual(groupConstraint, 1);
+                model.addLessOrEqual(groupConstraintEven, 1);
+                model.addLessOrEqual(groupConstraintOdd, 1);
+            }
+        }
+
+        // 7. Ograniczenie: każda grupa musi mieć wszystkie wymagane przedmioty
+        System.out.println("Ograniczenie 7: Każda grupa musi mieć wszystkie wymagane przedmioty.");
+        for (int g = 0; g < numGroups; ++g) {
+            String group = groups.get(g);
+            List<String> requiredSubjects = groupsToSubjects.get(group);
+
+            for (int p = 0; p < numSubjects; ++p) {
+                String subject = subjects.get(p);
+
+                if (requiredSubjects.contains(subject)) {
+                    String frequency = subjectFrequency.get(subject);
+
+                    if (frequency.equals("weekly")) {
+                        // Zajęcia co tydzień - muszą się odbyć w tygodniach parzystych i nieparzystych
+                        LinearExprBuilder subjectConstraintEven = LinearExpr.newBuilder();
+                        LinearExprBuilder subjectConstraintOdd = LinearExpr.newBuilder();
+                        for (int s = 0; s < numRooms; ++s) {
+                            for (int t = 0; t < numTimeSlots; ++t) {
+                                for (int n = 0; n < numTeachers; ++n) {
+                                    subjectConstraintEven.addTerm(xEven[g][s][t][p][n], 1);
+                                    subjectConstraintOdd.addTerm(xOdd[g][s][t][p][n], 1);
+                                }
+                            }
+                        }
+                        model.addEquality(subjectConstraintEven, 1);
+                        model.addEquality(subjectConstraintOdd, 1);
+                    } else if (frequency.equals("even_weeks")) {
+                        // Zajęcia tylko w tygodniach parzystych
+                        LinearExprBuilder subjectConstraintEven = LinearExpr.newBuilder();
+                        for (int s = 0; s < numRooms; ++s) {
+                            for (int t = 0; t < numTimeSlots; ++t) {
+                                for (int n = 0; n < numTeachers; ++n) {
+                                    subjectConstraintEven.addTerm(xEven[g][s][t][p][n], 1);
+                                }
+                            }
+                        }
+                        model.addEquality(subjectConstraintEven, 1);
+                    } else if (frequency.equals("odd_weeks")) {
+                        // Zajęcia tylko w tygodniach nieparzystych
+                        LinearExprBuilder subjectConstraintOdd = LinearExpr.newBuilder();
+                        for (int s = 0; s < numRooms; ++s) {
+                            for (int t = 0; t < numTimeSlots; ++t) {
+                                for (int n = 0; n < numTeachers; ++n) {
+                                    subjectConstraintOdd.addTerm(xOdd[g][s][t][p][n], 1);
+                                }
+                            }
+                        }
+                        model.addEquality(subjectConstraintOdd, 1);
+                    }
+                }
             }
         }
 
@@ -192,21 +296,26 @@ public class Planner {
 
         List<String[]> scheduleTable = new ArrayList<>();
         for (int t = 0; t < numTimeSlots; ++t) {
-            String[]row = new String[numGroups];
+            String[] rowEven = new String[numGroups];
+            String[] rowOdd = new String[numGroups];
+
             for (int g = 0; g < numGroups; ++g) {
                 for (int s = 0; s < numRooms; ++s) {
                     for (int p = 0; p < numSubjects; ++p) {
                         for (int n = 0; n < numTeachers; ++n) {
-                            if (solver.booleanValue(x[g][s][t][p][n])) {
-//                                System.out.println("Wiersz planu: " + groups.get(g) + " " + rooms.get(s) +
-//                                        " " + timeSlots.get(t) + " " + subjects.get(p) + " " + teachers.get(n));
-                                row[g] = "Room " + rooms.get(s) + " " + subjects.get(p) + " " + teachers.get(n);
+                            if (solver.booleanValue(xEven[g][s][t][p][n])) {
+                                rowEven[g] = "Room " + rooms.get(s) + " " + subjects.get(p) + " " + teachers.get(n);
+                            }
+                            if (solver.booleanValue(xOdd[g][s][t][p][n])) {
+                                rowOdd[g] = "Room " + rooms.get(s) + " " + subjects.get(p) + " " + teachers.get(n);
                             }
                         }
                     }
                 }
             }
-            scheduleTable.add(row);
+
+            scheduleTable.add(rowEven);
+            scheduleTable.add(rowOdd);
         }
 
         return scheduleTable;
