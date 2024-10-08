@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import pl.poznan.put.or_planner.Planner;
 import pl.poznan.put.or_planner.data.PlannerData;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +27,7 @@ public class PlannerController {
             Map<String, String> subjectFrequency = plannerData.getSubjectFrequency();
 
             Planner planner = new Planner(groups, subjects, rooms, timeSlots, roomToSubjects,
-                    subjectsToTeachers, teachers, groupsToSubjects);
+                    subjectsToTeachers, teachers, groupsToSubjects, subjectFrequency);
 
             List<String[]> optimizedSchedule = planner.optimizeSchedule();
 
@@ -37,6 +35,7 @@ public class PlannerController {
             System.out.println("done");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
+            System.out.println(e);
             System.out.println(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -47,25 +46,32 @@ public class PlannerController {
         int numTimeSlots = timeSlots.size();
 
         System.out.println("Pierwszy slot - tydzień parzysty \nDrugi slot tydzień nieparzysty");
-        System.out.print("    Time |");
+        System.out.print("    Time        |");
         for (int g = 0; g < numGroups; ++g) {
             System.out.print("-------" + groups.get(g) + "------|");
         }
         System.out.println();
 
         for (int t = 0; t < numTimeSlots; ++t) {
-            System.out.print(timeSlots.get(t) + " |");
+            // Drukowanie dla tygodnia parzystego
+            System.out.print(timeSlots.get(t) + " (even) |");
             for (int g = 0; g < numGroups; ++g) {
-                if (schedule.get(t)[g] != null) {
-                    System.out.print(schedule.get(t)[g] + "|");
+                if (schedule.get(t * 2)[g] != null) {  // W harmonogramie parzysty tydzień ma indeksy 0, 2, 4, ...
+                    System.out.print(schedule.get(t * 2)[g] + "|");
                 } else {
                     System.out.print("---------------|");
                 }
-//                if (schedule.get(t + numTimeSlots)[g] != null) {
-//                    System.out.print(schedule.get(t + numTimeSlots)[g] + "|");
-//                } else {
-//                    System.out.print("---------------|");
-//                }
+            }
+            System.out.println();
+
+            // Drukowanie dla tygodnia nieparzystego
+            System.out.print(timeSlots.get(t) + " (odd)  |");
+            for (int g = 0; g < numGroups; ++g) {
+                if (schedule.get(t * 2 + 1)[g] != null) {  // W harmonogramie nieparzysty tydzień ma indeksy 1, 3, 5, ...
+                    System.out.print(schedule.get(t * 2 + 1)[g] + "|");
+                } else {
+                    System.out.print("---------------|");
+                }
             }
             System.out.println();
         }
