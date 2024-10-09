@@ -53,12 +53,12 @@ jobs:
           password: ${{ secrets.PASSWORD }}          
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            mkdir -p /app
-            scp frontend.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app
-            scp backend.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app
+            sudo mkdir -p /app
+            sudo scp frontend.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app
+            sudo scp backend.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app
 
-            ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker load < /app/frontend.tar"
-            ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker load < /app/backend.tar"
+            sudo ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker load < /app/frontend.tar"
+            sudo ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker load < /app/backend.tar"
 
             cd /app
-            docker-compose up -d
+            sudo docker-compose up -d
