@@ -1,4 +1,4 @@
-FROM maven:3.9.3-eclipse-temurin-21-alpine as build-stage
+FROM maven:3.9.9-eclipse-temurin-21-alpine as build-stage
 
 WORKDIR /app
 
