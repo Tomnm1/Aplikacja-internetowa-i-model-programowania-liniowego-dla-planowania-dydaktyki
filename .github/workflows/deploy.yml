@@ -46,7 +46,7 @@ jobs:
           path: ./docker-images
           
       - name: list
-        run: ls -la
+        run: ls -la docker-images
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v1.1.0
         with:
