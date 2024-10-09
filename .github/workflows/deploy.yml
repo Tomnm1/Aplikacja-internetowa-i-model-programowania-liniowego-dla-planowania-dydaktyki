@@ -56,8 +56,8 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             sudo mkdir -p /app
-            sudo scp docker-images/frontend.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app
-            sudo scp docker-images/backend.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app
+            sudo scp /home/runner/work/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/docker-images/frontend.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app
+            sudo scp /home/runner/work/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/docker-images/backend.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app
 
             sudo ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker load < /app/frontend.tar"
             sudo ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker load < /app/backend.tar"
