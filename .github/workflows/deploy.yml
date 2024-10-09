@@ -25,8 +25,8 @@ jobs:
 
       - name: Save Docker images
         run: |
-          docker save frontend > frontend.tar
-          docker save backend > backend.tar
+          docker save app/frontend:latest > frontend.tar
+          docker save app/backend:latest > backend.tar
 
       - name: Upload Docker images as artifacts
         uses: actions/upload-artifact@v4
