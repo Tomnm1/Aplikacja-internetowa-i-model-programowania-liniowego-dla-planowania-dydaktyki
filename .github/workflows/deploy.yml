@@ -45,9 +45,7 @@ jobs:
           name: docker-images
           path: ./docker-images
           
-      - name: list
-        run: pwd
-      - name: Deploy to server via SSH
+      - name: Copy to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -55,8 +53,9 @@ jobs:
           password: ${{ secrets.PASSWORD }}          
           port: ${{ secrets.SERVER_PORT }}
           source: /home/runner/work/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/docker-images/frontend.tar, /home/runner/work/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/docker-images/backend.tar
-          destination: /app
-      - name: Deploy to server via SSH
+          target: /app
+          
+      - name: Deploy
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.SERVER_HOST }}
