@@ -57,6 +57,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
+          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           script: |
             mkdir -p /app
             scp frontend.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app
