@@ -21,7 +21,7 @@ jobs:
 
       - name: Build Docker images
         run: |
-          docker-compose build
+          docker compose build
 
       - name: Save Docker images
         run: |
