@@ -52,7 +52,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.PASSWORD }}          
           port: ${{ secrets.SERVER_PORT }}
-          source: docker-images/frontend.tar, docker-images/backend.tar
+          source: ./docker-images/frontend.tar, ./docker-images/backend.tar
           target: /app
           
       - name: Deploy
