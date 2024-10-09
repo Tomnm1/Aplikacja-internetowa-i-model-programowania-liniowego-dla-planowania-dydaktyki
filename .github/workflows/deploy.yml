@@ -52,7 +52,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.PASSWORD }}          
           port: ${{ secrets.SERVER_PORT }}
-          source: /home/runner/work/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/docker-images/frontend.tar, /home/runner/work/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/Aplikacja-internetowa-i-model-programowania-liniowego-dla-planowania-dydaktyki/docker-images/backend.tar
+          source: docker-images/frontend.tar, docker-images/backend.tar
           target: /app
           
       - name: Deploy
