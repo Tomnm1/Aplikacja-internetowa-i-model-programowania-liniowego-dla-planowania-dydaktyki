@@ -22,7 +22,7 @@ const Calendar: React.FC<CalendarViewProps> = ({teachers, groups, rooms, hours, 
 
     const handleStopDrag = (_e: DraggableEvent, data: DraggableData, scheduleId: number) => {
         console.log(`Przeciągnięto plan ${scheduleId} na pozycję X: ${data.x}, Y: ${data.y}`);
-        setDragging(false); // Koniec dragowania
+        setDragging(false);
     };
 
     useEffect(() => {
