@@ -5,9 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.poznan.put.or_planner.Planner;
 import pl.poznan.put.or_planner.data.PlannerData;
+import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/planner")
@@ -17,17 +17,12 @@ public class PlannerController {
     public ResponseEntity<Void> startScheduling(@RequestBody PlannerData plannerData) {
         try {
             List<String> groups = plannerData.getGroups();
-            List<String> subjects = plannerData.getSubjects();
+            List<String> teachers = plannerData.getTeachers();
             List<String> rooms = plannerData.getRooms();
             List<String> timeSlots = plannerData.getTimeSlots();
-            Map<String, List<String>> roomToSubjects = plannerData.getRoomToSubjects();
-            Map<String, List<String>> subjectsToTeachers = plannerData.getSubjectsToTeachers();
-            List<String> teachers = plannerData.getTeachers();
-            Map<String, List<String>> groupsToSubjects = plannerData.getGroupsToSubjects();
-            Map<String, String> subjectFrequency = plannerData.getSubjectFrequency();
+            List<PlannerSubject> subjects = plannerData.getSubjects();
 
-            Planner planner = new Planner(groups, subjects, rooms, timeSlots, roomToSubjects,
-                    subjectsToTeachers, teachers, groupsToSubjects, subjectFrequency);
+            Planner planner = new Planner(groups, teachers, rooms, timeSlots, subjects);
 
             List<String[]> optimizedSchedule = planner.optimizeSchedule();
 

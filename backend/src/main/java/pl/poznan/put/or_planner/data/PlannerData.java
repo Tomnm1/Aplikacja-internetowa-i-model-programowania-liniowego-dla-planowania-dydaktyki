@@ -1,18 +1,15 @@
 package pl.poznan.put.or_planner.data;
 
+import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
+
 import java.util.List;
-import java.util.Map;
 
 public class PlannerData {
     private List<String> groups;
-    private List<String> subjects;
-    private List<String> rooms;
     private List<String> teachers;
+    private List<String> rooms;
     private List<String> timeSlots;
-    private Map<String, List<String>> roomToSubjects;
-    private Map<String, List<String>> subjectsToTeachers;
-    private Map<String, List<String>> groupsToSubjects;
-    private Map<String, String> subjectFrequency;
+    private List<PlannerSubject> subjects;
 
     public List<String> getGroups() {
         return groups;
@@ -22,12 +19,12 @@ public class PlannerData {
         this.groups = groups;
     }
 
-    public List<String> getSubjects() {
-        return subjects;
+    public List<String> getTeachers() {
+        return teachers;
     }
 
-    public void setSubjects(List<String> subjects) {
-        this.subjects = subjects;
+    public void setTeachers(List<String> teachers) {
+        this.teachers = teachers;
     }
 
     public List<String> getRooms() {
@@ -46,36 +43,11 @@ public class PlannerData {
         this.timeSlots = timeSlots;
     }
 
-    public Map<String, List<String>> getRoomToSubjects() {
-        return roomToSubjects;
+    public List<PlannerSubject> getSubjects() {
+        return subjects;
     }
 
-    public void setRoomToSubjects(Map<String, List<String>> roomToSubjects) {
-        this.roomToSubjects = roomToSubjects;
-    }
-
-    public Map<String, List<String>> getSubjectsToTeachers() {
-        return subjectsToTeachers;
-    }
-
-    public void setSubjectsToTeachers(Map<String, List<String>> subjectsToTeachers) {
-        this.subjectsToTeachers = subjectsToTeachers;
-    }
-
-    public List<String> getTeachers() {
-        return teachers;
-    }
-
-    public void setTeachers(List<String> teachers) {
-        this.teachers = teachers;
-    }
-
-    public void setGroupsToSubjects(Map<String, List<String>> groupsToSubjects){ this.groupsToSubjects = groupsToSubjects; }
-    public Map<String, List<String>> getGroupsToSubjects() { return groupsToSubjects; }
-
-    public Map<String, String> getSubjectFrequency() { return subjectFrequency; }
-
-    public void setSubjectFrequency(Map<String, String> subjectFrequency) {
-        this.subjectFrequency = subjectFrequency;
+    public void setSubjects(List<PlannerSubject> subjects) {
+        this.subjects = subjects;
     }
 }
