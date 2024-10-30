@@ -1,4 +1,4 @@
-package pl.poznan.put.planner_endpoints.Employee;
+package pl.poznan.put.planner_endpoints.Teacher;
 
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,77 +14,78 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Controller for employee resource
+/**
+ * Controller for teacher resource
  */
 @RestController
-@RequestMapping("/employees")
-public class EmployeeController {
+@RequestMapping("/teachers")
+public class TeacherController {
     @Autowired
-    private EmployeeService employeeService;
+    private TeacherService teacherService;
 
-    @Operation(summary = "Return all Employees")
+    @Operation(summary = "Return all teachers")
     @GetMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    array = @ArraySchema(schema = @Schema(implementation = Employee.class))
+                    array = @ArraySchema(schema = @Schema(implementation = Teacher.class))
             )
     })
-    public List<Employee> getAllEmployees() {
-        return employeeService.getAllEmployees();
+    public List<Teacher> getAllTeachers() {
+        return teacherService.getAllteachers();
     }
 
-    @Operation(summary = "Return Employees by id")
+    @Operation(summary = "Return teachers by id")
     @GetMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Employee.class)
+                    schema = @Schema(implementation = Teacher.class)
             )
     })
-    public Optional<Employee> getEmployeeByID(@PathVariable("id") Integer id) {
-        return employeeService.getEmployeeByID(id);
+    public Optional<Teacher> getTeacherByID(@PathVariable("id") Integer id) {
+        return teacherService.getteacherByID(id);
     }
 
-    @Operation(summary = "Create Employees from provided JSON")
+    @Operation(summary = "Create teachers from provided JSON")
     @PostMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Employee.class)
+                    schema = @Schema(implementation = Teacher.class)
             )
     })
-    public Employee createEmployee(@RequestBody Employee employee){
-        return employeeService.createEmployee(employee);
+    public Teacher createTeacher(@RequestBody Teacher teacher){
+        return teacherService.createteacher(teacher);
     }
 
-    @Operation(summary = "Update specified Employees from provided JSON")
+    @Operation(summary = "Update specified teachers from provided JSON")
     @PutMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Employee.class)
+                    schema = @Schema(implementation = Teacher.class)
             )
     })
-    public Employee updateEmployeeByID(@PathVariable("id") Integer id, @RequestBody Employee employeeParams){
-        return employeeService.updateEmployeeByID(id, employeeParams);
+    public Teacher updateTeacherByID(@PathVariable("id") Integer id, @RequestBody Teacher teacherParams){
+        return teacherService.updateteacherByID(id, teacherParams);
     }
 
-    @Operation(summary = "Delete all Employees")
+    @Operation(summary = "Delete all teachers")
     @DeleteMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(schema = @Schema(hidden = true))
     })
-    public void deleteAllEmployee() {
-        employeeService.deleteAllEmployees();
+    public void deleteAllTeacher() {
+        teacherService.deleteAllteachers();
     }
 
-    @Operation(summary = "Delete specified Employee")
+    @Operation(summary = "Delete specified Teacher")
     @DeleteMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(schema = @Schema(hidden = true))
     })
-    public void deleteEmployee(@PathVariable("id") Integer id) {
-        employeeService.deleteEmployeeByID(id);
+    public void deleteTeacher(@PathVariable("id") Integer id) {
+        teacherService.deleteteacherByID(id);
     }
 }

@@ -1,7 +1,7 @@
 package pl.poznan.put.planner_endpoints.JoinTables.Employees_Subjects;
 
 import jakarta.persistence.*;
-import pl.poznan.put.planner_endpoints.Employee.Employee;
+import pl.poznan.put.planner_endpoints.Teacher.Employee;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 
 /**
