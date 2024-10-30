@@ -19,7 +19,7 @@ public class SlotsDayService {
      * return all SlotsDays
      * @return list of all SlotsDay objects
      */
-    public List<SlotsDay> getAllSlotsDays() {return SlotsDayRepository.findAll();}
+    public List<SlotsDay> getAllSlotsDays() {return SlotsDayRepository.findAll(Sort.by(Sort.Direction.ASC, "slots_days_id"));}
 
     /**
      * Finds room by ID
@@ -37,16 +37,15 @@ public class SlotsDayService {
 
     /**
      * Updates a SlotsDay by given ID and params
-     * @param slotsDayId id of SlotsDay to update
-     * @param slotsDayParams params to update
+     * @param SlotsDayId id of SlotsDay to update
+     * @param SlotsDayParams params to update
      * @return Optional - null or with updated SlotsDay
      */
-    public SlotsDay updateSlotsDayByID(Integer slotsDayId, SlotsDay slotsDayParams){
-        Optional<SlotsDay> SlotsDay = SlotsDayRepository.findById(slotsDayId);
+    public SlotsDay updateSlotsDayByID(Integer SlotsDayId, SlotsDay SlotsDayParams){
+        Optional<SlotsDay> SlotsDay = SlotsDayRepository.findById(SlotsDayId);
         if (SlotsDay.isPresent()){
             SlotsDay oldSlotsDay = SlotsDay.get();
-            oldSlotsDay.day = slotsDayParams.day;
-            oldSlotsDay.slot = slotsDayParams.slot;
+            oldSlotsDay.code = SlotsDayParams.code; // TODO
             return SlotsDayRepository.save(oldSlotsDay);
         } else {
             return null;

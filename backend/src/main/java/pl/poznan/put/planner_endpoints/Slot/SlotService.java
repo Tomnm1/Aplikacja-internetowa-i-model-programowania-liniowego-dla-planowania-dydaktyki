@@ -19,7 +19,7 @@ public class SlotService {
      * return all Slots
      * @return list of all Slot objects
      */
-    public List<Slot> getAllSlots() {return SlotRepository.findAll(Sort.by(Sort.Direction.ASC, "slotId"));}
+    public List<Slot> getAllSlots() {return SlotRepository.findAll(Sort.by(Sort.Direction.ASC, "slot_id"));}
 
     /**
      * Finds room by ID
