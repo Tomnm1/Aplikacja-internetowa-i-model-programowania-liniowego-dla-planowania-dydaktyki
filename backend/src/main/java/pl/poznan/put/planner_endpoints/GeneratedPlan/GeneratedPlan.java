@@ -14,7 +14,7 @@ public class GeneratedPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    public Integer generatedPlanId;
+    public Integer id;
     @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
     @JoinColumn(name = "plan_id")
     public Plan plan;
