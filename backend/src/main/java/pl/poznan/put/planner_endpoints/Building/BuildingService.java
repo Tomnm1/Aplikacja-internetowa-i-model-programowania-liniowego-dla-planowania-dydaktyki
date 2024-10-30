@@ -45,6 +45,7 @@ public class BuildingService {
         Optional<Building> building = buildingRepository.findById(buildingId);
         if (building.isPresent()){
             Building oldBuilding = building.get();
+            oldBuilding.code = buildingParams.code;
             return buildingRepository.save(oldBuilding);
         } else {
             return null;
