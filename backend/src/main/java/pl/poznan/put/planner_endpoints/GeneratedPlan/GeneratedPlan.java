@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import pl.poznan.put.planner_endpoints.Classroom.Classroom;
 import pl.poznan.put.planner_endpoints.Group.Group;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
+import pl.poznan.put.planner_endpoints.SlotsDay.SlotsDay;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
+import pl.poznan.put.planner_endpoints.Teacher.Teacher;
 
 /**
  * Data model for generatedPlans table
@@ -21,7 +23,7 @@ public class GeneratedPlan {
     public Plan plan;
     @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
     @JoinColumn(name = "slot_day_id")
-    public SlotDay slotDay;
+    public SlotsDay slotsDay;
     @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
     @JoinColumn(name = "group_id")
     public Group group;
