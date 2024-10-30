@@ -46,7 +46,7 @@ public class GeneratedPlanService {
         if (generatedPlan.isPresent()){
             GeneratedPlan oldGeneratedPlan = generatedPlan.get();
             oldGeneratedPlan.plan = generatedPlanParams.plan;
-            oldGeneratedPlan.slotsDay = generatedPlanParams.slotsDay;
+            oldGeneratedPlan.slotDay = generatedPlanParams.slotDay;
             oldGeneratedPlan.group = generatedPlanParams.group;
             oldGeneratedPlan.teacher = generatedPlanParams.teacher;
             oldGeneratedPlan.classroom = generatedPlanParams.classroom;

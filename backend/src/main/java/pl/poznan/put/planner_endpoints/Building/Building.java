@@ -1,9 +1,6 @@
 package pl.poznan.put.planner_endpoints.Building;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 /**
  * Data model for buildings table
@@ -12,6 +9,7 @@ import jakarta.persistence.Table;
 @Table(name = "buildings")
 public class Building {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "building_id")
     public Integer buildingId;
     @Column(name = "code")
