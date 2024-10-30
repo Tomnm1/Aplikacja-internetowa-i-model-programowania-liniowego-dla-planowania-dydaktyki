@@ -9,9 +9,11 @@ import jakarta.persistence.Table;
  * Data model for buildings table
  */
 @Entity
-@Table(name = "budynki")
+@Table(name = "buildings")
 public class Building {
     @Id
-    @Column(name = "budynek")
-    public String building;
+    @Column(name = "building_id")
+    public Integer buildingId;
+    @Column(name = "code")
+    public String code;
 }

@@ -11,7 +11,7 @@ import java.util.Optional;
  * Business logic for buildings
  */
 @Service
-public class BuildingService { // TODO refactor update methods
+public class BuildingService {
     @Autowired
     private BuildingRepository buildingRepository;
 
@@ -19,14 +19,14 @@ public class BuildingService { // TODO refactor update methods
      * return all buildings
      * @return list of all building objects
      */
-    public List<Building> getAllBuildings() {return buildingRepository.findAll(Sort.by(Sort.Direction.ASC, "building"));}
+    public List<Building> getAllBuildings() {return buildingRepository.findAll(Sort.by(Sort.Direction.ASC, "code"));}
 
     /**
      * Finds room by ID
-     * @param building name of building
+     * @param buildingId ID of building
      * @return Optional - empty or with Building
      */
-    public Optional<Building> getBuildingByID(String building) {return buildingRepository.findById(building);}
+    public Optional<Building> getBuildingByID(Integer buildingId) {return buildingRepository.findById(buildingId);}
 
     /**
      * Creates a building
@@ -37,12 +37,12 @@ public class BuildingService { // TODO refactor update methods
 
     /**
      * Updates a building by given ID and params
-     * @param id id of building to update
+     * @param buildingId id of building to update
      * @param buildingParams params to update
      * @return Optional - null or with updated building
      */
-    public Building updateBuildingByID(String id, Building buildingParams){
-        Optional<Building> building = buildingRepository.findById(id);
+    public Building updateBuildingByID(Integer buildingId, Building buildingParams){
+        Optional<Building> building = buildingRepository.findById(buildingId);
         if (building.isPresent()){
             Building oldBuilding = building.get();
             return buildingRepository.save(oldBuilding);
@@ -53,10 +53,10 @@ public class BuildingService { // TODO refactor update methods
 
     /**
      * Deletes building by ID
-     * @param building name of building
+     * @param buildingId ID of building
      */
-    public void deleteBuildingByID(String building){
-        buildingRepository.deleteById(building);
+    public void deleteBuildingByID(Integer buildingId){
+        buildingRepository.deleteById(buildingId);
     }
 
     /**
