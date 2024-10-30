@@ -3,7 +3,7 @@ package pl.poznan.put.planner_endpoints.Group;
 import jakarta.persistence.*;
 
 /**
- * Data model fot groups table
+ * Data model for groups table
  */
 @Entity
 @Table(name = "groups")

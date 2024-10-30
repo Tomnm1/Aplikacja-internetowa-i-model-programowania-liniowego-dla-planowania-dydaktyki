@@ -1,5 +1,4 @@
-package pl.poznan.put.planner_endpoints.Employee;
-
+package pl.poznan.put.planner_endpoints.Subgroup;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -14,77 +13,77 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Controller for employee resource
+ * Controller for Subgroup resource
  */
 @RestController
-@RequestMapping("/employees")
-public class EmployeeController {
+@RequestMapping("/subgroups")
+public class SubgroupController {
     @Autowired
-    private EmployeeService employeeService;
+    private SubgroupService subgroupService;
 
-    @Operation(summary = "Return all Employees")
+    @Operation(summary = "Return all Subgroups")
     @GetMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    array = @ArraySchema(schema = @Schema(implementation = Employee.class))
+                    array = @ArraySchema(schema = @Schema(implementation = Subgroup.class))
             )
     })
-    public List<Employee> getAllEmployees() {
-        return employeeService.getAllEmployees();
+    public List<Subgroup> getAllSubgroup() {
+        return subgroupService.getAllSubgroup();
     }
 
-    @Operation(summary = "Return Employees by id")
+    @Operation(summary = "Return Subgroup by id")
     @GetMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Employee.class)
+                    schema = @Schema(implementation = Subgroup.class)
             )
     })
-    public Optional<Employee> getEmployeeByID(@PathVariable("id") Integer id) {
-        return employeeService.getEmployeeByID(id);
+    public Optional<Subgroup> getSubgroupByID(@PathVariable("id") Integer id) {
+        return subgroupService.getSubgroupByID(id);
     }
 
-    @Operation(summary = "Create Employees from provided JSON")
+    @Operation(summary = "Create Subgroup from provided JSON")
     @PostMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Employee.class)
+                    schema = @Schema(implementation = Subgroup.class)
             )
     })
-    public Employee createEmployee(@RequestBody Employee employee){
-        return employeeService.createEmployee(employee);
+    public Subgroup createSubgroup(@RequestBody Subgroup subgroup){
+        return subgroupService.createSubgroup(subgroup);
     }
 
-    @Operation(summary = "Update specified Employees from provided JSON")
+    @Operation(summary = "Update specified Subgroup from provided JSON")
     @PutMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Employee.class)
+                    schema = @Schema(implementation = Subgroup.class)
             )
     })
-    public Employee updateEmployeeByID(@PathVariable("id") Integer id, @RequestBody Employee employeeParams){
-        return employeeService.updateEmployeeByID(id, employeeParams);
+    public Subgroup updateSubgroupByID(@PathVariable("id") Integer id, @RequestBody Subgroup subgroupParams){
+        return subgroupService.updateSubgroupByID(id, subgroupParams);
     }
 
-    @Operation(summary = "Delete all Employees")
+    @Operation(summary = "Delete all Subgroups")
     @DeleteMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(schema = @Schema(hidden = true))
     })
-    public void deleteAllEmployee() {
-        employeeService.deleteAllEmployees();
+    public void deleteAllSubgroups() {
+        subgroupService.deleteAllSubgroups();
     }
 
-    @Operation(summary = "Delete specified Employee")
+    @Operation(summary = "Delete specified Subgroup")
     @DeleteMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(schema = @Schema(hidden = true))
     })
-    public void deleteEmployee(@PathVariable("id") Integer id) {
-        employeeService.deleteEmployeeByID(id);
+    public void deleteSubgroup(@PathVariable("id") Integer id) {
+        subgroupService.deleteSubgroupByID(id);
     }
 }
