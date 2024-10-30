@@ -25,7 +25,7 @@ public class ClassroomService {
      * @return list of Classroom objects
      */
     public List<Classroom> getAllClassrooms(){
-        return classroomRepository.findAll(Sort.by(Sort.Direction.ASC, "classroomID"));
+        return classroomRepository.findAll(Sort.by(Sort.Direction.ASC, "code"));
     }
 
     /**
@@ -90,15 +90,5 @@ public class ClassroomService {
      */
     public void deleteAllClassrooms(){
         classroomRepository.deleteAll();
-    }
-
-    public Classroom createClassroomIfNotExists(Classroom classroom){
-        boolean exists = classroomRepository.existsByCodeAndBuilding(classroom.code, classroom.building);
-        if(exists){
-            return null;
-        } else {
-            createRoom(classroom);
-            return classroom;
-        }
     }
 }

@@ -9,17 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Data model for classrooms table
+ * Data model for classclassrooms table
  */
 @Entity
-@Table(name="classrooms")
+@Table(name="classclassrooms")
 public class Classroom {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "classroom_id")
     public Integer classroomID;
-   // @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
     @JoinColumn(name = "building_id")
     public Building building;
     @Column(name = "code")
