@@ -3,6 +3,7 @@ package pl.poznan.put.planner_endpoints.GeneratedPlan;
 import jakarta.persistence.*;
 import pl.poznan.put.planner_endpoints.Classroom.Classroom;
 import pl.poznan.put.planner_endpoints.Group.Group;
+import pl.poznan.put.planner_endpoints.Plan.Plan;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 
 /**
