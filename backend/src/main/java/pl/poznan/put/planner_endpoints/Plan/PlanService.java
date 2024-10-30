@@ -19,7 +19,7 @@ public class PlanService {
      * return all plans
      * @return list of all plan objects
      */
-    public List<Plan> getAllPlans() {return planRepository.findAll(Sort.by(Sort.Direction.ASC, "planId"));}
+    public List<Plan> getAllPlans() {return planRepository.findAll(Sort.by(Sort.Direction.ASC, "code"));}
 
     /**
      * Finds room by ID
