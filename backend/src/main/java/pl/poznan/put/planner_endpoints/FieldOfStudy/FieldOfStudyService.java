@@ -19,7 +19,7 @@ public class FieldOfStudyService {
      * return all fieldOfStudys
      * @return list of all fieldOfStudy objects
      */
-    public List<FieldOfStudy> getAllFieldOfStudys() {return fieldOfStudyRepository.findAll(Sort.by(Sort.Direction.ASC, "fieldOfStudyId"));}
+    public List<FieldOfStudy> getAllFieldOfStudys() {return fieldOfStudyRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));}
 
     /**
      * Finds room by ID
@@ -65,15 +65,5 @@ public class FieldOfStudyService {
      */
     public void deleteAllFieldOfStudys(){
         fieldOfStudyRepository.deleteAll();
-    }
-
-    public FieldOfStudy createFieldOfStudyIfNotExists(FieldOfStudy fieldOfStudy){
-        boolean exists = fieldOfStudyRepository.existsByName(fieldOfStudy.name);
-        if(exists){
-            return null;
-        } else {
-            createFieldOfStudy(fieldOfStudy);
-            return fieldOfStudy;
-        }
     }
 }
