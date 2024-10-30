@@ -9,12 +9,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Data model for classclassrooms table
+ * Data model for classrooms table
  */
 @Entity
-@Table(name="classclassrooms")
+@Table(name="classrooms")
 public class Classroom {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "classroom_id")
     public Integer classroomID;
     @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
