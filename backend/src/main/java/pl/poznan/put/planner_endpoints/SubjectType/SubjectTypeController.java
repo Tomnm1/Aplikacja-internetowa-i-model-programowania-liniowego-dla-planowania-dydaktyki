@@ -16,7 +16,7 @@ import java.util.Optional;
 /**
  * Controller for SubjectType resource
  */
-@RestController // TODO use http response builders to create success and fail responses
+@RestController
 @RequestMapping("/subjectTypes")
 public class SubjectTypeController {
     @Autowired
@@ -54,7 +54,6 @@ public class SubjectTypeController {
                     schema = @Schema(implementation = SubjectType.class)
             )
     })
-    // TODO add check to fail if entity already exists
     public SubjectType createSubjectType(@RequestBody SubjectType subjectType){
         return subjectTypeService.createsubjectType(subjectType);
     }

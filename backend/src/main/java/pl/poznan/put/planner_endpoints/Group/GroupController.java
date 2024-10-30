@@ -15,7 +15,7 @@ import java.util.Optional;
 /**
  * Controller for Group resource
  */
-@RestController // TODO use http response builders to create success and fail responses
+@RestController
 @RequestMapping("/groups")
 public class GroupController {
     @Autowired
@@ -53,7 +53,6 @@ public class GroupController {
                     schema = @Schema(implementation = Group.class)
             )
     })
-    // TODO add check to fail if entity already exists
     public Group createGroup(@RequestBody Group group){
         return groupService.createGroup(group);
     }

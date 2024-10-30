@@ -54,7 +54,6 @@ public class EmployeeController {
                     schema = @Schema(implementation = Employee.class)
             )
     })
-    // TODO add check to fail if entity already exists
     public Employee createEmployee(@RequestBody Employee employee){
         return employeeService.createEmployee(employee);
     }
