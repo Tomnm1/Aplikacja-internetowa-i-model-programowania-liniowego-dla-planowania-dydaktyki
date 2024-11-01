@@ -6,7 +6,7 @@ import jakarta.persistence.*;
  * Data model for fieldOfStudys table
  */
 @Entity
-@Table(name = "fieldOfStudys")
+@Table(name = "fieldsOfStudy")
 public class FieldOfStudy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

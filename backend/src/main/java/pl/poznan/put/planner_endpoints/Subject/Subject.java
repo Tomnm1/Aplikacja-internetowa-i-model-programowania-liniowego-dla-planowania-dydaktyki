@@ -1,6 +1,8 @@
 package pl.poznan.put.planner_endpoints.Subject;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import pl.poznan.put.planner_endpoints.Semester.Semester;
 
 /**
@@ -16,6 +18,7 @@ public class Subject {
     @Column(name = "name")
     public String name;
     @Column(name = "language")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     public Language language;
     @Column(name = "exam")
     public Boolean exam;

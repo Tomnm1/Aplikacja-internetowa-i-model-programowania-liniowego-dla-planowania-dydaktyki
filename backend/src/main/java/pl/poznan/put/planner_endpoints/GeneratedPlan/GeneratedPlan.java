@@ -34,7 +34,7 @@ public class GeneratedPlan {
     @JoinColumn(name = "classroom_id")
     public Classroom classroom;
     @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
-    @JoinColumn(name = "subject_type__id")
+    @JoinColumn(name = "subject_type_id")
     public SubjectType subjectType;
     @Column(name = "even_week")
     public Boolean isEvenWeek;

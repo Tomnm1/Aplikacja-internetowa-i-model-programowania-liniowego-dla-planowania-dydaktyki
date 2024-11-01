@@ -19,7 +19,7 @@ public class SemesterService {
      * return all semesters
      * @return list of all semester objects
      */
-    public List<Semester> getAllSemesters() {return semesterRepository.findAll(Sort.by(Sort.Direction.ASC, "semester_id"));}
+    public List<Semester> getAllSemesters() {return semesterRepository.findAll(Sort.by(Sort.Direction.ASC, "semesterId"));}
 
     /**
      * Finds room by ID
