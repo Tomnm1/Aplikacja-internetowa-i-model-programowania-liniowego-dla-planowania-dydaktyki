@@ -2,18 +2,18 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import endpoints from '../../utils/endpoints.ts';
 import axios from 'axios';
 
-export const fetchEmployees = createAsyncThunk('employees/fetchEmployees', async () => {
-    const response = await axios.get(endpoints.employee.getAll);
+export const fetchBuildings = createAsyncThunk('buildings/fetchBuildings', async () => {
+    const response = await axios.get(endpoints.building.getAll);
     return response.data;
 });
 
-export const createEmployee = createAsyncThunk('employees/createEmployee', async (newEmployee) => {
-    const response = await axios.post(endpoints.employee.create, newEmployee);
+export const createBuilding = createAsyncThunk('buildings/createBuilding', async (newBuilding) => {
+    const response = await axios.post(endpoints.building.create, newBuilding);
     return response.data;
 });
 
-const employeeSlice = createSlice({
-    name: 'employees',
+const buildingSlice = createSlice({
+    name: 'buildings',
     initialState: {
         list: [],
         status: 'idle',
@@ -22,21 +22,21 @@ const employeeSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchEmployees.pending, (state) => {
+            .addCase(fetchBuildings.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchEmployees.fulfilled, (state, action) => {
+            .addCase(fetchBuildings.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.list = action.payload;
             })
-            .addCase(fetchEmployees.rejected, (state, action) => {
+            .addCase(fetchBuildings.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
-            .addCase(createEmployee.fulfilled, (state, action) => {
+            .addCase(createBuilding.fulfilled, (state, action) => {
                 state.list.push(action.payload);
             });
     },
 });
 
-export default employeeSlice.reducer;
+export default buildingSlice.reducer;

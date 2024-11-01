@@ -25,7 +25,7 @@ import {
     updateClassroom,
     deleteClassroom,
     setRowModesModel,
-} from '../app/slices/classroomSlice';
+} from '../app/slices/roomSlice.ts';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import {useState} from "react";
 

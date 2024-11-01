@@ -2,18 +2,18 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import endpoints from '../../utils/endpoints.ts';
 import axios from 'axios';
 
-export const fetchEmployees = createAsyncThunk('employees/fetchEmployees', async () => {
-    const response = await axios.get(endpoints.employee.getAll);
+export const fetchSubjects = createAsyncThunk('subjects/fetchSubjects', async () => {
+    const response = await axios.get(endpoints.subject.getAll);
     return response.data;
 });
 
-export const createEmployee = createAsyncThunk('employees/createEmployee', async (newEmployee) => {
-    const response = await axios.post(endpoints.employee.create, newEmployee);
+export const createSubject = createAsyncThunk('subjects/createSubject', async (newSubject) => {
+    const response = await axios.post(endpoints.subject.create, newSubject);
     return response.data;
 });
 
-const employeeSlice = createSlice({
-    name: 'employees',
+const subjectSlice = createSlice({
+    name: 'subjects',
     initialState: {
         list: [],
         status: 'idle',
@@ -22,21 +22,21 @@ const employeeSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchEmployees.pending, (state) => {
+            .addCase(fetchSubjects.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchEmployees.fulfilled, (state, action) => {
+            .addCase(fetchSubjects.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.list = action.payload;
             })
-            .addCase(fetchEmployees.rejected, (state, action) => {
+            .addCase(fetchSubjects.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
-            .addCase(createEmployee.fulfilled, (state, action) => {
+            .addCase(createSubject.fulfilled, (state, action) => {
                 state.list.push(action.payload);
             });
     },
 });
 
-export default employeeSlice.reducer;
+export default subjectSlice.reducer;

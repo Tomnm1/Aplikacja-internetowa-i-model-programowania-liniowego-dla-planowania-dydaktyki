@@ -2,18 +2,18 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import endpoints from '../../utils/endpoints.ts';
 import axios from 'axios';
 
-export const fetchEmployees = createAsyncThunk('employees/fetchEmployees', async () => {
-    const response = await axios.get(endpoints.employee.getAll);
+export const fetchRooms = createAsyncThunk('rooms/fetchRooms', async () => {
+    const response = await axios.get(endpoints.room.getAll);
     return response.data;
 });
 
-export const createEmployee = createAsyncThunk('employees/createEmployee', async (newEmployee) => {
-    const response = await axios.post(endpoints.employee.create, newEmployee);
+export const createRoom = createAsyncThunk('rooms/createRoom', async (newRoom) => {
+    const response = await axios.post(endpoints.room.create, newRoom);
     return response.data;
 });
 
-const employeeSlice = createSlice({
-    name: 'employees',
+const roomSlice = createSlice({
+    name: 'rooms',
     initialState: {
         list: [],
         status: 'idle',
@@ -22,21 +22,21 @@ const employeeSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchEmployees.pending, (state) => {
+            .addCase(fetchRooms.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchEmployees.fulfilled, (state, action) => {
+            .addCase(fetchRooms.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.list = action.payload;
             })
-            .addCase(fetchEmployees.rejected, (state, action) => {
+            .addCase(fetchRooms.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
-            .addCase(createEmployee.fulfilled, (state, action) => {
+            .addCase(createRoom.fulfilled, (state, action) => {
                 state.list.push(action.payload);
             });
     },
 });
 
-export default employeeSlice.reducer;
+export default roomSlice.reducer;

@@ -2,18 +2,18 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import endpoints from '../../utils/endpoints.ts';
 import axios from 'axios';
 
-export const fetchEmployees = createAsyncThunk('employees/fetchEmployees', async () => {
-    const response = await axios.get(endpoints.employee.getAll);
+export const fetchCourses = createAsyncThunk('courses/fetchCourses', async () => {
+    const response = await axios.get(endpoints.course.getAll);
     return response.data;
 });
 
-export const createEmployee = createAsyncThunk('employees/createEmployee', async (newEmployee) => {
-    const response = await axios.post(endpoints.employee.create, newEmployee);
+export const createCourse = createAsyncThunk('courses/createCourse', async (newCourse) => {
+    const response = await axios.post(endpoints.course.create, newCourse);
     return response.data;
 });
 
-const employeeSlice = createSlice({
-    name: 'employees',
+const courseSlice = createSlice({
+    name: 'courses',
     initialState: {
         list: [],
         status: 'idle',
@@ -22,21 +22,21 @@ const employeeSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchEmployees.pending, (state) => {
+            .addCase(fetchCourses.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchEmployees.fulfilled, (state, action) => {
+            .addCase(fetchCourses.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.list = action.payload;
             })
-            .addCase(fetchEmployees.rejected, (state, action) => {
+            .addCase(fetchCourses.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
-            .addCase(createEmployee.fulfilled, (state, action) => {
+            .addCase(createCourse.fulfilled, (state, action) => {
                 state.list.push(action.payload);
             });
     },
 });
 
-export default employeeSlice.reducer;
+export default courseSlice.reducer;

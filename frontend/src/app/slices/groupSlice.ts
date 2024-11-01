@@ -2,18 +2,19 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import endpoints from '../../utils/endpoints.ts';
 import axios from 'axios';
 
-export const fetchEmployees = createAsyncThunk('employees/fetchEmployees', async () => {
-    const response = await axios.get(endpoints.employee.getAll);
+
+export const fetchGroups = createAsyncThunk('groups/fetchGroups', async () => {
+    const response = await axios.get(endpoints.group.getAll);
     return response.data;
 });
 
-export const createEmployee = createAsyncThunk('employees/createEmployee', async (newEmployee) => {
-    const response = await axios.post(endpoints.employee.create, newEmployee);
+export const createGroup = createAsyncThunk('groups/createGroup', async (newGroup) => {
+    const response = await axios.post(endpoints.group.create, newGroup);
     return response.data;
 });
 
-const employeeSlice = createSlice({
-    name: 'employees',
+const groupSlice = createSlice({
+    name: 'groups',
     initialState: {
         list: [],
         status: 'idle',
@@ -22,21 +23,21 @@ const employeeSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchEmployees.pending, (state) => {
+            .addCase(fetchGroups.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchEmployees.fulfilled, (state, action) => {
+            .addCase(fetchGroups.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.list = action.payload;
             })
-            .addCase(fetchEmployees.rejected, (state, action) => {
+            .addCase(fetchGroups.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
-            .addCase(createEmployee.fulfilled, (state, action) => {
+            .addCase(createGroup.fulfilled, (state, action) => {
                 state.list.push(action.payload);
             });
     },
 });
 
-export default employeeSlice.reducer;
+export default groupSlice.reducer;

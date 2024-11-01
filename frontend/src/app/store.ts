@@ -1,7 +1,7 @@
 // store.ts
 import { configureStore } from '@reduxjs/toolkit';
 import employeesReducer from './slices/employeesSlice';
-import classroomReducer from './slices/classroomSlice'
+import classroomReducer from './slices/roomSlice.ts'
 
 export const store = configureStore({
     reducer: {
