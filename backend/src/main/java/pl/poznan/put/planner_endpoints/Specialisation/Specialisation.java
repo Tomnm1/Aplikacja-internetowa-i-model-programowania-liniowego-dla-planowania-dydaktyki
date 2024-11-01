@@ -1,8 +1,6 @@
 package pl.poznan.put.planner_endpoints.Specialisation;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import pl.poznan.put.planner_endpoints.FieldOfStudy.FieldOfStudy;
 import pl.poznan.put.planner_endpoints.Subject.Language;
 
@@ -12,13 +10,12 @@ public class Specialisation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "specialisation_id")
-    public Integer specialisationId;
+    public Integer SpecialisationId;
     @Column(name = "name")
     public String name;
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "cycle")
     public Cycle cycle;
     @JoinColumn(name = "field_of_study_id")
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
     public FieldOfStudy fieldOfStudy;
 }
