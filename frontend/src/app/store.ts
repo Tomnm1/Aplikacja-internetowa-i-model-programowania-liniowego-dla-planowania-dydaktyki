@@ -1,12 +1,14 @@
 // store.ts
 import { configureStore } from '@reduxjs/toolkit';
-import employeesReducer from './slices/employeesSlice';
+import teacherReducer from './slices/teacherSlice.ts';
 import classroomReducer from './slices/classroomSlice'
+import buildingReducer from './slices/buildingSlice.ts'
 
 export const store = configureStore({
     reducer: {
-        employees: employeesReducer,
-        classroom: classroomReducer
+        teachers: teacherReducer,
+        classroom: classroomReducer,
+        buildings: buildingReducer,
     },
 });
 

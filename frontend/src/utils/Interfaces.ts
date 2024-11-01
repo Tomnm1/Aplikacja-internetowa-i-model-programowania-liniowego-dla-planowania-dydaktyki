@@ -1,4 +1,4 @@
-import {GridRowId} from "@mui/x-data-grid";
+import {GridRowId, GridRowModesModel} from "@mui/x-data-grid";
 
 export interface ClassroomRow {
     id: GridRowId;
@@ -13,10 +13,6 @@ export interface ClassroomState {
     rowModesModel: Record<GridRowId, { mode: string }>;
 }
 
-export interface Teacher {
-    id: number;
-    name: string;
-}
 
 export interface Room {
     id: number;
@@ -48,4 +44,57 @@ export interface CalendarViewProps {
     rooms: Room[];
     hours: Hour[];
     schedules: Schedule[];
+}
+
+export interface SubjectType {
+    id: number;
+    name: string;
+}
+
+export interface BackendTeacher {
+    id: number;
+    firstName: string;
+    lastName: string;
+    degree: string;
+    preferences: { [key: string]: string };
+    subjectTypesList: SubjectType[];
+}
+
+export interface Teacher {
+    id: GridRowId;
+    firstName: string;
+    lastName: string;
+    degree: string;
+    preferences: { [key: string]: string };
+    subjectTypesList: number[];
+    isNew?: boolean;
+}
+
+export interface TeachersState {
+    rows: Teacher[];
+    rowModesModel: GridRowModesModel;
+    selectedRowId: GridRowId | null;
+    selectedRowName: string | null;
+    loading: boolean;
+    error: string | null;
+}
+
+export interface Building {
+    id: GridRowId;
+    code: string;
+    isNew?: boolean;
+}
+
+export interface BackendBuilding {
+    id: number;
+    code: string;
+}
+
+export interface BuildingsState {
+    rows: Building[];
+    rowModesModel: GridRowModesModel;
+    selectedRowId: GridRowId | null;
+    selectedRowCode: string | null;
+    loading: boolean;
+    error: string | null;
 }
