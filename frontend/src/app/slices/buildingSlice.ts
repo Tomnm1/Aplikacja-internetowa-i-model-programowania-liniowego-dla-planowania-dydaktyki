@@ -1,3 +1,5 @@
+// buildingSlice.ts
+
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { GridRowId, GridRowModesModel } from '@mui/x-data-grid';
 import { API_ENDPOINTS } from '../urls';
@@ -19,7 +21,7 @@ export const fetchBuildings = createAsyncThunk<Building[]>('buildings/fetchBuild
     }
     const data: BackendBuilding[] = await response.json();
     const adjustedData: Building[] = data.map((building) => ({
-        id: building.buildingId,
+        id: building.id,
         code: building.code,
     }));
     return adjustedData;
@@ -43,7 +45,7 @@ export const addBuilding = createAsyncThunk<{ tempId: GridRowId; building: Build
         }
         const data: BackendBuilding = await response.json();
         const adjustedBuilding: Building = {
-            id: data.buildingId,
+            id: data.id,
             code: data.code,
         };
         return { tempId: building.id, building: adjustedBuilding };
@@ -68,7 +70,7 @@ export const updateBuilding = createAsyncThunk<Building, Building>(
         }
         const data: BackendBuilding = await response.json();
         const adjustedBuilding: Building = {
-            id: data.buildingId,
+            id: data.id,
             code: data.code,
         };
         return adjustedBuilding;
@@ -132,6 +134,7 @@ const buildingSlice = createSlice({
                 } else {
                     state.rows.push(building);
                 }
+                // Update rowModesModel with the new id
                 if (state.rowModesModel[tempId]) {
                     state.rowModesModel[building.id] = state.rowModesModel[tempId];
                     delete state.rowModesModel[tempId];

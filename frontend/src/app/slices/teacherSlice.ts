@@ -140,6 +140,7 @@ const teacherSlice = createSlice({
                 } else {
                     state.rows.push(teacher);
                 }
+                // Aktualizuj rowModesModel z nowym id
                 if (state.rowModesModel[tempId]) {
                     state.rowModesModel[teacher.id] = state.rowModesModel[tempId];
                     delete state.rowModesModel[tempId];

@@ -1,28 +1,5 @@
 import {GridRowId, GridRowModesModel} from "@mui/x-data-grid";
 
-export const degrees = {
-    BRAK: "brak",
-    LIC: "lic.",
-    INZ: "inż.",
-    MGR: "mgr",
-    MGR_INZ: "mgr inż.",
-    DR: "dr",
-    DR_INZ: "dr inż.",
-    DR_HAB: "dr hab.",
-    DR_HAB_INZ: "dr hab. inż.",
-    DR_PROF_PP: "dr, prof. PP",
-    DR_INZ_PROF_PP: "dr inż., prof. PP",
-    DR_HAB_PROF_PP: "dr hab., prof. PP",
-    DR_HAB_INZ_PROF_PP: "dr hab. inż., prof. PP",
-    PROF_DR_HAB: "prof. dr hab.",
-    PROF_DR_HAB_INZ: "prof. dr hab. inż."
-};
-
-export enum Cycle {
-    FIRST = 'first',
-    SECOND = 'second',
-}
-
 export interface ClassroomRow {
     id: GridRowId;
     name: string;
@@ -109,7 +86,7 @@ export interface Building {
 }
 
 export interface BackendBuilding {
-    buildingId: number;
+    id: number;
     code: string;
 }
 
@@ -118,92 +95,6 @@ export interface BuildingsState {
     rowModesModel: GridRowModesModel;
     selectedRowId: GridRowId | null;
     selectedRowCode: string | null;
-    loading: boolean;
-    error: string | null;
-}
-
-export interface BackendClassroom {
-    classroomID?: number;
-    building: BackendBuilding;
-    code: string;
-    floor: number;
-    capacity: number;
-    equipment: { [key: string]: boolean };
-}
-
-export interface Classroom {
-    id: GridRowId;
-    buildingId: GridRowId;
-    code: string;
-    floor: number;
-    capacity: number;
-    equipment: string[];
-    buildingCode?: string;
-}
-
-export interface ClassroomsState {
-    rows: Classroom[];
-    loading: boolean;
-    error: string | null;
-}
-
-export interface FieldOfStudy {
-    id: GridRowId;
-    name: string;
-    isNew?: boolean;
-}
-
-export interface BackendFieldOfStudies {
-    fieldOfStudyId: number;
-    name: string;
-}
-
-export interface FieldOfStudiesState {
-    rows: FieldOfStudy[];
-    rowModesModel: GridRowModesModel;
-    selectedRowId: GridRowId | null;
-    selectedRowName: string | null;
-    loading: boolean;
-    error: string | null;
-}
-
-export interface Specialisation {
-    id: GridRowId;
-    name: string;
-    cycle: Cycle;
-    fieldOfStudyId?: number;
-    fieldOfStudyName?: string;
-}
-
-export interface BackendSpecialisation {
-    specialisationId?: number;
-    name: string;
-    cycle: Cycle;
-    fieldOfStudy: BackendFieldOfStudies;
-}
-
-export type LocalTime = string;
-
-
-export interface Slot {
-    slot_id: GridRowId;
-    start_time: LocalTime;
-    end_time: LocalTime;
-    isNew?: boolean;
-}
-
-export interface BackendSlot {
-    slotId: number;
-    startTime: LocalTime;
-    endTime: LocalTime;
-}
-
-export interface SlotsState {
-    rows: Slot[];
-    rowModesModel: GridRowModesModel;
-    selectedRowId: GridRowId | null;
-    selectedRowStart: LocalTime | null;
-    selectedRowStop: LocalTime | null;
     loading: boolean;
     error: string | null;
 }

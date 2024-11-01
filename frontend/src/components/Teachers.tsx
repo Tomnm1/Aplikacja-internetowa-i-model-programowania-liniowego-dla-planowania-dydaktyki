@@ -41,10 +41,8 @@ import {
     addNewTeacher,
     removeNewTeacher,
 } from '../app/slices/teacherSlice.ts';
-import {degrees, SubjectType, Teacher} from '../utils/Interfaces.ts';
+import { SubjectType, Teacher } from '../utils/Interfaces.ts';
 import { API_ENDPOINTS } from '../app/urls.ts';
-import {plPL} from "@mui/x-data-grid/locales";
-
 
 const Teachers: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -56,6 +54,23 @@ const Teachers: React.FC = () => {
     const error = useSelector((state: RootState) => state.teachers.error);
     const [isDialogOpen, setDialogOpen] = React.useState(false);
 
+    const degrees = [
+        'brak',
+        'lic.',
+        'inż.',
+        'mgr',
+        'mgr inż.',
+        'dr',
+        'dr inż.',
+        'dr hab.',
+        'dr hab. inż.',
+        'dr, prof. PP',
+        'dr inż., prof. PP',
+        'dr hab., prof. PP',
+        'dr hab. inż., prof. PP',
+        'prof. dr hab.',
+        'prof. dr hab. inż.',
+    ];
 
 
     const [subjectTypes, setSubjectTypes] = React.useState<SubjectType[]>([]);
@@ -141,23 +156,17 @@ const Teachers: React.FC = () => {
                 <Select
                     value={params.value || ''}
                     onChange={(event) => {
-                        params.api.setEditCellValue(
-                            { id: params.id, field: 'degree', value: event.target.value },
-                            event
-                        );
+                        params.api.setEditCellValue({ id: params.id, field: 'degree', value: event.target.value }, event);
                     }}
                     fullWidth
-                    variant="outlined"
-                >
-                    {Object.entries(degrees).map(([key, displayName]) => (
-                        <MenuItem key={key} value={key}>
-                            {displayName}
+                    variant="standard">
+                    {degrees.map((degree) => (
+                        <MenuItem key={degree} value={degree}>
+                            {degree}
                         </MenuItem>
                     ))}
                 </Select>
             ),
-            renderCell: (params) => degrees[params.value as keyof typeof degrees] || '',
-
         },
         {
             field: 'preferences',
@@ -202,8 +211,7 @@ const Teachers: React.FC = () => {
                                 .map((type) => type.name)
                                 .join(', ')
                         }
-                        variant="outlined"
-                    >
+                     variant="standard">
                         {subjectTypes.map((type) => (
                             <MenuItem key={type.id} value={type.id}>
                                 <Checkbox checked={(params.value || []).includes(type.id)} />
@@ -274,7 +282,7 @@ const Teachers: React.FC = () => {
             id,
             firstName: '',
             lastName: '',
-            degree: "BRAK",
+            degree: degrees[0],
             preferences: {},
             subjectTypesList: [],
             isNew: true,
@@ -300,7 +308,6 @@ const Teachers: React.FC = () => {
                 rows={rows}
                 columns={columns}
                 loading={loading}
-                localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
                 editMode="row"
                 rowModesModel={rowModesModel}
                 onRowModesModelChange={handleRowModesModelChange}

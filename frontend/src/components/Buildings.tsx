@@ -1,38 +1,39 @@
-import React, {useEffect} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+// Buildings.tsx
+
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import {
-    DataGrid,
-    GridActionsCellItem,
-    GridColDef,
-    GridRowId,
-    GridRowModel,
     GridRowModes,
-    GridRowModesModel,
-    GridRowParams,
-    GridToolbar,
+    DataGrid,
     GridToolbarContainer,
+    GridActionsCellItem,
+    GridRowId,
+    GridRowModesModel,
+    GridToolbar,
+    GridColDef,
+    GridRowModel,
+    GridRowParams,
 } from '@mui/x-data-grid';
-import {Button} from '@mui/material';
+import { Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
-import {AppDispatch, RootState} from '../app/store';
+import { RootState, AppDispatch } from '../app/store';
 import {
-    addBuilding,
-    addNewBuilding,
-    clearSelectedRow,
-    deleteBuilding,
-    fetchBuildings,
-    removeNewBuilding,
     setRowModesModel,
     setSelectedRow,
+    clearSelectedRow,
+    fetchBuildings,
+    addBuilding,
     updateBuilding,
+    deleteBuilding,
+    addNewBuilding,
+    removeNewBuilding,
 } from '../app/slices/buildingSlice';
-import {Building} from '../utils/Interfaces.ts';
-import {plPL} from "@mui/x-data-grid/locales";
+import { Building } from '../utils/Interfaces.ts';
 
 const Buildings: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -49,7 +50,6 @@ const Buildings: React.FC = () => {
     useEffect(() => {
         dispatch(fetchBuildings());
     }, [dispatch]);
-
 
     const handleEditClick = (id: GridRowId) => () => {
         dispatch(setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } }));
@@ -89,7 +89,7 @@ const Buildings: React.FC = () => {
         }
     };
 
-    const processRowUpdate = async (newRow: GridRowModel) => {
+    const processRowUpdate = (newRow: GridRowModel) => {
         const updatedRow: Building = {
             id: newRow.id,
             code: newRow.code || '',
@@ -97,21 +97,11 @@ const Buildings: React.FC = () => {
         };
 
         if (updatedRow.isNew) {
-            const resultAction = await dispatch(addBuilding(updatedRow));
-            if (addBuilding.fulfilled.match(resultAction)) {
-                const { building } = resultAction.payload;
-                return building;
-            } else {
-                throw new Error('Failed to add building');
-            }
+            dispatch(addBuilding(updatedRow));
         } else {
-            const resultAction = await dispatch(updateBuilding(updatedRow));
-            if (updateBuilding.fulfilled.match(resultAction)) {
-                return resultAction.payload;
-            } else {
-                throw new Error('Failed to update building');
-            }
+            dispatch(updateBuilding(updatedRow));
         }
+        return updatedRow;
     };
 
     const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
@@ -202,7 +192,6 @@ const Buildings: React.FC = () => {
                 rows={rows}
                 columns={columns}
                 loading={loading}
-                localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
                 editMode="row"
                 rowModesModel={rowModesModel}
                 onRowModesModelChange={handleRowModesModelChange}
