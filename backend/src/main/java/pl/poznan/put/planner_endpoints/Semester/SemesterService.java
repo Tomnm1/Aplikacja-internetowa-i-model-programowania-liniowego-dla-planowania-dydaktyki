@@ -19,7 +19,7 @@ public class SemesterService {
      * return all semesters
      * @return list of all semester objects
      */
-    public List<Semester> getAllSemesters() {return semesterRepository.findAll(Sort.by(Sort.Direction.ASC, "semesterId"));}
+    public List<Semester> getAllSemesters() {return semesterRepository.findAll(Sort.by(Sort.Direction.ASC, "semester_id"));}
 
     /**
      * Finds room by ID
@@ -66,15 +66,5 @@ public class SemesterService {
      */
     public void deleteAllSemesters(){
         semesterRepository.deleteAll();
-    }
-
-    public Semester createSemesterIfNotExists(Semester semester){
-        boolean exists = semesterRepository.existsByNumberAndSpecialisation(semester.number, semester.specialisation);
-        if(exists){
-            return null;
-        } else {
-            createSemester(semester);
-            return semester;
-        }
     }
 }

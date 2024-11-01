@@ -19,7 +19,7 @@ public class SpecialisationService {
      * return all specialisations
      * @return list of all specialisation objects
      */
-    public List<Specialisation> getAllSpecialisations() {return specialisationRepository.findAll(Sort.by(Sort.Direction.ASC, "specialisationId"));}
+    public List<Specialisation> getAllSpecialisations() {return specialisationRepository.findAll(Sort.by(Sort.Direction.ASC, "specialisation_id"));}
 
     /**
      * Finds room by ID
@@ -67,15 +67,5 @@ public class SpecialisationService {
      */
     public void deleteAllSpecialisations(){
         specialisationRepository.deleteAll();
-    }
-
-    public Specialisation createSpecialisationIfNotExists(Specialisation specialisation){
-        boolean exists = specialisationRepository.existsByNameAndCycleAndFieldOfStudy(specialisation.name, specialisation.cycle, specialisation.fieldOfStudy);
-        if(exists){
-            return null;
-        } else {
-            createSpecialisation(specialisation);
-            return specialisation;
-        }
     }
 }

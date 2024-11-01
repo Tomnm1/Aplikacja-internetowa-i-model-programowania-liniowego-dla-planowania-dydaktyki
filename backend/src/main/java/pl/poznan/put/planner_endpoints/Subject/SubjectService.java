@@ -25,7 +25,7 @@ public class SubjectService {
      * @return list of Subject
      */
     public List<Subject> getAllSubject(){
-        return subjectRepository.findAll();
+        return subjectRepository.findAll(Sort.by(Sort.Direction.ASC, "subject_id"));
     }
 
     /**
@@ -91,15 +91,5 @@ public class SubjectService {
      */
     public void deleteAllSubjects(){
         subjectRepository.deleteAll();
-    }
-
-    public Subject createSubjectIfNotExists(Subject subject){
-        boolean exists = subjectRepository.existsByNameAndSemester(subject.name, subject.semester);
-        if(exists){
-            return null;
-        } else {
-            createSubject(subject);
-            return subject;
-        }
     }
 }

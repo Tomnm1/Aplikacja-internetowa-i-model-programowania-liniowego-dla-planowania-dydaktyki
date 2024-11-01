@@ -2,10 +2,7 @@ package pl.poznan.put.planner_endpoints.Semester;
 
 import jakarta.persistence.*;
 import pl.poznan.put.planner_endpoints.FieldOfStudy.FieldOfStudy;
-import pl.poznan.put.planner_endpoints.Group.Group;
 import pl.poznan.put.planner_endpoints.Specialisation.Specialisation;
-
-import java.util.List;
 
 @Entity
 @Table(name="semesters")
@@ -15,8 +12,8 @@ public class Semester {
     @Column(name = "semester_id")
     public Integer semesterId;
     @Column(name = "number")
-    public String number;
+    public Short number;
     @JoinColumn(name = "specialisation_id")
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
     public Specialisation specialisation;
 }

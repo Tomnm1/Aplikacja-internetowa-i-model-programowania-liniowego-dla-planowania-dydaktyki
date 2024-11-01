@@ -1,6 +1,7 @@
 package pl.poznan.put.planner_endpoints.Subject;
 
 import jakarta.persistence.*;
+import pl.poznan.put.planner_endpoints.Semester.Semester;
 
 /**
  * Data model for subjects table
