@@ -56,6 +56,7 @@ public class TeacherController {
             )
     })
     public Teacher createTeacher(@RequestBody Teacher teacher){
+        //teacher.degree = Degree.valueOf(teacher.degree.getDisplayName());
         return teacherService.createteacher(teacher);
     }
 

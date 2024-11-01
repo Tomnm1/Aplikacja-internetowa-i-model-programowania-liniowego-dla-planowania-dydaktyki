@@ -53,6 +53,7 @@ public class TeacherService {
      * @return saved Teacher
      */
     public Teacher createteacher(Teacher teacher){
+        System.out.print(teacher);
         return teacherRepository.save(teacher);
     }
 

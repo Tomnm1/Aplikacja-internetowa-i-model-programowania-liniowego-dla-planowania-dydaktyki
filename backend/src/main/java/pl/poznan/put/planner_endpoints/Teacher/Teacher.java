@@ -1,8 +1,11 @@
 package pl.poznan.put.planner_endpoints.Teacher;
 
+import com.sun.jna.platform.unix.solaris.LibKstat;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 
 import java.util.HashMap;
@@ -23,8 +26,11 @@ public class Teacher {
     public String firstName;
     @Column(name = "last_name")
     public String lastName;
+
     @Column(name = "degree")
-    public String degree;
+    //@JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Convert(converter = DegreeConverter.class)
+    public Degree degree;
     @Column(name = "preferences", columnDefinition = "json")
     @Type(JsonType.class)
     public Map<String, String> preferences = new HashMap<>();
