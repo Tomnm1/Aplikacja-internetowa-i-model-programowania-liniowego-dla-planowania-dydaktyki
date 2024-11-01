@@ -69,9 +69,9 @@ public class SubjectService {
             oldSubject.name = subjectParams.name;
             oldSubject.language = subjectParams.language;
             oldSubject.exam = subjectParams.exam;
-            oldSubject.elective = subjectParams.elective;
+            oldSubject.mandatory = subjectParams.mandatory;
             oldSubject.planned = subjectParams.planned;
-            oldSubject.course = subjectParams.course;
+            oldSubject.semester = subjectParams.semester;
             return subjectRepository.save(oldSubject);
         } else {
             return null;
