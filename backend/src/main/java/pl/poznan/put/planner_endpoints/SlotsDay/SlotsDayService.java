@@ -19,7 +19,7 @@ public class SlotsDayService {
      * return all SlotsDays
      * @return list of all SlotsDay objects
      */
-    public List<SlotsDay> getAllSlotsDays() {return SlotsDayRepository.findAll(Sort.by(Sort.Direction.ASC, "SlotsDayId"));}
+    public List<SlotsDay> getAllSlotsDays() {return SlotsDayRepository.findAll();}
 
     /**
      * Finds room by ID
