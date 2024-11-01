@@ -25,7 +25,7 @@ public class ClassroomService {
      * @return list of Classroom objects
      */
     public List<Classroom> getAllClassrooms(){
-        return classroomRepository.findAll(Sort.by(Sort.Direction.ASC, "code"));
+        return classroomRepository.findAll(Sort.by(Sort.Direction.ASC, "classroomID"));
     }
 
     /**

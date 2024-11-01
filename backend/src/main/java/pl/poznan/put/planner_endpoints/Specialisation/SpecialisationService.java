@@ -19,7 +19,7 @@ public class SpecialisationService {
      * return all specialisations
      * @return list of all specialisation objects
      */
-    public List<Specialisation> getAllSpecialisations() {return specialisationRepository.findAll(Sort.by(Sort.Direction.ASC, "specialisation_id"));}
+    public List<Specialisation> getAllSpecialisations() {return specialisationRepository.findAll(Sort.by(Sort.Direction.ASC, "specialisationId"));}
 
     /**
      * Finds room by ID

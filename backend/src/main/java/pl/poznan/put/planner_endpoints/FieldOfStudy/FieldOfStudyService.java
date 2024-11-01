@@ -19,7 +19,7 @@ public class FieldOfStudyService {
      * return all fieldOfStudys
      * @return list of all fieldOfStudy objects
      */
-    public List<FieldOfStudy> getAllFieldOfStudys() {return fieldOfStudyRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));}
+    public List<FieldOfStudy> getAllFieldOfStudys() {return fieldOfStudyRepository.findAll(Sort.by(Sort.Direction.ASC, "fieldOfStudyId"));}
 
     /**
      * Finds room by ID

@@ -25,7 +25,7 @@ public class SubjectService {
      * @return list of Subject
      */
     public List<Subject> getAllSubject(){
-        return subjectRepository.findAll(Sort.by(Sort.Direction.ASC, "subject_id"));
+        return subjectRepository.findAll(Sort.by(Sort.Direction.ASC, "SubjectId"));
     }
 
     /**
