@@ -25,7 +25,7 @@ public class SubjectTypeService {
      * @return list of SubjectType
      */
     public List<SubjectType> getAllsubjectType(){
-        return subjectTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+        return subjectTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "subject_types_id"));
     }
 
     /**

@@ -1,4 +1,4 @@
 /**
- * This package contains everything related to Subjects
+ * This package contains everything related to specialisations
  */
 package pl.poznan.put.planner_endpoints.Specialisation;
