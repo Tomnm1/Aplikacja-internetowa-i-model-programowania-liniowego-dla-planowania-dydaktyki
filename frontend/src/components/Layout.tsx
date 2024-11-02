@@ -1,4 +1,3 @@
-// Layout.tsx
 import Navbar from "./Navbar.tsx";
 import {ReactNode} from "react";
 import Topper from "./Topper.tsx";

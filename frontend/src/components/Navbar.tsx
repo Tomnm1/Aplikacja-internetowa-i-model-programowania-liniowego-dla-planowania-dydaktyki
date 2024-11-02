@@ -1,4 +1,3 @@
-// Navbar.tsx
 import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
@@ -7,6 +6,7 @@ import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import BusinessIcon from '@mui/icons-material/Business';
+import WindowIcon from '@mui/icons-material/Window';
 import {CalendarMonth, DesignServices} from "@mui/icons-material";
 
 const routes = [
@@ -38,6 +38,11 @@ const routes = [
         name: "Budynki",
         link: "/buildings",
         icon: <BusinessIcon/>,
+    },
+    {
+        name: "Kierunki studiów",
+        link: "/fieldofstudies",
+        icon: <WindowIcon/>,
     },
 ]
 const Navbar: React.FC = () => {

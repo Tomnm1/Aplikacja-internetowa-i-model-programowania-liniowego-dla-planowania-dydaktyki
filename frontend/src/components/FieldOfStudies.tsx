@@ -21,33 +21,33 @@ import CancelIcon from '@mui/icons-material/Close';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import {AppDispatch, RootState} from '../app/store';
 import {
-    addBuilding,
-    addNewBuilding,
-    clearSelectedRow,
-    deleteBuilding,
-    fetchBuildings,
-    removeNewBuilding,
     setRowModesModel,
     setSelectedRow,
-    updateBuilding,
-} from '../app/slices/buildingSlice';
-import {Building} from '../utils/Interfaces.ts';
+    clearSelectedRow,
+    addNewFOS,
+    removeNewFOS,
+    fetchFOS,
+    addFOS,
+    updateFOS,
+    deleteFOS,
+} from '../app/slices/fieldOfStudySlice.ts';
+import {FieldOfStudy} from '../utils/Interfaces.ts';
 import {plPL} from "@mui/x-data-grid/locales";
 
-const Buildings: React.FC = () => {
+const FieldOfStudies: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const rows = useSelector((state: RootState) => state.buildings.rows);
-    const rowModesModel = useSelector((state: RootState) => state.buildings.rowModesModel);
-    const selectedRowCode = useSelector((state: RootState) => state.buildings.selectedRowCode);
-    const selectedRowId = useSelector((state: RootState) => state.buildings.selectedRowId);
-    const loading = useSelector((state: RootState) => state.buildings.loading);
-    const error = useSelector((state: RootState) => state.buildings.error);
+    const rows = useSelector((state: RootState) => state.fields.rows);
+    const rowModesModel = useSelector((state: RootState) => state.fields.rowModesModel);
+    const selectedRowName = useSelector((state: RootState) => state.fields.selectedRowName);
+    const selectedRowId = useSelector((state: RootState) => state.fields.selectedRowId);
+    const loading = useSelector((state: RootState) => state.fields.loading);
+    const error = useSelector((state: RootState) => state.fields.error);
     const [isDialogOpen, setDialogOpen] = React.useState(false);
 
     const [rowIdCounter, setRowIdCounter] = React.useState(-1);
 
     useEffect(() => {
-        dispatch(fetchBuildings());
+        dispatch(fetchFOS());
     }, [dispatch]);
 
 
@@ -62,14 +62,14 @@ const Buildings: React.FC = () => {
     const handleDeleteClick = (id: GridRowId) => () => {
         const rowToDelete = rows.find((row) => row.id === id);
         if (rowToDelete) {
-            dispatch(setSelectedRow({ id, code: rowToDelete.code }));
+            dispatch(setSelectedRow({ id, name: rowToDelete.name }));
             setDialogOpen(true);
         }
     };
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteBuilding(selectedRowId));
+            dispatch(deleteFOS(selectedRowId));
         }
         setDialogOpen(false);
         dispatch(clearSelectedRow());
@@ -85,31 +85,31 @@ const Buildings: React.FC = () => {
 
         const editedRow = rows.find((row) => row.id === id);
         if (editedRow?.isNew) {
-            dispatch(removeNewBuilding(id));
+            dispatch(removeNewFOS(id));
         }
     };
 
     const processRowUpdate = async (newRow: GridRowModel) => {
-        const updatedRow: Building = {
+        const updatedRow: FieldOfStudy = {
             id: newRow.id,
-            code: newRow.code || '',
+            name: newRow.name || '',
             isNew: newRow.isNew || false,
         };
 
         if (updatedRow.isNew) {
-            const resultAction = await dispatch(addBuilding(updatedRow));
-            if (addBuilding.fulfilled.match(resultAction)) {
-                const { building } = resultAction.payload;
-                return building;
+            const resultAction = await dispatch(addFOS(updatedRow));
+            if (addFOS.fulfilled.match(resultAction)) {
+                const { fos } = resultAction.payload;
+                return fos;
             } else {
-                throw new Error('Failed to add building');
+                throw new Error('Failed to add field of study');
             }
         } else {
-            const resultAction = await dispatch(updateBuilding(updatedRow));
-            if (updateBuilding.fulfilled.match(resultAction)) {
+            const resultAction = await dispatch(updateFOS(updatedRow));
+            if (updateFOS.fulfilled.match(resultAction)) {
                 return resultAction.payload;
             } else {
-                throw new Error('Failed to update building');
+                throw new Error('Failed to update field of study');
             }
         }
     };
@@ -119,7 +119,7 @@ const Buildings: React.FC = () => {
     };
 
     const columns: GridColDef[] = [
-        { field: 'code', headerName: 'Kod', width: 150, editable: true },
+        { field: 'name', headerName: 'Kod', width: 150, editable: true },
         {
             field: 'actions',
             type: 'actions',
@@ -171,16 +171,16 @@ const Buildings: React.FC = () => {
     const handleAddClick = () => {
         const id = rowIdCounter;
         setRowIdCounter((prev) => prev - 1);
-        const newBuilding: Building = {
+        const newFOS: FieldOfStudy = {
             id,
-            code: '',
+            name: '',
             isNew: true,
         };
-        dispatch(addNewBuilding(newBuilding));
+        dispatch(addNewFOS(newFOS));
         dispatch(
             setRowModesModel({
                 ...rowModesModel,
-                [id]: { mode: GridRowModes.Edit, fieldToFocus: 'code' },
+                [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
             })
         );
     };
@@ -189,7 +189,7 @@ const Buildings: React.FC = () => {
         return (
             <GridToolbarContainer>
                 <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
-                    Dodaj budynek
+                    Dodaj kierunek studiów
                 </Button>
                 <GridToolbar />
             </GridToolbarContainer>
@@ -213,7 +213,7 @@ const Buildings: React.FC = () => {
                 open={isDialogOpen}
                 onClose={handleDialogClose}
                 title="Potwierdzenie"
-                content={`Czy na pewno chcesz usunąć budynek ${selectedRowCode}?`}
+                content={`Czy na pewno chcesz usunąć kierunek studiów? ${selectedRowName}?`}
                 action="Potwierdź"
             />
             {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
@@ -221,4 +221,4 @@ const Buildings: React.FC = () => {
     );
 };
 
-export default Buildings;
+export default FieldOfStudies;

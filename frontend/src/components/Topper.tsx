@@ -1,4 +1,3 @@
-// Topper.tsx
 import PersonIcon from '@mui/icons-material/Person';
 import put_logo_text from "../assets/put_logo_text.png"
 import put_logo from "../assets/put_logo.png"
