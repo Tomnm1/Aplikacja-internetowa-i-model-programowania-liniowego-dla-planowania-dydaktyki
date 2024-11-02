@@ -86,7 +86,7 @@ export interface Building {
 }
 
 export interface BackendBuilding {
-    id: number;
+    buildingId: number;
     code: string;
 }
 
@@ -95,6 +95,55 @@ export interface BuildingsState {
     rowModesModel: GridRowModesModel;
     selectedRowId: GridRowId | null;
     selectedRowCode: string | null;
+    loading: boolean;
+    error: string | null;
+}
+
+export interface BackendClassroom {
+    classroomID?: number;
+    building: {
+        buildingId: number;
+        code: string;
+    };
+    code: string;
+    floor: number;
+    capacity: number;
+    equipment: { [key: string]: boolean };
+
+}
+
+export interface Classroom {
+    id: GridRowId;
+    buildingId: GridRowId;
+    code: string;
+    floor: number;
+    capacity: number;
+    equipment: string[];
+    buildingCode?: string;
+}
+
+export interface ClassroomsState {
+    rows: Classroom[];
+    loading: boolean;
+    error: string | null;
+}
+
+export interface FieldOfStudy {
+    id: GridRowId;
+    name: string;
+    isNew?: boolean;
+}
+
+export interface BackendFieldOfStudies {
+    fieldOfStudyId: number;
+    name: string;
+}
+
+export interface FieldOfStudiesState {
+    rows: FieldOfStudy[];
+    rowModesModel: GridRowModesModel;
+    selectedRowId: GridRowId | null;
+    selectedRowName: string | null;
     loading: boolean;
     error: string | null;
 }

@@ -8,6 +8,7 @@ import Classrooms from "./Classrooms.tsx";
 import Desiderata from "./Desiderata.tsx";
 import Calendar from "./Calendar.tsx";
 import Buildings from "./Buildings.tsx";
+import FieldOfStudies from "./FieldOfStudies.tsx";
 
 const App: React.FC = () => {
 
@@ -21,6 +22,7 @@ const App: React.FC = () => {
                     <Route path="/calendar" element={<Calendar /> } />
                     <Route path="/desiderata" element={<Desiderata />} />
                     <Route path="/buildings" element={<Buildings />} />
+                    <Route path="/fieldofstudies" element={<FieldOfStudies />} />
                 </Routes>
             </Layout>
         </Router>

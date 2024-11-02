@@ -19,6 +19,6 @@ public class Specialisation {
     @Column(name = "cycle")
     public Cycle cycle;
     @JoinColumn(name = "field_of_study_id")
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne
     public FieldOfStudy fieldOfStudy;
 }
