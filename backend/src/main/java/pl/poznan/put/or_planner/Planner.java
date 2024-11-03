@@ -1,104 +1,106 @@
 package pl.poznan.put.or_planner;
 
 import com.google.ortools.Loader;
-import com.google.ortools.sat.*;
+import com.google.ortools.linearsolver.MPObjective;
+import com.google.ortools.linearsolver.MPSolver;
+import com.google.ortools.linearsolver.MPVariable;
+import pl.poznan.put.or_planner.constraints.ConstraintsManager;
+import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+/**
+ * Weź se wyloguj
+ * if(Objects.equals(groups.get(g), "L1") && Objects.equals(subjects.get(p), "PTC"))
+ *                   System.out.println("wykluczam kombinację: " + groups.get(g) + " " + rooms.get(s) +
+ *                   " " + timeSlots.get(t) + " " + subjects.get(p) + " " + teachers.get(n)) + " " + typesOfClasses.get(c);
+ */
 public class Planner {
 
-    private final ArrayList<String> groups;
-    private final ArrayList<String> subjects;
-    private final ArrayList<String> rooms;
-    private final ArrayList<String> timeSlots;
-    private final Map<String, List<String>> roomToSubjects;
+    private final List<String> groups;
+    private final List<String> teachers;
+    private final List<String> rooms;
+    private final List<String> timeSlots;
+    private final List<PlannerSubject> subjects;
 
     private final int numGroups;
     private final int numRooms;
     private final int numSubjects;
     private final int numTimeSlots;
+    private final int numTeachers;
 
-    public Planner(ArrayList<String> groups, ArrayList<String> subjects, ArrayList<String> rooms,
-                   ArrayList<String> timeSlots, Map<String, List<String>> roomToSubjects) {
+    private final List<String> evenTimeSlots;
+    private final List<String> oddTimeSlots;
+
+
+    public Planner(List<String> groups, List<String> teachers, List<String> rooms, List<String> timeSlots,
+                   List<PlannerSubject> subjects) {
         Loader.loadNativeLibraries();
 
         this.groups = groups;
-        this.subjects = subjects;
+        this.teachers = teachers;
         this.rooms = rooms;
         this.timeSlots = timeSlots;
-        this.roomToSubjects = roomToSubjects;
+        this.subjects = subjects;
 
         this.numGroups = groups.size();
         this.numSubjects = subjects.size();
         this.numRooms = rooms.size();
         this.numTimeSlots = timeSlots.size();
+        this.numTeachers = teachers.size();
+
+        this.evenTimeSlots = new ArrayList<>();
+        this.oddTimeSlots = new ArrayList<>();
+
+        for (String slot : timeSlots) {
+            evenTimeSlots.add(slot + "_even");
+            oddTimeSlots.add(slot + "_odd");
+        }
+
     }
 
     public List<String[]> optimizeSchedule() {
-        CpModel model = new CpModel();
+        MPSolver solver = MPSolver.createSolver("SCIP");
+        MPObjective objective = solver.objective();
+        objective.setMinimization();
 
-        // Variables - dana grupa g, w danej sali s, o danym czasie t, ma przedmiot p
-        Literal[][][][] x = new Literal[numGroups][numRooms][numTimeSlots][numSubjects];
+        // Variables - dana grupa g, w danej sali s, o danym czasie t, ma przedmiot p z nauczycielem n
+        MPVariable[][][][][] xEven =
+                new MPVariable[numGroups][numRooms][evenTimeSlots.size()][numSubjects][numTeachers];
+        MPVariable[][][][][] xOdd =
+                new MPVariable[numGroups][numRooms][oddTimeSlots.size()][numSubjects][numTeachers];
         for (int g = 0; g < numGroups; ++g) {
             for (int s = 0; s < numRooms; ++s) {
                 for (int t = 0; t < numTimeSlots; ++t) {
                     for (int p = 0; p < numSubjects; ++p) {
-                        x[g][s][t][p] = model.newBoolVar("x_" + g + "_" + s + "_" + t + "_" + p);
-                    }
-                }
-            }
-        }
-
-        // Constraints
-        // 1. Ograniczenie: każda sala może być zajęta tylko przez jedną grupę w danym czasie.
-        for (int s = 0; s < numRooms; ++s) {
-            for (int t = 0; t < numTimeSlots; ++t) {
-                LinearExprBuilder roomConstraint = LinearExpr.newBuilder();
-                for (int g = 0; g < numGroups; ++g) {
-                    for (int p = 0; p < numSubjects; ++p) {
-                        roomConstraint.addTerm(x[g][s][t][p], 1);
-                    }
-                }
-                model.addLessOrEqual(roomConstraint, 1);
-            }
-        }
-
-        // 2. Ograniczenie: każda grupa musi mieć każdy przedmiot w jednym czasie i jednej sali.
-        for (int g = 0; g < numGroups; ++g) {
-            for (int p = 0; p < numSubjects; ++p) {
-                List<Literal> groupSubjectConstraint = new ArrayList<>();
-                for (int s = 0; s < numRooms; ++s) {
-                    for (int t = 0; t < numTimeSlots; ++t) {
-                        groupSubjectConstraint.add(x[g][s][t][p]);
-                    }
-                }
-                model.addExactlyOne(groupSubjectConstraint);
-            }
-        }
-
-        // 3. Ograniczenie: przedmioty mogą odbywać sie w określonych salach
-        for (int g = 0; g < numGroups; ++g) {
-            for (int s = 0; s < numRooms; ++s) {
-                String room = rooms.get(s);
-                List<String> allowedSubjects = roomToSubjects.get(room);
-                for (int t = 0; t < numTimeSlots; ++t) {
-                    for (int p = 0; p < numSubjects; ++p) {
-                        String subject = subjects.get(p);
-                        if (!allowedSubjects.contains(subject)) {
-                            model.addEquality(x[g][s][t][p], 0); //ograniczenie wykluczające
+                        for (int n = 0; n < numTeachers; ++n){
+                            xEven[g][s][t][p][n] = solver.makeBoolVar("xEven_" + groups.get(g) + "_"
+                                    + rooms.get(s) + "_" + timeSlots.get(t) + "_" + subjects.get(p) + "_"
+                                    + teachers.get(n));
+                            xOdd[g][s][t][p][n] = solver.makeBoolVar("xOdd_" + groups.get(g) + "_"
+                                    + rooms.get(s) + "_" + timeSlots.get(t) + "_" + subjects.get(p) + "_"
+                                    + teachers.get(n));
                         }
                     }
                 }
             }
         }
 
-        CpSolver solver = new CpSolver();
-        CpSolverStatus status = solver.solve(model);
+        ConstraintsManager constraintsManager = new ConstraintsManager(solver, groups, teachers, rooms, timeSlots, subjects);
 
-        if (status == CpSolverStatus.OPTIMAL || status == CpSolverStatus.FEASIBLE) {
-            System.out.println("Found a solution!");
+        constraintsManager.addRoomOccupationConstraint(xEven, xOdd);
+
+        constraintsManager.assignSubjectsToGroupsAndBlockGroupsConstraint(xEven, xOdd);
+
+        constraintsManager.oneTeacherOneClassConstraint(xEven, xOdd);
+
+        constraintsManager.oneGroupOneClassConstraint(xEven, xOdd);
+
+
+        MPSolver.ResultStatus status = solver.solve();
+
+        if (status == MPSolver.ResultStatus.OPTIMAL || status == MPSolver.ResultStatus.FEASIBLE) {
+            System.out.println("Found a " + status + " solution!");
         } else {
             System.out.println("No feasible solution found.");
             return null;
@@ -106,19 +108,32 @@ public class Planner {
 
         List<String[]> scheduleTable = new ArrayList<>();
         for (int t = 0; t < numTimeSlots; ++t) {
-            String[]row = new String[numGroups];
+            String[] rowEven = new String[numGroups];
+            String[] rowOdd = new String[numGroups];
+
             for (int g = 0; g < numGroups; ++g) {
                 for (int s = 0; s < numRooms; ++s) {
                     for (int p = 0; p < numSubjects; ++p) {
-                        if (solver.booleanValue(x[g][s][t][p])) {
-                            row[g] = "Room " + rooms.get(s) + " " + subjects.get(p);
+                        for (int n = 0; n < numTeachers; ++n) {
+                            if (xEven[g][s][t][p][n].solutionValue() == 1) {
+                                rowEven[g] = xEven[g][s][t][p][n].solutionValue() + "R " + rooms.get(s) + " " + subjects.get(p).getName()
+                                        + " " + teachers.get(n);
+                            }
+                            if (xOdd[g][s][t][p][n].solutionValue() == 1) {
+                                rowOdd[g] = xOdd[g][s][t][p][n].solutionValue() + "R " + rooms.get(s) + " " + subjects.get(p).getName()
+                                        + " " + teachers.get(n);
+                            }
                         }
                     }
                 }
             }
-            scheduleTable.add(row);
+
+            scheduleTable.add(rowEven);
+            scheduleTable.add(rowOdd);
         }
 
         return scheduleTable;
     }
 }
+
+// fiat voluntas tua
