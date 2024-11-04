@@ -41,7 +41,7 @@ import {
     addNewTeacher,
     removeNewTeacher,
 } from '../app/slices/teacherSlice.ts';
-import { SubjectType, Teacher } from '../utils/Interfaces.ts';
+import {degrees, SubjectType, Teacher} from '../utils/Interfaces.ts';
 import { API_ENDPOINTS } from '../app/urls.ts';
 import {plPL} from "@mui/x-data-grid/locales";
 
@@ -55,24 +55,6 @@ const Teachers: React.FC = () => {
     const loading = useSelector((state: RootState) => state.teachers.loading);
     const error = useSelector((state: RootState) => state.teachers.error);
     const [isDialogOpen, setDialogOpen] = React.useState(false);
-
-    const degrees = {
-        BRAK: "brak",
-        LIC: "lic.",
-        INZ: "inż.",
-        MGR: "mgr",
-        MGR_INZ: "mgr inż.",
-        DR: "dr",
-        DR_INZ: "dr inż.",
-        DR_HAB: "dr hab.",
-        DR_HAB_INZ: "dr hab. inż.",
-        DR_PROF_PP: "dr, prof. PP",
-        DR_INZ_PROF_PP: "dr inż., prof. PP",
-        DR_HAB_PROF_PP: "dr hab., prof. PP",
-        DR_HAB_INZ_PROF_PP: "dr hab. inż., prof. PP",
-        PROF_DR_HAB: "prof. dr hab.",
-        PROF_DR_HAB_INZ: "prof. dr hab. inż."
-    };
 
 
 

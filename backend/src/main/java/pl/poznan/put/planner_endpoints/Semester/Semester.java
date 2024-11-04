@@ -17,7 +17,7 @@ public class Semester {
     @Column(name = "number")
     public Short number;
     @JoinColumn(name = "specialisation_id")
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne
     public Specialisation specialisation;
     @ManyToMany
     @JoinTable(
