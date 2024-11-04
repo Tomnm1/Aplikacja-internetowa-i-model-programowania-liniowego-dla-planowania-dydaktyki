@@ -16,7 +16,7 @@ import java.util.Optional;
  * Controller for Slot resource
  */
 @RestController
-@RequestMapping("/Slots")
+@RequestMapping("/slots")
 public class SlotController {
     @Autowired
     private pl.poznan.put.planner_endpoints.Slot.SlotService SlotService;

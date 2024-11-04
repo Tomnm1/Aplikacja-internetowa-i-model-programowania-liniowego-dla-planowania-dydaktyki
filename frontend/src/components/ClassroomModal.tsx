@@ -1,16 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Dialog,
     DialogTitle,
     DialogContent,
     DialogActions,
-    Button,
     TextField,
     FormControl,
     InputLabel,
     Select,
-    MenuItem, OutlinedInput,
+    MenuItem,
+    OutlinedInput,
+    Typography,
+    Box,
+    Fade,
 } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../app/store';
 import { Classroom, BackendBuilding, BackendClassroom } from '../utils/Interfaces';
@@ -18,6 +22,9 @@ import { addClassroom, updateClassroom } from '../app/slices/classroomSlice';
 import { API_ENDPOINTS } from '../app/urls';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { GridRowId } from '@mui/x-data-grid';
+import SaveButton from '../utils/SaveButton';
+import {green} from "@mui/material/colors";
+import CancelButton from "../utils/CancelButton.tsx";
 
 interface ClassroomModalProps {
     open: boolean;
@@ -28,8 +35,8 @@ interface ClassroomModalProps {
 
 const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroom, isAdding }) => {
     const dispatch = useDispatch<AppDispatch>();
-    const [buildings, setBuildings] = React.useState<BackendBuilding[]>([]);
-    const [formData, setFormData] = React.useState<{
+    const [buildings, setBuildings] = useState<BackendBuilding[]>([]);
+    const [formData, setFormData] = useState<{
         id: GridRowId;
         buildingId: string;
         buildingCode: string;
@@ -47,13 +54,17 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
         equipment: classroom?.equipment || [],
     });
 
+    const [loading, setLoading] = useState<boolean>(false);
+    const [success, setSuccess] = useState<boolean>(false);
+
     const EQUIPMENT_OPTIONS = [
         { label: 'projektor', value: 'PROJECTOR' },
         { label: 'tablica', value: 'WHITEBOARD' },
         { label: 'komputery', value: 'COMPUTERS' },
         { label: 'nagłośnienie', value: 'SOUND' },
-        { label: 'sowa', value: 'OWL'},
+        { label: 'sowa', value: 'OWL' },
     ];
+
     useEffect(() => {
         if (isAdding) {
             fetch(API_ENDPOINTS.BUILDINGS)
@@ -118,6 +129,7 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
             [name]: name === 'floor' || name === 'capacity' ? Number(value) : value,
         }));
     };
+
     const handleEquipmentChange = (event: SelectChangeEvent<typeof formData.equipment>) => {
         const {
             target: { value },
@@ -138,11 +150,15 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
         }));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!formData.buildingId || !formData.code) {
-            alert('Please fill in all required fields.');
+            alert('Proszę wypełnić wszystkie pola.');
             return;
         }
+
+        setLoading(true);
+        setSuccess(false);
+
         const equipmentMap: { [key: string]: boolean } = {};
         formData.equipment.forEach((key) => {
             equipmentMap[key] = true;
@@ -162,103 +178,157 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
         if (!isAdding && formData.id !== '') {
             classroomData.classroomID = Number(formData.id);
         }
-        console.log(classroomData);
-        if (isAdding) {
-            dispatch(addClassroom(classroomData));
-        } else {
-            dispatch(updateClassroom(classroomData));
+
+        const MIN_SUCCESS_DURATION = 1000;
+        const startTime = Date.now();
+
+        try {
+            if (isAdding) {
+                await dispatch(addClassroom(classroomData)).unwrap();
+            } else {
+                await dispatch(updateClassroom(classroomData)).unwrap();
+            }
+            setSuccess(true);
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = MIN_SUCCESS_DURATION - elapsedTime;
+            if (remainingTime > 0) {
+                setTimeout(() => {
+                    setLoading(false);
+                    setSuccess(false);
+                    onClose();
+                }, remainingTime);
+            } else {
+                setLoading(false);
+                setSuccess(false);
+                onClose();
+            }
+        } catch (error) {
+            alert('Wystąpił błąd podczas zapisywania sali.');
+            setLoading(false);
         }
-        onClose();
     };
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-            <DialogTitle>{isAdding ? 'Dodaj salę' : 'Szczegóły sali'}</DialogTitle>
-            <DialogContent>
-                {isAdding ? (
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel id="building-label">Budynek</InputLabel>
-                        <Select
-                            labelId="building-label"
-                            value={formData.buildingId}
-                            onChange={handleBuildingChange}
-                            label="Budynek"
-                            variant="outlined"
-                        >
-                            {buildings.map((building) => (
-                                <MenuItem key={building.buildingId} value={building.buildingId.toString()}>
-                                    {building.code || `Budynek ${building.buildingId}`}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                ) : (
-                    <TextField
-                        margin="normal"
-                        label="Budynek"
-                        value={formData.buildingCode}
-                        fullWidth
-                        disabled
-                    />
-                )}
-                <TextField
-                    margin="normal"
-                    label="Kod"
-                    name="code"
-                    value={formData.code}
-                    onChange={handleInputChange}
-                    fullWidth
-                    //disabled={!isAdding}
-                />
-                <TextField
-                    margin="normal"
-                    label="Piętro"
-                    name="floor"
-                    type="number"
-                    value={formData.floor}
-                    onChange={handleInputChange}
-                    fullWidth
-                    //disabled={!isAdding}
-                />
-                <TextField
-                    margin="normal"
-                    label="Pojemność"
-                    name="capacity"
-                    type="number"
-                    value={formData.capacity}
-                    onChange={handleInputChange}
-                    fullWidth
-                    //disabled={!isAdding}
-                />
-                <FormControl fullWidth margin="normal">
-                    <InputLabel id="equipment-label">Wyposażenie</InputLabel>
-                    <Select
-                        labelId="equipment-label"
-                        id="equipment"
-                        variant="outlined"
-                        multiple
-                        value={formData.equipment}
-                        onChange={handleEquipmentChange}
-                        input={<OutlinedInput label="Wyposażenie" />}
-                        // disabled={!isAdding}
-                    >
-                        {EQUIPMENT_OPTIONS.map((option) => (
-                            <MenuItem
-                                key={option.value}
-                                value={option.value}
+            <Fade in={open} timeout={500}>
+                <Box
+                    sx={{
+                        position: 'relative',
+                        transition: 'background-color 0.5s ease',
+                        backgroundColor: success ? 'white' : 'inherit',
+                        minHeight: '200px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: success ? 4 : undefined,
+                    }}
+                >
+                    {!success ? (
+                        <>
+                            <DialogTitle>{isAdding ? 'Dodaj salę' : 'Szczegóły sali'}</DialogTitle>
+                            <DialogContent>
+                                {isAdding ? (
+                                    <FormControl fullWidth margin="normal" disabled={loading}>
+                                        <InputLabel id="building-label">Budynek</InputLabel>
+                                        <Select
+                                            labelId="building-label"
+                                            value={formData.buildingId}
+                                            onChange={handleBuildingChange}
+                                            label="Budynek"
+                                            variant="outlined"
+                                        >
+                                            {buildings.map((building) => (
+                                                <MenuItem key={building.buildingId} value={building.buildingId.toString()}>
+                                                    {building.code || `Budynek ${building.buildingId}`}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                ) : (
+                                    <TextField
+                                        margin="normal"
+                                        label="Budynek"
+                                        value={formData.buildingCode}
+                                        fullWidth
+                                        disabled
+                                    />
+                                )}
+                                <TextField
+                                    margin="normal"
+                                    label="Kod"
+                                    name="code"
+                                    value={formData.code}
+                                    onChange={handleInputChange}
+                                    fullWidth
+                                    disabled={loading}
+                                />
+                                <TextField
+                                    margin="normal"
+                                    label="Piętro"
+                                    name="floor"
+                                    type="number"
+                                    value={formData.floor}
+                                    onChange={handleInputChange}
+                                    fullWidth
+                                    disabled={loading}
+                                />
+                                <TextField
+                                    margin="normal"
+                                    label="Pojemność"
+                                    name="capacity"
+                                    type="number"
+                                    value={formData.capacity}
+                                    onChange={handleInputChange}
+                                    fullWidth
+                                    disabled={loading}
+                                />
+                                <FormControl fullWidth margin="normal" disabled={loading}>
+                                    <InputLabel id="equipment-label">Wyposażenie</InputLabel>
+                                    <Select
+                                        labelId="equipment-label"
+                                        id="equipment"
+                                        variant="outlined"
+                                        multiple
+                                        value={formData.equipment}
+                                        onChange={handleEquipmentChange}
+                                        input={<OutlinedInput label="Wyposażenie" />}
+                                    >
+                                        {EQUIPMENT_OPTIONS.map((option) => (
+                                            <MenuItem
+                                                key={option.value}
+                                                value={option.value}
+                                            >
+                                                {option.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </DialogContent>
+                            <DialogActions>
+                                <SaveButton onClick={handleSubmit} loading={loading} success={success} />
+                                <CancelButton onClick={onClose} disabled={loading} />
+                            </DialogActions>
+                        </>
+                    ) : (
+                        <Fade in={success} timeout={1000}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}
                             >
-                                {option.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose}>Anuluj</Button>
-                {isAdding && <Button onClick={handleSubmit} variant="contained" color="primary">Zapisz</Button>}
-                {!isAdding && <Button onClick={handleSubmit} variant="contained" color="primary">Aktualizuj</Button>}
-            </DialogActions>
+                                <CheckIcon sx={{ fontSize: 60, color: green[500], mb: 2 }} />
+                                <Typography variant="h6" color="green">
+                                    Dodano!
+                                </Typography>
+                            </Box>
+                        </Fade>
+                    )}
+                </Box>
+            </Fade>
         </Dialog>
     );
 };
