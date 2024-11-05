@@ -19,11 +19,4 @@ public class Semester {
     @JoinColumn(name = "specialisation_id")
     @ManyToOne
     public Specialisation specialisation;
-    @ManyToMany
-    @JoinTable(
-            name = "semester_group",
-            joinColumns = @JoinColumn(name = "semester_id"),
-            inverseJoinColumns = @JoinColumn(name = "group_id")
-    )
-    public List<Group> groupsList;
 }
