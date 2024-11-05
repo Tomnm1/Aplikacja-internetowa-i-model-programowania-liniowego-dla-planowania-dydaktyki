@@ -15,7 +15,7 @@ public class Semester {
     @Column(name = "semester_id")
     public Integer semesterId;
     @Column(name = "number")
-    public Short number;
+    public String number;
     @JoinColumn(name = "specialisation_id")
     @ManyToOne
     public Specialisation specialisation;
