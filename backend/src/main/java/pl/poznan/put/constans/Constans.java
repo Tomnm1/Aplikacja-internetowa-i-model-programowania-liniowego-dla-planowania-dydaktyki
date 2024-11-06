@@ -8,4 +8,40 @@ public final class Constans {
         public static final String EVEN_WEEKS = "even_weeks";
         public static final String ODD_WEEKS = "odd_weeks";
     }
+
+    public static final class ExcelToDb{
+        public static final class HeaderHelper{
+            public static final String NUM_HOURS = "Ilość godz.";
+            public static final String NUM_GROUPS = "Ilość grup";
+            public static final String LECTURER = "wyk.";
+            public static final String TEACHER = "Prow.";
+
+            public static final class Prefixes{
+                public static final String HOURS = "hours_";
+                public static final String GROUPS = "groups_";
+                public static final String LEC_TEACHER_PR = "lectureTeacher_";
+                public static final String TEACHER_PR = "teacher_";
+            }
+        }
+
+        public static final class ColumnNames{
+            public static final String FIELD_OF_STUDY = "Kierunek, specjal.";
+            public static final String TYPE_FACULTY = "Rodzaj stud./ Wydz.";
+            public static final String TERM = "Sem";
+            public static final String SUBJECT = "Nazwa przedmiotu";
+            public static final String EXAM_LETTER = "E";
+        }
+    }
+
+    public static class EnumUtils {
+
+        public static <E extends Enum<E>> E fromString(Class<E> enumType, String label) {
+            for (E enumConstant : enumType.getEnumConstants()) {
+                if (enumConstant.toString().equalsIgnoreCase(label)) {
+                    return enumConstant;
+                }
+            }
+            throw new IllegalArgumentException("Unknown enum type: " + label);
+        }
+    }
 }

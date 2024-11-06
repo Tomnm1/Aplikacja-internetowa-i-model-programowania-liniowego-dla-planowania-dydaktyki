@@ -1,13 +1,13 @@
-package pl.poznan.put.xml_reader.model.plan;
+package pl.poznan.put.data_import.model.plan;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
-import pl.poznan.put.xml_reader.model.buildings.BuildingsWrapper;
-import pl.poznan.put.xml_reader.model.subject_groups.SubjectGroupsWrapper;
-import pl.poznan.put.xml_reader.model.subjects.DidacticCycles;
-import pl.poznan.put.xml_reader.model.worker.WorkersWrapper;
+import pl.poznan.put.data_import.model.buildings.BuildingsWrapper;
+import pl.poznan.put.data_import.model.subject_groups.SubjectGroupsWrapper;
+import pl.poznan.put.data_import.model.subjects.DidacticCycles;
+import pl.poznan.put.data_import.model.worker.WorkersWrapper;
 
 @XmlRootElement(name = "plan")
 @XmlAccessorType(XmlAccessType.FIELD)

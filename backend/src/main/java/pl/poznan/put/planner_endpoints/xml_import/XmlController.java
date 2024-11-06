@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import pl.poznan.put.xml_reader.XmlReaderService;
-import pl.poznan.put.xml_reader.model.plan.Plan;
+import pl.poznan.put.data_import.XmlReaderService;
+import pl.poznan.put.data_import.model.plan.Plan;
 
 import java.io.File;
 
@@ -30,6 +30,7 @@ public class XmlController {
             File xmlFile = File.createTempFile("temp", null);
             file.transferTo(xmlFile);
             Plan plan = xmlReaderService.getPlanFromXml(xmlFile);
+            xmlReaderService.insertDataToDB(plan);
             return ResponseEntity.ok(plan);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

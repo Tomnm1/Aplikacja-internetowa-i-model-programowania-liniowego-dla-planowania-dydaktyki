@@ -68,4 +68,14 @@ public class SpecialisationService {
     public void deleteAllSpecialisations(){
         specialisationRepository.deleteAll();
     }
+
+    public Specialisation createSpecialisationIfNotExists(Specialisation specialisation){
+        boolean exists = specialisationRepository.existsByNameAndCycleAndFieldOfStudy(specialisation.name, specialisation.cycle, specialisation.fieldOfStudy);
+        if(exists){
+            return null;
+        } else {
+            createSpecialisation(specialisation);
+            return specialisation;
+        }
+    }
 }

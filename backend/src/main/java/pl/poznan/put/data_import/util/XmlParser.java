@@ -1,10 +1,10 @@
-package pl.poznan.put.xml_reader.util;
+package pl.poznan.put.data_import.util;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import org.springframework.stereotype.Component;
-import pl.poznan.put.xml_reader.model.plan.Plan;
+import pl.poznan.put.data_import.model.plan.Plan;
 
 import java.io.File;
 
