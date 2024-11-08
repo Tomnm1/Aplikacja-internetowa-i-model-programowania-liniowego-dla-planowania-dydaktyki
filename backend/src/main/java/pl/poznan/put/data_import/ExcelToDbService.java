@@ -6,15 +6,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.poznan.put.data_import.insert_to_db.FieldOfStudyHandler;
-import pl.poznan.put.data_import.insert_to_db.SemesterHandler;
-import pl.poznan.put.data_import.insert_to_db.SpecialisationHandler;
-import pl.poznan.put.data_import.insert_to_db.SubjectHandler;
+import pl.poznan.put.data_import.insert_to_db.*;
 import pl.poznan.put.planner_endpoints.FieldOfStudy.FieldOfStudy;
 import pl.poznan.put.planner_endpoints.Semester.Semester;
 import pl.poznan.put.planner_endpoints.Specialisation.Specialisation;
 import pl.poznan.put.planner_endpoints.Subject.Language;
 import pl.poznan.put.planner_endpoints.Subject.Subject;
+import pl.poznan.put.planner_endpoints.SubjectType.ClassTypeOwn;
+import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -22,11 +21,13 @@ import java.util.function.Consumer;
 import static pl.poznan.put.constans.Constans.ExcelToDb.ColumnNames.*;
 import static pl.poznan.put.constans.Constans.ExcelToDb.HeaderHelper.*;
 import static pl.poznan.put.constans.Constans.ExcelToDb.HeaderHelper.Prefixes.*;
+import static pl.poznan.put.constans.Constans.ExcelToDb.subjectTypeStudentQuantity.*;
 
 @Service
 public class ExcelToDbService {
     private Sheet sheet;
     private Row row;
+    private String columnName;
 
     private final Map<String, Integer> columnIndices = new HashMap<>();
     private final Map<String, Consumer<Cell>> columnActions = new HashMap<>();
@@ -35,6 +36,7 @@ public class ExcelToDbService {
     private final SpecialisationHandler specialisationHandler;
     private final SemesterHandler semesterHandler;
     private final SubjectHandler subjectHandler;
+    private final SubjectTypeHandler subjectTypeHandler;
 
     private String cycle = "";
     private String semesterNumber = "";
@@ -48,18 +50,21 @@ public class ExcelToDbService {
     private String specialisationName;
     private Semester semester;
     private Subject subject;
+    private final List<SubjectType> subjectTypes = new ArrayList<>();
 
     @Autowired
     public ExcelToDbService(
         FieldOfStudyHandler fieldOfStudyHandler,
         SpecialisationHandler specialisationHandler,
         SemesterHandler semesterHandler,
-        SubjectHandler subjectHandler
+        SubjectHandler subjectHandler,
+        SubjectTypeHandler subjectTypeHandler
     ){
         this.fieldOfStudyHandler = fieldOfStudyHandler;
         this.specialisationHandler = specialisationHandler;
         this.semesterHandler = semesterHandler;
         this.subjectHandler = subjectHandler;
+        this.subjectTypeHandler = subjectTypeHandler;
     }
     public void startSheetProcessing(Sheet sheet){
         Row headerRow = sheet.getRow(2);
@@ -77,6 +82,8 @@ public class ExcelToDbService {
         this.specialisation = assignIfNotNull(specialisationHandler.insertSpecialisation(specialisationName, cycle, fieldOfStudy), this.specialisation);
         this.semester = assignIfNotNull(semesterHandler.insertSemester(semesterNumber, specialisation), this.semester);
         this.subject = assignIfNotNull(subjectHandler.insertSubject(subjectName, exam, false, false, Language.polski, semester), this.subject);
+        if(!subjectTypes.isEmpty())
+            subjectTypeHandler.insertSubjectTypes(this.subjectTypes, this.subject);
     }
 
     private void processAllRows(Sheet sheet, int startingRow){
@@ -84,7 +91,7 @@ public class ExcelToDbService {
         for (int i = startingRow; i < sheet.getLastRowNum(); i++){
             row = sheet.getRow(i);
             for (Map.Entry<String, Consumer<Cell>> entry : columnActions.entrySet()) {
-                String columnName = entry.getKey();
+                columnName = entry.getKey();
                 Consumer<Cell> action = entry.getValue();
                 int columnIndex = columnIndices.get(columnName);
                 Cell cell = row.getCell(columnIndex);
@@ -93,6 +100,7 @@ public class ExcelToDbService {
                 }
             }
             insertData();
+            subjectTypes.clear();
         }
     }
 
@@ -101,6 +109,10 @@ public class ExcelToDbService {
         columnActions.put(TYPE_FACULTY, this::processTypeFaculty);
         columnActions.put(TERM, this::processTerm);
         columnActions.put(SUBJECT, this::processSubject);
+        columnActions.put(HOURS+LECUTRE_LETTER, this::processSubjectTypeLecture);
+        columnActions.put(HOURS+EXERCISE_LETTER, this::processSubjectTypeExercise);
+        columnActions.put(HOURS+LAB_LETTER, this::processSubjectTypeLab);
+        columnActions.put(HOURS+PROJECT_LETTER, this::processSubjectTypeProject);
     }
 
     private void processSubject(Cell cell){
@@ -110,6 +122,42 @@ public class ExcelToDbService {
             String examValue = row.getCell(columnIndices.get(HOURS+EXAM_LETTER)).getStringCellValue();
             exam = !examValue.isBlank() && examValue.equals(EXAM_LETTER);
         }
+    }
+
+    private void processSubjectTypeLecture(Cell cell){
+        int cellValue = (int) cell.getNumericCellValue();
+        if(cellValue != 0) {
+            createSubjectType(ClassTypeOwn.wykład, cellValue, MAX_LECTURE);
+        }
+    }
+
+    private void processSubjectTypeExercise(Cell cell){
+        int cellValue = (int) cell.getNumericCellValue();
+        if(cellValue != 0) {
+            createSubjectType(ClassTypeOwn.ćwiczenia, cellValue, MAX_EXERCISE);
+        }
+    }
+
+    private void processSubjectTypeLab(Cell cell){
+        int cellValue = (int) cell.getNumericCellValue();
+        if(cellValue != 0) {
+            createSubjectType(ClassTypeOwn.laboratoria, cellValue, MAX_LABORATORY);
+        }
+    }
+
+    private void processSubjectTypeProject(Cell cell){
+        int cellValue = (int) cell.getNumericCellValue();
+        if(cellValue != 0) {
+            createSubjectType(ClassTypeOwn.projekt, cellValue, MAX_PROJECT);
+        }
+    }
+
+    private void createSubjectType(ClassTypeOwn type, int cellValue, int maxNumberOfStudents){
+        SubjectType subjectType = new SubjectType();
+        subjectType.type = type;
+        subjectType.numOfHours = cellValue;
+        subjectType.maxStudentsPerGroup = maxNumberOfStudents;
+        subjectTypes.add(subjectType);
     }
 
     private void processTerm(Cell cell){
