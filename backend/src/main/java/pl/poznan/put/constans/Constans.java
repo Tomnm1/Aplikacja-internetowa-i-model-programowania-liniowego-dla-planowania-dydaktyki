@@ -30,8 +30,9 @@ public final class Constans {
             public static final String TERM = "Sem";
             public static final String SUBJECT = "Nazwa przedmiotu";
             public static final String EXAM_LETTER = "E";
-            public static final String LECUTRE_LETTER = "w";
+            public static final String LECTURE_LETTER = "w";
             public static final String EXERCISE_LETTER = "ćw";
+            public static final String EXERCISE_DOT_LETTER = "ćw.";
             public static final String LAB_LETTER = "l";
             public static final String PROJECT_LETTER = "p";
         }

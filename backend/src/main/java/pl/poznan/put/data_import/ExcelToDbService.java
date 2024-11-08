@@ -37,6 +37,7 @@ public class ExcelToDbService {
     private final SemesterHandler semesterHandler;
     private final SubjectHandler subjectHandler;
     private final SubjectTypeHandler subjectTypeHandler;
+    private final GroupsHandler groupsHandler;
 
     private String cycle = "";
     private String semesterNumber = "";
@@ -51,6 +52,7 @@ public class ExcelToDbService {
     private Semester semester;
     private Subject subject;
     private final List<SubjectType> subjectTypes = new ArrayList<>();
+    private Map<String, Integer> groupsCounter;
 
     @Autowired
     public ExcelToDbService(
@@ -58,13 +60,15 @@ public class ExcelToDbService {
         SpecialisationHandler specialisationHandler,
         SemesterHandler semesterHandler,
         SubjectHandler subjectHandler,
-        SubjectTypeHandler subjectTypeHandler
+        SubjectTypeHandler subjectTypeHandler,
+        GroupsHandler groupsHandler
     ){
         this.fieldOfStudyHandler = fieldOfStudyHandler;
         this.specialisationHandler = specialisationHandler;
         this.semesterHandler = semesterHandler;
         this.subjectHandler = subjectHandler;
         this.subjectTypeHandler = subjectTypeHandler;
+        this.groupsHandler = groupsHandler;
     }
     public void startSheetProcessing(Sheet sheet){
         Row headerRow = sheet.getRow(2);
@@ -80,7 +84,13 @@ public class ExcelToDbService {
     private void insertData(){
         this.fieldOfStudy = assignIfNotNull(fieldOfStudyHandler.insertFieldOfStudy(fieldOfStudyName), this.fieldOfStudy);
         this.specialisation = assignIfNotNull(specialisationHandler.insertSpecialisation(specialisationName, cycle, fieldOfStudy), this.specialisation);
-        this.semester = assignIfNotNull(semesterHandler.insertSemester(semesterNumber, specialisation), this.semester);
+        Semester newSemester = semesterHandler.insertSemester(semesterNumber, specialisation);
+        if (newSemester != null){
+            if(this.semester != null)
+                this.groupsHandler.processAndInsertGroups(this.groupsCounter, this.semester);
+            this.semester = newSemester;
+        }
+//        this.semester = assignIfNotNull(semesterHandler.insertSemester(semesterNumber, specialisation), this.semester);
         this.subject = assignIfNotNull(subjectHandler.insertSubject(subjectName, exam, false, false, Language.polski, semester), this.subject);
         if(!subjectTypes.isEmpty())
             subjectTypeHandler.insertSubjectTypes(this.subjectTypes, this.subject);
@@ -88,6 +98,7 @@ public class ExcelToDbService {
 
     private void processAllRows(Sheet sheet, int startingRow){
         this.sheet = sheet;
+        resetGroupsCounter();
         for (int i = startingRow; i < sheet.getLastRowNum(); i++){
             row = sheet.getRow(i);
             for (Map.Entry<String, Consumer<Cell>> entry : columnActions.entrySet()) {
@@ -109,10 +120,14 @@ public class ExcelToDbService {
         columnActions.put(TYPE_FACULTY, this::processTypeFaculty);
         columnActions.put(TERM, this::processTerm);
         columnActions.put(SUBJECT, this::processSubject);
-        columnActions.put(HOURS+LECUTRE_LETTER, this::processSubjectTypeLecture);
+        columnActions.put(HOURS+ LECTURE_LETTER, this::processSubjectTypeLecture);
         columnActions.put(HOURS+EXERCISE_LETTER, this::processSubjectTypeExercise);
         columnActions.put(HOURS+LAB_LETTER, this::processSubjectTypeLab);
         columnActions.put(HOURS+PROJECT_LETTER, this::processSubjectTypeProject);
+        columnActions.put(GROUPS+LECTURE_LETTER, this::processLectureGroups);
+        columnActions.put(GROUPS+EXERCISE_DOT_LETTER, this::processExerciseGroups);
+        columnActions.put(GROUPS+LAB_LETTER, this::processLabGroups);
+        columnActions.put(GROUPS+PROJECT_LETTER, this::processProjectGroups);
     }
 
     private void processSubject(Cell cell){
@@ -160,6 +175,38 @@ public class ExcelToDbService {
         subjectTypes.add(subjectType);
     }
 
+    private void processLectureGroups(Cell cell){
+        int cellValue = (int) cell.getNumericCellValue();
+        if(cellValue != 0) {
+            setGroups(LECTURE_LETTER, cellValue);
+        }
+    }
+
+    private void processExerciseGroups(Cell cell){
+        int cellValue = (int) cell.getNumericCellValue();
+        if(cellValue != 0) {
+            setGroups(EXERCISE_LETTER, cellValue);
+        }
+    }
+
+    private void processLabGroups(Cell cell){
+        int cellValue = (int) cell.getNumericCellValue();
+        if(cellValue != 0) {
+            setGroups(LAB_LETTER, cellValue);
+        }
+    }
+
+    private void processProjectGroups(Cell cell){
+        int cellValue = (int) cell.getNumericCellValue();
+        if(cellValue != 0) {
+            setGroups(PROJECT_LETTER, cellValue);
+        }
+    }
+
+    private void setGroups(String key, int val){
+        groupsCounter.merge(key, val, Math::max);
+    }
+
     private void processTerm(Cell cell){
         String cellValue;
         if (cell.getCellType() == CellType.NUMERIC){
@@ -196,6 +243,13 @@ public class ExcelToDbService {
         specialisationName = fieldAndSpecialisation.get(1).replace(" ", "");
     }
 
+    private void resetGroupsCounter(){
+        groupsCounter = new HashMap<>();
+        groupsCounter.put(LECTURE_LETTER, 0);
+        groupsCounter.put(EXERCISE_LETTER, 0);
+        groupsCounter.put(LAB_LETTER, 0);
+        groupsCounter.put(PROJECT_LETTER, 0);
+    }
     private void processHeaderRow(Row headerRow, Row helper){
         String prefix = "";
         int teacherLecutureIterator = 0;
