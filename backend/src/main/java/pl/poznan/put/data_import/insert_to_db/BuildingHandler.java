@@ -13,10 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static pl.poznan.put.constans.Constans.HelperMethods.assignIfNotNull;
+
 @Component
 public class BuildingHandler {
     private final BuildingService buildingService;
     private final ClassroomService classroomService;
+    private pl.poznan.put.planner_endpoints.Building.Building building;
+    private pl.poznan.put.planner_endpoints.Classroom.Classroom classroom;
 
     @Autowired
     public BuildingHandler(
@@ -32,10 +36,10 @@ public class BuildingHandler {
             pl.poznan.put.planner_endpoints.Building.Building dbBuilding =
                     new pl.poznan.put.planner_endpoints.Building.Building();
             dbBuilding.code = building.getCode();
-            buildingService.createBuilding(dbBuilding);
+            this.building = assignIfNotNull(buildingService.createBuildingIfNotExists(dbBuilding), this.building);
 
             List<Classroom> classrooms = building.getClassrooms();
-            insertClassrooms(classrooms, dbBuilding);
+            insertClassrooms(classrooms, this.building);
         }
     }
 
@@ -48,7 +52,7 @@ public class BuildingHandler {
             dbClassroom.code = classroom.getNumber();
             dbClassroom.capacity = classroom.getCapacity();
             dbClassroom.equipment = getClassroomAttributesAsMap(classroom);
-            classroomService.createRoom(dbClassroom);
+            this.classroom = assignIfNotNull(classroomService.createClassroomIfNotExists(dbClassroom), this.classroom);
         }
     }
 
