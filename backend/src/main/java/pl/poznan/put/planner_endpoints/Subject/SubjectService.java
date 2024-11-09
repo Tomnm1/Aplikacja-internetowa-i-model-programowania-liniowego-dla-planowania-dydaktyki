@@ -92,4 +92,14 @@ public class SubjectService {
     public void deleteAllSubjects(){
         subjectRepository.deleteAll();
     }
+
+    public Subject createSubjectIfNotExists(Subject subject){
+        boolean exists = subjectRepository.existsByNameAndSemester(subject.name, subject.semester);
+        if(exists){
+            return null;
+        } else {
+            createSubject(subject);
+            return subject;
+        }
+    }
 }

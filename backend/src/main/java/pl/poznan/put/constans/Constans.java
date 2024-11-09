@@ -56,10 +56,4 @@ public final class Constans {
             throw new IllegalArgumentException("Unknown enum type: " + label);
         }
     }
-
-    public static class HelperMethods{
-        public static <T> T assignIfNotNull(T newValue, T currentValue) {
-            return newValue != null ? newValue : currentValue;
-        }
-    }
 }
