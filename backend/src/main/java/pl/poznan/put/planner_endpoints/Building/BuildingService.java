@@ -66,4 +66,15 @@ public class BuildingService {
     public void deleteAllBuildings(){
         buildingRepository.deleteAll();
     }
+
+    public Building createBuildingIfNotExists(Building building){
+        boolean exists = buildingRepository.existsByCode(building.code);
+        if(exists){
+            return null;
+        } else {
+            createBuilding(building);
+            return building;
+        }
+    }
+
 }

@@ -91,4 +91,14 @@ public class ClassroomService {
     public void deleteAllClassrooms(){
         classroomRepository.deleteAll();
     }
+
+    public Classroom createClassroomIfNotExists(Classroom classroom){
+        boolean exists = classroomRepository.existsByCodeAndBuilding(classroom.code, classroom.building);
+        if(exists){
+            return null;
+        } else {
+            createRoom(classroom);
+            return classroom;
+        }
+    }
 }

@@ -22,6 +22,7 @@ import static pl.poznan.put.constans.Constans.ExcelToDb.ColumnNames.*;
 import static pl.poznan.put.constans.Constans.ExcelToDb.HeaderHelper.*;
 import static pl.poznan.put.constans.Constans.ExcelToDb.HeaderHelper.Prefixes.*;
 import static pl.poznan.put.constans.Constans.ExcelToDb.subjectTypeStudentQuantity.*;
+import static pl.poznan.put.constans.Constans.HelperMethods.assignIfNotNull;
 
 @Service
 public class ExcelToDbService {
@@ -286,9 +287,5 @@ public class ExcelToDbService {
             }
             columnIndices.put(cellValue, cellIndex);
         }
-    }
-
-    private <T> T assignIfNotNull(T newValue, T currentValue) {
-        return newValue != null ? newValue : currentValue;
     }
 }
