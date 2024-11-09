@@ -1,4 +1,4 @@
-package pl.poznan.put.xml_reader.model.buildings;
+package pl.poznan.put.data_import.model.buildings;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

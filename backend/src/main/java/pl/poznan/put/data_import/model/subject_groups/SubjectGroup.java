@@ -1,4 +1,4 @@
-package pl.poznan.put.xml_reader.model.subject_groups;
+package pl.poznan.put.data_import.model.subject_groups;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

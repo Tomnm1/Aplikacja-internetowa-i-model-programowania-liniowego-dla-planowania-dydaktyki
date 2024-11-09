@@ -1,7 +1,7 @@
 package pl.poznan.put.planner_endpoints.Teacher;
 
 public enum Degree {
-    BRAK("brak"),
+    BRAK(""),
     LIC("lic."),
     INZ("inż."),
     MGR("mgr"),
@@ -15,7 +15,8 @@ public enum Degree {
     DR_HAB_PROF_PP("dr hab., prof. PP"),
     DR_HAB_INZ_PROF_PP("dr hab. inż., prof. PP"),
     PROF_DR_HAB("prof. dr hab."),
-    PROF_DR_HAB_INZ("prof. dr hab. inż.");
+    PROF_DR_HAB_INZ("prof. dr hab. inż."),
+    PROF_ZW_DR_HAB_INZ("prof. zw. dr hab. inż.");
 
     private final String displayName;
 
@@ -27,4 +28,8 @@ public enum Degree {
         return displayName;
     }
 
+    @Override
+    public String toString(){
+        return displayName;
+    }
 }

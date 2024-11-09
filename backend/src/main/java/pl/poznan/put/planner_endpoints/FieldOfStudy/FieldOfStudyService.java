@@ -66,4 +66,14 @@ public class FieldOfStudyService {
     public void deleteAllFieldOfStudys(){
         fieldOfStudyRepository.deleteAll();
     }
+
+    public FieldOfStudy createFieldOfStudyIfNotExists(FieldOfStudy fieldOfStudy){
+        boolean exists = fieldOfStudyRepository.existsByName(fieldOfStudy.name);
+        if(exists){
+            return null;
+        } else {
+            createFieldOfStudy(fieldOfStudy);
+            return fieldOfStudy;
+        }
+    }
 }

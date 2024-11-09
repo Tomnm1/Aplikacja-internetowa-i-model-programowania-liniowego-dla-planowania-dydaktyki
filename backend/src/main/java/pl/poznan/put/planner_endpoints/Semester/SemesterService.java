@@ -67,4 +67,14 @@ public class SemesterService {
     public void deleteAllSemesters(){
         semesterRepository.deleteAll();
     }
+
+    public Semester createSemesterIfNotExists(Semester semester){
+        boolean exists = semesterRepository.existsByNumberAndSpecialisation(semester.number, semester.specialisation);
+        if(exists){
+            return null;
+        } else {
+            createSemester(semester);
+            return semester;
+        }
+    }
 }
