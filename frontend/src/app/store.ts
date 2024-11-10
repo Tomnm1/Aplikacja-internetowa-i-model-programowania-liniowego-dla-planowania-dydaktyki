@@ -6,6 +6,7 @@ import buildingReducer from './slices/buildingSlice.ts';
 import fieldReducer from './slices/fieldOfStudySlice.ts';
 import specialisationReducer from './slices/specialisationSlice.ts';
 import slotsReducer from './slices/slotsSlice.ts';
+import slotsDayReducer from './slices/slotsDaysSlice.ts';
 
 export const store = configureStore({
     reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
         fields: fieldReducer,
         specialisations: specialisationReducer,
         slots: slotsReducer,
+        slotsDays: slotsDayReducer,
     },
 });
 
