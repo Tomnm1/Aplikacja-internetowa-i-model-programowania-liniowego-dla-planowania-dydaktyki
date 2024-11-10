@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     FIELD_OF_STUDIES: `${API_BASE}/fieldOfStudys`,
     SPECIALISATIONS: `${API_BASE}/specialisations`,
     SLOTS: `${API_BASE}/slots`,
+    SLOTS_DAYS: `${API_BASE}/SlotsDays`,
 };
 
 export default API_ENDPOINTS;

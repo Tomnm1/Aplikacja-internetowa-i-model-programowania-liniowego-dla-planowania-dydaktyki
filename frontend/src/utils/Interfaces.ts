@@ -23,6 +23,16 @@ export enum Cycle {
     SECOND = 'second',
 }
 
+export enum Day {
+    MONDAY = 'monday',
+    TUESDAY = 'tuesday',
+    WEDNESDAY = 'wednesday',
+    THURSDAY = 'thursday',
+    FRIDAY = 'friday',
+    SATURDAY = 'saturday',
+    SUNDAY = 'sunday',
+}
+
 export interface ClassroomRow {
     id: GridRowId;
     name: string;
@@ -204,6 +214,28 @@ export interface SlotsState {
     selectedRowId: GridRowId | null;
     selectedRowStart: LocalTime | null;
     selectedRowStop: LocalTime | null;
+    loading: boolean;
+    error: string | null;
+}
+
+export interface SlotsDay {
+    id: GridRowId;
+    slotId: GridRowId;
+    day:Day;
+    slotRepresentation?: string;
+    isNew?: boolean;
+}
+
+export interface BackendSlotsDay {
+    SlotsDayId?: number;
+    slot: BackendSlot;
+    day: Day;
+}
+
+export interface SlotsDayState {
+    rows: SlotsDay[];
+    rowModesModel: GridRowModesModel;
+    selectedRowId: GridRowId | null;
     loading: boolean;
     error: string | null;
 }
