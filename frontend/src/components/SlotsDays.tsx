@@ -1,35 +1,26 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-    DataGrid,
-    GridColDef,
-    GridToolbarContainer,
-    GridActionsCellItem,
-    GridRowId,
-    GridRowParams, GridToolbar,
+    DataGrid, GridColDef, GridToolbarContainer,
+    GridActionsCellItem, GridRowParams, GridToolbar,
 } from '@mui/x-data-grid';
-import {
-    Button,
-} from '@mui/material';
+import { Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import { RootState, AppDispatch } from '../app/store';
-import {Day, SlotsDay} from '../utils/Interfaces.ts';
+import {Day, dayMapping, SlotsDay} from '../utils/Interfaces';
 import { plPL } from '@mui/x-data-grid/locales';
-import {deleteSlotsDay, fetchSlotsDays} from "../app/slices/slotsDaysSlice.ts";
-import SlotsDayModal from "./SlotsDayModal.tsx";
-
+import { deleteSlotsDay, fetchSlotsDays } from "../app/slices/slotsDaysSlice";
+import SlotsDayModal from "./SlotsDayModal";
 
 const SlotsDays: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const slotsDays = useSelector((state: RootState) => state.slotsDays.rows);
-    const loading = useSelector((state: RootState) => state.slotsDays.loading);
-    const error = useSelector((state: RootState) => state.slotsDays.error);
+    const { rows: slotsDays, loading, error } = useSelector((state: RootState) => state.slotsDays);
 
     const [isDialogOpen, setDialogOpen] = React.useState(false);
-    const [selectedRowId, setSelectedRowId] = React.useState<GridRowId | null>(null);
+    const [selectedRowId, setSelectedRowId] = React.useState<number | null>(null);
     const [isModalOpen, setModalOpen] = React.useState(false);
     const [selectedSlotsDay, setSelectedSlotsDay] = React.useState<SlotsDay | null>(null);
     const [isAdding, setIsAdding] = React.useState(false);
@@ -38,17 +29,7 @@ const SlotsDays: React.FC = () => {
         dispatch(fetchSlotsDays());
     }, [dispatch]);
 
-    const dayMapping: { [key in Day]: string } = {
-        [Day.MONDAY]: 'Poniedziałek',
-        [Day.TUESDAY]: 'Wtorek',
-        [Day.WEDNESDAY]: 'Środa',
-        [Day.THURSDAY]: 'Czwartek',
-        [Day.FRIDAY]: 'Piątek',
-        [Day.SATURDAY]: 'Sobota',
-        [Day.SUNDAY]: 'Niedziela',
-    };
-
-    const handleViewClick = (id: GridRowId) => () => {
+    const handleViewClick = (id: number) => () => {
         const slotsDay = slotsDays.find((sd) => sd.id === id);
         if (slotsDay) {
             setSelectedSlotsDay(slotsDay);
@@ -57,16 +38,14 @@ const SlotsDays: React.FC = () => {
         }
     };
 
-    const handleDeleteClick = (id: GridRowId) => () => {
+    const handleDeleteClick = (id: number) => () => {
         setSelectedRowId(id);
         setDialogOpen(true);
     };
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            if (typeof selectedRowId === "number") {
-                dispatch(deleteSlotsDay(selectedRowId));
-            }
+            dispatch(deleteSlotsDay(selectedRowId));
         }
         setDialogOpen(false);
         setSelectedRowId(null);
@@ -83,7 +62,7 @@ const SlotsDays: React.FC = () => {
             field: 'day',
             headerName: 'Dzień',
             width: 150,
-            valueGetter: (value) => dayMapping[value] || value,
+            valueGetter: (params) => dayMapping[params as Day],
         },
         { field: 'slotRepresentation', headerName: 'Slot', width: 300 },
         {
@@ -94,24 +73,25 @@ const SlotsDays: React.FC = () => {
                 <GridActionsCellItem
                     icon={<VisibilityIcon />}
                     label="Szczegóły"
-                    onClick={handleViewClick(params.id)}
+                    onClick={handleViewClick(params.id as number)}
                     color="inherit"
                 />,
                 <GridActionsCellItem
                     icon={<DeleteIcon />}
                     label="Usuń"
-                    onClick={handleDeleteClick(params.id)}
+                    onClick={handleDeleteClick(params.id as number)}
                     color="inherit"
                 />,
             ],
         },
     ];
+
     const TopToolbar = () => (
         <GridToolbarContainer>
             <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
                 Dodaj slot dnia
             </Button>
-            <GridToolbar/>
+            <GridToolbar />
         </GridToolbarContainer>
     );
 

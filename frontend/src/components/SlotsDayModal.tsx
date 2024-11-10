@@ -1,34 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Typography,
-    Box,
-    Fade,
+    Dialog, DialogTitle, DialogContent, DialogActions,
+    TextField, FormControl, InputLabel, Select, MenuItem,
+    Typography, Box, Fade,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../app/store';
-import {
-    SlotsDay,
-    BackendSlot,
-    Day,
-    BackendSlotsDay,
-} from '../utils/Interfaces';
-import { SelectChangeEvent } from '@mui/material/Select';
-import { GridRowId } from '@mui/x-data-grid';
+import {SlotsDay, BackendSlot, Day, dayMapping} from '../utils/Interfaces';
 import SaveButton from '../utils/SaveButton';
-import {green} from "@mui/material/colors";
-import CancelButton from "../utils/CancelButton.tsx";
-import {addSlotsDay, updateSlotsDay} from "../app/slices/slotsDaysSlice.ts";
-import API_ENDPOINTS from '../app/urls.ts';
+import { green } from "@mui/material/colors";
+import CancelButton from "../utils/CancelButton";
+import {addSlotsDay, fetchSlotsDays, updateSlotsDay} from "../app/slices/slotsDaysSlice";
+import API_ENDPOINTS from '../app/urls';
+import { SelectChangeEvent } from '@mui/material/Select';
 
 interface SlotsDayModalProps {
     open: boolean;
@@ -40,86 +25,36 @@ interface SlotsDayModalProps {
 const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, isAdding }) => {
     const dispatch = useDispatch<AppDispatch>();
     const [slots, setSlots] = useState<BackendSlot[]>([]);
-    const [formData, setFormData] = useState<{
-        id: GridRowId;
-        slotId: string;
-        day:Day;
-        slotRepresentation: string;
-    }>({
+    const [formData, setFormData] = useState({
         id: slotsDay?.id || '',
-        slotId: slotsDay?.slotId ? slotsDay?.slotId.toString() : '',
-        day:slotsDay?.day || Day.MONDAY,
+        slotId: slotsDay?.slotId?.toString() || '',
+        day: slotsDay?.day || Day.MONDAY,
         slotRepresentation: slotsDay?.slotRepresentation || '',
     });
-
     const [loading, setLoading] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
 
     useEffect(() => {
         if (isAdding) {
             fetch(API_ENDPOINTS.SLOTS)
-                .then((res) => res.json())
-                .then((data: BackendSlot[]) => {
-                    setSlots(data);
-                    if (data.length > 0) {
-                        setFormData((prev) => ({
-                            ...prev,
-                            slotId: data[0].slotId.toString(),
-                            slotRepresentation: `${data[0].startTime} - ${data[0].endTime}`,
-                        }));
-                    }
-                })
-                .catch((err) => console.error('Failed to fetch slots', err));
-        } else if (slotsDay) {
-            fetch(`${API_ENDPOINTS.SLOTS}/${slotsDay.slotId}`)
-                .then((res) => res.json())
-                /*.then((data: BackendSlot) => {
-                    setFormData((prev) => ({
-                        ...prev,
-                    }));
-                })*/
-                .catch((err) => console.error('Failed to fetch slot', err));
+                .then(res => res.json())
+                .then((data: BackendSlot[]) => setSlots(data))
+                .catch(err => console.error('Failed to fetch slots', err));
         }
-    }, [isAdding, slotsDay]);
+    }, [isAdding]);
 
-    useEffect(() => {
-        if (slotsDay && !isAdding) {
-            setFormData({
-                id: slotsDay.id || '',
-                slotId: slotsDay.slotId ? slotsDay.slotId.toString() : '',
-                day:slotsDay.day,
-                slotRepresentation:slotsDay.slotRepresentation || '',
-            });
-        } else if (isAdding) {
-            setFormData((prev) => ({
-                ...prev,
-            }));
-        } else {
-            setFormData({
-                id: '',
-                slotId: '',
-                day: Day.MONDAY,
-                slotRepresentation: '',
-            });
-        }
-    }, [slotsDay, isAdding, slots]);
-
-
-    const handleDayChange = (event: SelectChangeEvent<Day>) => {
-        const selectedDay = event.target.value as Day;
-        setFormData((prev) => ({
-            ...prev,
-            day: selectedDay,
-        }));
+    const handleDayChange = (event: SelectChangeEvent) => {
+        setFormData({ ...formData, day: event.target.value as Day });
     };
 
     const handleSlotChange = (event: SelectChangeEvent) => {
-        const selectedSlotId = event.target.value;
-        //const selectedSlot = slots.find(s => s.slotId.toString() === selectedSlotId);
-        setFormData((prev) => ({
-            ...prev,
+        const selectedSlotId = event.target.value as string;
+        const selectedSlot = slots.find(slot => slot.slotId.toString() === selectedSlotId);
+        setFormData({
+            ...formData,
             slotId: selectedSlotId,
-        }));
+            slotRepresentation: selectedSlot ? `${selectedSlot.startTime} - ${selectedSlot.endTime}` : '',
+        });
     };
 
     const handleSubmit = async () => {
@@ -129,45 +64,27 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
         }
 
         setLoading(true);
-        setSuccess(false);
 
-        const slotsDayData: BackendSlotsDay = {
+        const slotsDayData = {
             day: formData.day,
             slot: {
                 slotId: Number(formData.slotId),
-                startTime: '',
-                endTime: ''
             },
+            ...(isAdding ? {} : { SlotsDayId: Number(formData.id) }),
         };
 
-        if (!isAdding && formData.id !== '') {
-            slotsDayData.SlotsDayId = Number(formData.id);
-        }
-
-        const MIN_SUCCESS_DURATION = 1000;
-        const startTime = Date.now();
-
         try {
-            if (isAdding) {
-                await dispatch(addSlotsDay(slotsDayData)).unwrap();
-            } else {
-                await dispatch(updateSlotsDay(slotsDayData)).unwrap();
-            }
+            const action = isAdding ? addSlotsDay : updateSlotsDay;
+            await dispatch(action(slotsDayData)).unwrap();
+            await dispatch(fetchSlotsDays());
             setSuccess(true);
-            const elapsedTime = Date.now() - startTime;
-            const remainingTime = MIN_SUCCESS_DURATION - elapsedTime;
-            if (remainingTime > 0) {
-                setTimeout(() => {
-                    setLoading(false);
-                    setSuccess(false);
-                    onClose();
-                }, remainingTime);
-            } else {
+            setTimeout(() => {
                 setLoading(false);
                 setSuccess(false);
                 onClose();
-            }
+            }, 1000);
         } catch (error) {
+            console.log(error)
             alert('Wystąpił błąd podczas zapisywania slotu dnia.');
             setLoading(false);
         }
@@ -176,19 +93,7 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <Fade in={open} timeout={500}>
-                <Box
-                    sx={{
-                        position: 'relative',
-                        transition: 'background-color 0.5s ease',
-                        backgroundColor: success ? 'white' : 'inherit',
-                        minHeight: '200px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        padding: success ? 4 : undefined,
-                    }}
-                >
+                <Box sx={{ position: 'relative', minHeight: '200px', padding: 4 }}>
                     {!success ? (
                         <>
                             <DialogTitle>{isAdding ? 'Dodaj slot dnia' : 'Szczegóły slotu dnia'}</DialogTitle>
@@ -205,7 +110,7 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
                                         >
                                             {slots.map((slot) => (
                                                 <MenuItem key={slot.slotId} value={slot.slotId.toString()}>
-                                                    {`${slot.startTime} - ${slot.endTime}` || `Slot ${slot.slotId}`}
+                                                    {`${slot.startTime} - ${slot.endTime}`}
                                                 </MenuItem>
                                             ))}
                                         </Select>
@@ -223,18 +128,16 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
                                     <InputLabel id="day-label">Dzień</InputLabel>
                                     <Select
                                         labelId="day-label"
-                                        id="day"
-                                        variant="outlined"
                                         value={formData.day}
                                         onChange={handleDayChange}
+                                        label="Dzień"
+                                        variant="outlined"
                                     >
-                                        <MenuItem value={Day.MONDAY}>Poniedziałek</MenuItem>
-                                        <MenuItem value={Day.TUESDAY}>Wtorek</MenuItem>
-                                        <MenuItem value={Day.WEDNESDAY}>Środa</MenuItem>
-                                        <MenuItem value={Day.THURSDAY}>Czwartek</MenuItem>
-                                        <MenuItem value={Day.FRIDAY}>Piątek</MenuItem>
-                                        <MenuItem value={Day.SATURDAY}>Sobota</MenuItem>
-                                        <MenuItem value={Day.SUNDAY}>Niedziela</MenuItem>
+                                        {Object.values(Day).map((day) => (
+                                            <MenuItem key={day} value={day}>
+                                                {dayMapping[day]}
+                                            </MenuItem>
+                                        ))}
                                     </Select>
                                 </FormControl>
                             </DialogContent>
@@ -245,14 +148,7 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
                         </>
                     ) : (
                         <Fade in={success} timeout={1000}>
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
-                            >
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <CheckIcon sx={{ fontSize: 60, color: green[500], mb: 2 }} />
                                 <Typography variant="h6" color="green">
                                     Dodano!

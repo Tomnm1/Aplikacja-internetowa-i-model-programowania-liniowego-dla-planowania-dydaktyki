@@ -18,7 +18,7 @@ public class SlotsDay {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "day")
     public Day day;
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne
     @JoinColumn(name = "slot_id")
     public Slot slot;
 }

@@ -1,6 +1,5 @@
-// src/Navbar.tsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import BadgeIcon from '@mui/icons-material/Badge';
 import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences';
@@ -104,7 +103,6 @@ const Navbar: React.FC = () => {
 
         window.addEventListener('resize', handleResize);
 
-        // Initial check
         handleResize();
 
         return () => {
@@ -120,12 +118,12 @@ const Navbar: React.FC = () => {
         <nav className="bg-gray-100 px-5 pt-8 z-50">
             <h2 className="font-semibold pb-6 flex flex-row items-center gap-4">
                 <div
-                    className="block md:hidden text-gray-800 focus:outline-none cursor-pointer px-1"
+                    className="block text-gray-800 focus:outline-none cursor-pointer px-1"
                     onClick={handleMenuToggle}
                 >
-                    {showMenu ? <ArrowBackIosNewIcon /> : <ArrowForwardIosIcon />}
+                    {showMenu ? <ArrowBackIosNewIcon/> : <ArrowForwardIosIcon/>}
                 </div>
-                <div className={!showMenu ? "hidden md:block" : "text-put-light text-nowrap"}>
+                <div className={!showMenu ? "hidden" : "text-put-light text-nowrap"}>
                     Menu
                 </div>
             </h2>
@@ -138,21 +136,23 @@ const Navbar: React.FC = () => {
                     })
                     .map((route) => (
                         <li
-                            className="border-gray-100 border hover:border-gray-400 hover:bg-gray-50 rounded-sm"
+                            className="border border-transparent hover:border-gray-400 hover:bg-gray-50 rounded-sm"
                             key={route.name}
                         >
-                            <Link
+                            <NavLink
                                 to={route.link}
-                                className={
+                                className={({isActive}) =>
                                     "text-gray-800 gap-2 flex flex-row py-3" +
-                                    (!showMenu ? " px-1" : " pr-20 ml-2")
+                                    (!showMenu ? " px-2" : " pl-2 pr-10") +
+                                    " transition-all duration-200 " +
+                                    (isActive ? " border border-gray-400 bg-gray-50 text-put-light" : "")
                                 }
                             >
                                 {route.icon}
-                                <div className={!showMenu ? "hidden md:block" : "text-put-light text-nowrap"}>
+                                <div className={!showMenu ? "hidden" : "text-put-light text-nowrap"}>
                                     {route.name}
                                 </div>
-                            </Link>
+                            </NavLink>
                         </li>
                     ))}
             </ul>
