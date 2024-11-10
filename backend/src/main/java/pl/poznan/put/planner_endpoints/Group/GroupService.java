@@ -66,9 +66,7 @@ public class GroupService {
         Optional<Group> group = groupRepository.findById(id);
         if (group.isPresent()) {
             Group oldGroup = group.get();
-            oldGroup.number = groupParams.number;
-            oldGroup.numOfStudents = groupParams.numOfStudents;
-            oldGroup.course = groupParams.course;
+            oldGroup.code = groupParams.code;
             return groupRepository.save(oldGroup);
         } else {
             return null;

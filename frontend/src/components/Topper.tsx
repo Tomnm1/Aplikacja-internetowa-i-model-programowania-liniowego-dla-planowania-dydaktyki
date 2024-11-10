@@ -1,9 +1,20 @@
-// Topper.tsx
 import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
 import put_logo_text from "../assets/put_logo_text.png"
 import put_logo from "../assets/put_logo.png"
+import {logout} from "../app/slices/authSlice.ts";
+import {useAppDispatch, useAppSelector} from "../hooks/hooks.ts";
+import {useNavigate} from "react-router-dom";
 
 const Topper = () => {
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    //const userId = useAppSelector((state) => state.auth.userId);
+
+    const handleLogout = () => {
+        dispatch(logout());
+        navigate('/login');
+    };
     return (
         <div className={"sticky top-0 w-full flex flex-nowrap flex-row justify-between bg-put-dark items-center p-4"}>
             <div className={"flex flex-row gap-5 items-center"}>
@@ -35,7 +46,12 @@ const Topper = () => {
                         <PersonIcon/>
                     </div>
                 </div>
+                <div className={"text-white hover:text-gray-500 cursor-pointer"}>
+                    <LogoutIcon onClick={handleLogout}/>
+                </div>
+
             </div>
+
         </div>
     );
 };

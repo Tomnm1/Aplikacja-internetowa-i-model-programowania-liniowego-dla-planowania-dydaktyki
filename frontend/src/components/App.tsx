@@ -1,105 +1,20 @@
-// App.tsx
 import React from 'react';
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
 import Home from './Home';
-import Crew from './Crew.tsx';
+import Employees from './Teachers.tsx';
 import Layout from "./Layout.tsx";
 import Classrooms from "./Classrooms.tsx";
 import Desiderata from "./Desiderata.tsx";
 import Calendar from "./Calendar.tsx";
-const teachers = [
-    { id: 1, name: 'Jan Kowalski' },
-    { id: 2, name: 'Anna Nowak' },
-    { id: 3, name: 'Krzysztof Wiśniewski' },
-    { id: 4, name: 'Ewa Zielińska' },
-    { id: 5, name: 'Piotr Malinowski' },
-];
+import Buildings from "./Buildings.tsx";
+import FieldOfStudies from "./FieldOfStudies.tsx";
+import Specialisations from "./Specialisations.tsx";
+import Slots from "./Slots.tsx";
+import UserTest from "./UserTest.tsx";
+import ProtectedRoute from "./ProtectedRoute.tsx";
+import Login from "./Login.tsx";
 
-const groups = [
-    { id: 1, name: 'Grupa A' },
-    { id: 2, name: 'Grupa B' },
-    { id: 3, name: 'Grupa C' },
-    { id: 4, name: 'Grupa D' },
-    { id: 5, name: 'Grupa E' },
-];
-
-const rooms = [
-    { id: 1, name: 'Sala 101' },
-    { id: 2, name: 'Sala 102' },
-    { id: 3, name: 'Sala 103' },
-    { id: 4, name: 'Sala 104' },
-    { id: 5, name: 'Sala 105' },
-];
-
-const hours = [
-    { id: 1, timeRange: '08:00 - 09:00' },
-    { id: 2, timeRange: '09:00 - 10:00' },
-    { id: 3, timeRange: '10:00 - 11:00' },
-    { id: 4, timeRange: '11:00 - 12:00' },
-    { id: 5, timeRange: '12:00 - 13:00' },
-    { id: 6, timeRange: '13:00 - 14:00' },
-    { id: 7, timeRange: '14:00 - 15:00' },
-];
-
-const schedules = [
-    {
-        id: 1,
-        teacherIds: [1, 2],
-        groupIds: [1],
-        roomId: 1,
-        hourId: 1,
-    },
-    {
-        id: 2,
-        teacherIds: [3],
-        groupIds: [2, 3],
-        roomId: 2,
-        hourId: 1,
-    },
-    {
-        id: 3,
-        teacherIds: [4],
-        groupIds: [4],
-        roomId: 3,
-        hourId: 2,
-    },
-    {
-        id: 4,
-        teacherIds: [2, 5],
-        groupIds: [5],
-        roomId: 4,
-        hourId: 3,
-    },
-    {
-        id: 5,
-        teacherIds: [1],
-        groupIds: [1, 2],
-        roomId: 5,
-        hourId: 4,
-    },
-    {
-        id: 6,
-        teacherIds: [3],
-        groupIds: [3],
-        roomId: 2,
-        hourId: 5,
-    },
-    {
-        id: 7,
-        teacherIds: [5],
-        groupIds: [4, 5],
-        roomId: 1,
-        hourId: 6,
-    },
-    {
-        id: 8,
-        teacherIds: [2, 4],
-        groupIds: [1, 3, 5],
-        roomId: 3,
-        hourId: 7,
-    },
-];
-
+//https://blog.logrocket.com/authentication-react-router-v6/
 
 const App: React.FC = () => {
 
@@ -107,11 +22,88 @@ const App: React.FC = () => {
         <Router>
             <Layout>
                 <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/crew" element={<Crew />} />
-                    <Route path="/classrooms" element={<Classrooms />} />
-                    <Route path="/calendar" element={<Calendar teachers={teachers} rooms={rooms} hours={hours} schedules={schedules} groups={groups} />} />
-                    <Route path="/desiderata" element={<Desiderata />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route
+                        path="/"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Home />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/employees"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Employees />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/classrooms"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Classrooms />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/calendar"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Calendar />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/desiderata"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Desiderata />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/buildings"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Buildings />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/fieldofstudies"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <FieldOfStudies />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/specialisations"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Specialisations />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/slots"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Slots />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/usertest"
+                        element={
+                            <ProtectedRoute allowedRoles={['user']}>
+                                <UserTest />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
             </Layout>
         </Router>

@@ -1,12 +1,22 @@
-// store.ts
 import { configureStore } from '@reduxjs/toolkit';
-import employeesReducer from './slices/employeesSlice';
-import classroomReducer from './slices/classroomSlice'
+import authReducer from './slices/authSlice.ts';
+import teacherReducer from './slices/teacherSlice.ts';
+import classroomReducer from './slices/classroomSlice';
+import buildingReducer from './slices/buildingSlice.ts';
+import fieldReducer from './slices/fieldOfStudySlice.ts';
+import specialisationReducer from './slices/specialisationSlice.ts';
+import slotsReducer from './slices/slotsSlice.ts';
 
 export const store = configureStore({
     reducer: {
-        employees: employeesReducer,
-        classroom: classroomReducer
+        auth: authReducer,
+        teachers: teacherReducer,
+        classroom: classroomReducer,
+        buildings: buildingReducer,
+        classrooms: classroomReducer,
+        fields: fieldReducer,
+        specialisations: specialisationReducer,
+        slots: slotsReducer,
     },
 });
 

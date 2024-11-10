@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /**
  * Interface to communicate with DB
  */
-public interface BuildingRepository extends JpaRepository<Building, String> {
+public interface BuildingRepository extends JpaRepository<Building, Integer> {
+    boolean existsByCode(String code);
 }

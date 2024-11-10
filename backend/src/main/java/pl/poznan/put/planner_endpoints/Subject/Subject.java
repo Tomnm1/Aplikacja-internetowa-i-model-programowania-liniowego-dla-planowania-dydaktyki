@@ -1,29 +1,32 @@
 package pl.poznan.put.planner_endpoints.Subject;
 
 import jakarta.persistence.*;
-import pl.poznan.put.planner_endpoints.Course.Course;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import pl.poznan.put.planner_endpoints.Semester.Semester;
 
 /**
  * Data model for subjects table
  */
 @Entity
-@Table(name="przedmioty")
+@Table(name="subjects")
 public class Subject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    public Integer id;
-    @Column(name = "nazwa")
+    @Column(name = "subject_id")
+    public Integer SubjectId;
+    @Column(name = "name")
     public String name;
-    @Column(name = "jezyk")
-    public String language;
-    @Column(name = "egzamin")
+    @Column(name = "language")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    public Language language;
+    @Column(name = "exam")
     public Boolean exam;
-    @Column(name = "obieralny")
-    public Boolean elective;
-    @Column(name = "planowany")
+    @Column(name = "mandatory")
+    public Boolean mandatory;
+    @Column(name = "planned")
     public Boolean planned;
-    @JoinColumn(name = "kierunek")
+    @JoinColumn(name = "semester_id")
     @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
-    public Course course;
+    public Semester semester;
 }
