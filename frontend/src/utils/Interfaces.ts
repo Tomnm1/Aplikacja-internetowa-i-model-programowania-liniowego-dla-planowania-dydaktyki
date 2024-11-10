@@ -30,8 +30,18 @@ export enum Day {
     THURSDAY = 'thursday',
     FRIDAY = 'friday',
     SATURDAY = 'saturday',
-    SUNDAY = 'sunday',
+    SUNDAY = 'sunday ',
 }
+
+export const dayMapping: { [key in Day]: string } = {
+    [Day.MONDAY]: 'Poniedziałek',
+    [Day.TUESDAY]: 'Wtorek',
+    [Day.WEDNESDAY]: 'Środa',
+    [Day.THURSDAY]: 'Czwartek',
+    [Day.FRIDAY]: 'Piątek',
+    [Day.SATURDAY]: 'Sobota',
+    [Day.SUNDAY]: 'Niedziela',
+};
 
 export interface ClassroomRow {
     id: GridRowId;
@@ -219,23 +229,25 @@ export interface SlotsState {
 }
 
 export interface SlotsDay {
-    id: GridRowId;
-    slotId: GridRowId;
-    day:Day;
+    id: number;
+    slotId: number;
+    day: Day;
     slotRepresentation?: string;
-    isNew?: boolean;
 }
 
 export interface BackendSlotsDay {
     SlotsDayId?: number;
-    slot: BackendSlot;
+    slot: {
+        slotId: number;
+        startTime?: string;
+        endTime?: string;
+    };
     day: Day;
 }
 
 export interface SlotsDayState {
     rows: SlotsDay[];
-    rowModesModel: GridRowModesModel;
-    selectedRowId: GridRowId | null;
     loading: boolean;
     error: string | null;
 }
+

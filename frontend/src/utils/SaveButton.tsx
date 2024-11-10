@@ -41,8 +41,8 @@ const SaveButton: React.FC<SaveButtonProps> = ({ onClick, loading, success }) =>
                         sx={{
                             color: green[500],
                             position: 'absolute',
-                            top: -6,
-                            left: -6,
+                            top: -3,
+                            left: -3,
                             zIndex: 1,
                         }}
                     />
