@@ -1,6 +1,8 @@
 package pl.poznan.put.planner_endpoints.Specialisation;
 
-public enum Cycle {
+import pl.poznan.put.constans.Constans;
+
+public enum Cycle implements Constans.EnumUtils.DisplayName {
     first("1st"),
     second("2st");
 
@@ -11,7 +13,7 @@ public enum Cycle {
     }
 
     @Override
-    public String toString(){
+    public String getDisplayName() {
         return displayName;
     }
 }

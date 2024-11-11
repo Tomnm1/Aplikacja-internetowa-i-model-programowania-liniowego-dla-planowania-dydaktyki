@@ -1,6 +1,8 @@
 package pl.poznan.put.planner_endpoints.Teacher;
 
-public enum Degree {
+import pl.poznan.put.constans.Constans;
+
+public enum Degree implements Constans.EnumUtils.DisplayName {
     BRAK(""),
     LIC("lic."),
     INZ("inż."),
@@ -24,12 +26,8 @@ public enum Degree {
         this.displayName = displayName;
     }
 
-    public String getDegree() {
-        return displayName;
-    }
-
     @Override
-    public String toString(){
+    public String getDisplayName() {
         return displayName;
     }
 }
