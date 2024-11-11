@@ -1,5 +1,6 @@
 package pl.poznan.put.planner_endpoints.Teacher;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.jna.platform.unix.solaris.LibKstat;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
@@ -28,7 +29,6 @@ public class Teacher {
     public String lastName;
 
     @Column(name = "degree")
-    //@JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Convert(converter = DegreeConverter.class)
     public Degree degree;
     @Column(name = "preferences", columnDefinition = "json")
@@ -40,5 +40,6 @@ public class Teacher {
             joinColumns = @JoinColumn(name = "teacher_id"),
             inverseJoinColumns = @JoinColumn(name = "subject_type_id")
     )
+    @JsonIgnore
     public List<SubjectType> subjectTypesList;
 }
