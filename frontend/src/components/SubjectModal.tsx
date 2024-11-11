@@ -26,7 +26,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
     const dispatch = useDispatch<AppDispatch>();
     const [semesters, setSemesters] = useState<BackendSemester[]>([]);
     const [formData, setFormData] = useState({
-        id: subject?.subject_id || '',
+        id: subject?.SubjectId || '',
         name: subject?.name || '',
         language: subject?.language || Language.POLSKI,
         exam: subject?.exam || false,
@@ -76,7 +76,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
         setLoading(true);
 
         const subjectData: BackendSubject = {
-            ...(isAdding ? {} : { subject_id: Number(formData.id) }),
+            ...(isAdding ? {} : { SubjectId: Number(formData.id) }),
             name: formData.name,
             language: formData.language,
             exam: formData.exam,

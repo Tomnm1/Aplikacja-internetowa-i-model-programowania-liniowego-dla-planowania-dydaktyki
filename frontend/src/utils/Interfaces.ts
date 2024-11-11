@@ -276,7 +276,7 @@ export interface SemesterState {
 }
 
 export interface Subject {
-    subject_id: number;
+    SubjectId: number;
     name: string;
     language: Language;
     exam: boolean;
@@ -286,7 +286,7 @@ export interface Subject {
 }
 
 export interface BackendSubject {
-    subject_id?: number;
+    SubjectId?: number;
     name: string;
     language: Language;
     exam: boolean;
