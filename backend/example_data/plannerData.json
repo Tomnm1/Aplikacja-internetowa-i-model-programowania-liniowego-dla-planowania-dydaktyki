@@ -1,129 +1,123 @@
 {
-  "groups": ["W1", "C1", "C2", "L1", "L2", "L3", "L4"],
-  "teachers": ["AD", "RW", "RK"],
-  "rooms": ["142", "143", "CW8", "144"],
-  "timeSlots": [
-    "Pn 08:00", "Pn 09:45", "Pn 11:45", "Pn 13:15",
-    "Wt 08:00", "Wt 09:45", "Wt 11:45", "Wt 13:15",
-    "Śr 08:00", "Śr 09:45", "Śr 11:45", "Śr 13:15",
-    "Cz 08:00", "Cz 09:45", "Cz 11:45", "Cz 13:15",
-    "Pt 08:00", "Pt 09:45", "Pt 11:45", "Pt 13:15"
-  ],
+  "groups": ["1", "2", "3", "4", "5", "6", "7"],
+  "teachers": ["1", "2", "3"],
+  "rooms": ["1", "2", "3", "4"],
+  "timeSlots": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"],
   "subjects": [
     {
-      "name": "PTC",
-      "groups": ["W1", "C1", "C2", "L1", "L2", "L3", "L4"],
+      "name": "1",
+      "groups": ["1", "2", "3", "4", "5", "6", "7"],
       "typesOfClasses": [
         {
           "type": "lecture",
           "frequency": "weekly",
-          "rooms": ["CW8"],
-          "teachers": ["RW"],
+          "rooms": ["3"],
+          "teachers": ["2"],
           "groupMappings": {
-            "W1": ["C1", "C2", "L1", "L2", "L3", "L4"]
+            "1": ["2", "3", "4", "5", "6", "7"]
           }
         },
         {
           "type": "exercise",
           "frequency": "even_weeks",
-          "rooms": ["142", "143"],
-          "teachers": ["RW"],
+          "rooms": ["1", "2"],
+          "teachers": ["2"],
           "groupMappings": {
-            "C1": ["W1", "L1", "L2"],
-            "C2": ["W1", "L3", "L4"]
+            "2": ["4", "5"],
+            "3": ["6", "7"]
           }
         },
         {
           "type": "lab",
           "frequency": "odd_weeks",
-          "rooms": ["142", "143"],
-          "teachers": ["RW", "AD"],
+          "rooms": ["1", "2"],
+          "teachers": ["2", "1"],
           "groupMappings": {
-            "L1": ["W1", "C1"],
-            "L2": ["W1", "C1"],
-            "L3": ["W1", "C2"],
-            "L4": ["W1", "C2"]
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": []
           }
         }
       ]
     },
     {
-      "name": "Prr",
-      "groups": ["W1","C1", "C2", "L1", "L2", "L3", "L4"],
+      "name": "2",
+      "groups": ["1","2", "3", "4", "5", "6", "7"],
       "typesOfClasses": [
         {
           "type": "lecture",
           "frequency": "weekly",
-          "rooms": ["CW8"],
-          "teachers": ["RW"],
+          "rooms": ["3"],
+          "teachers": ["2"],
           "groupMappings": {
-            "W1": ["C1", "C2", "L1", "L2", "L3", "L4"]
+            "1": ["2", "3", "4", "5", "6", "7"]
           }
         },
         {
           "type": "lab",
           "frequency": "weekly",
-          "rooms": ["143", "144"],
-          "teachers": ["RW", "AD"],
+          "rooms": ["2", "4"],
+          "teachers": ["2", "1"],
           "groupMappings": {
-            "L1": ["W1", "C1"],
-            "L2": ["W1", "C1"],
-            "L3": ["W1", "C2"],
-            "L4": ["W1", "C2"]
+            "4": ["2"],
+            "5": ["2"],
+            "6": ["3"],
+            "7": ["3"]
           }
         }
       ]
     },
     {
-      "name": "Prz",
-      "groups": ["W1", "C1", "C2","L1", "L2", "L3", "L4"],
+      "name": "3",
+      "groups": ["1", "2", "3","4", "5", "6", "7"],
       "typesOfClasses": [
         {
           "type": "lecture",
           "frequency": "weekly",
-          "rooms": ["CW8"],
-          "teachers": ["AD"],
+          "rooms": ["3"],
+          "teachers": ["1"],
           "groupMappings": {
-            "W1": ["C1", "C2", "L1", "L2", "L3", "L4"]
+            "1": ["2", "3", "4", "5", "6", "7"]
           }
         },
         {
           "type": "lab",
           "frequency": "weekly",
-          "rooms": ["142", "144"],
-          "teachers": ["AD"],
+          "rooms": ["1", "4"],
+          "teachers": ["1"],
           "groupMappings": {
-            "L1": ["W1", "C1"],
-            "L2": ["W1", "C1"],
-            "L3": ["W1", "C2"],
-            "L4": ["W1", "C2"]
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": []
           }
         }
       ]
     },
     {
-      "name": "ASK",
-      "groups": ["W1", "C1", "C2", "L1", "L2", "L3", "L4"],
+      "name": "4",
+      "groups": ["1", "2", "3", "4", "5", "6", "7"],
       "typesOfClasses": [
         {
           "type": "lecture",
           "frequency": "weekly",
-          "rooms": ["CW8"],
-          "teachers": ["RK"],
+          "rooms": ["3"],
+          "teachers": ["3"],
           "groupMappings": {
-            "W1": ["L1", "C1", "C2", "L2", "L3", "L4"]
+            "1": ["4", "2", "3", "5", "6", "7"]
           }
         },
         {
           "type": "lab",
           "frequency": "weekly",
-          "rooms": ["142", "143", "144"],
-          "teachers": ["RK"],
+          "rooms": ["1", "2", "4"],
+          "teachers": ["3"],
           "groupMappings": {
-            "L1": ["W1", "C1"],
-            "L2": ["W1", "C1"],
-            "L3": ["W1", "C2"],
-            "L4": ["W1", "C2"]
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": []
           }
         }
       ]

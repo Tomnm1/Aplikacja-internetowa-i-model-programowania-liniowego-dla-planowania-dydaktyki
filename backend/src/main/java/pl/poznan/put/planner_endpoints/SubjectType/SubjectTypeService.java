@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.poznan.put.planner_endpoints.Subject.Subject;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +46,10 @@ public class SubjectTypeService {
      */
     public Optional<SubjectType> getsubjectTypeByID(Integer id){
         return subjectTypeRepository.findById(id);
+    }
+
+    public SubjectType getSubjectTypeBySubjectAndType(Subject subject, ClassTypeOwn type){
+        return subjectTypeRepository.findSubjectTypeBySubjectAndType(subject, type);
     }
 
     /**
