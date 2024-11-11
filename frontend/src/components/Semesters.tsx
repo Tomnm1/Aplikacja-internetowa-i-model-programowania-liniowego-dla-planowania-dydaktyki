@@ -64,6 +64,11 @@ const Semesters: React.FC = () => {
             width: 150,
         },
         {
+            field: 'specialisationRepresentation',
+            headerName: 'Specjalizacja',
+            width: 250,
+        },
+        {
             field: 'actions',
             type: 'actions',
             headerName: 'Akcje',

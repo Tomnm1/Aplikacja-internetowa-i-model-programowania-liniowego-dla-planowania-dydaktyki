@@ -22,6 +22,7 @@ export const fetchSemesters = createAsyncThunk<Semester[]>('semesters/fetchSemes
         id: semester.semesterId!,
         number: semester.number,
         specialisationId: semester.specialisation.specialisationId!,
+        specialisationRepresentation: semester.specialisation.name,
     }));
 });
 
@@ -41,6 +42,7 @@ export const addSemester = createAsyncThunk<Semester, BackendSemester>(
             id: data.semesterId!,
             number: data.number,
             specialisationId: data.specialisation.specialisationId!,
+            specialisationRepresentation: data.specialisation.name,
         };
     }
 );
@@ -64,6 +66,7 @@ export const updateSemester = createAsyncThunk<Semester, BackendSemester>(
             id: data.semesterId!,
             number: data.number,
             specialisationId: data.specialisation.specialisationId!,
+            specialisationRepresentation: data.specialisation.name,
         };
     }
 );

@@ -29,6 +29,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
         id: semester?.id || '',
         number: semester?.number || '',
         specialisationId: semester?.specialisationId?.toString() || '',
+        specialisationRepresentation: semester?.specialisationRepresentation || '',
     });
     const [loading, setLoading] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
@@ -52,10 +53,11 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
 
     const handleSpecialisationChange = (event: SelectChangeEvent) => {
         const selectedSpecialisationId = event.target.value as string;
-        //const selectedSpecialisation = specialisations.find(specialisation => specialisation!.specialisationId!.toString() === selectedSpecialisationId);
+        const selectedSpecialisation = specialisations.find(specialisation => specialisation!.specialisationId!.toString() === selectedSpecialisationId);
         setFormData({
             ...formData,
             specialisationId: selectedSpecialisationId,
+            specialisationRepresentation: selectedSpecialisation?.name || selectedSpecialisationId,
         });
     };
 
@@ -104,7 +106,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                                     <FormControl fullWidth margin="normal" disabled={loading}>
                                         <InputLabel id="semester-label">Specjalizacja</InputLabel>
                                         <Select
-                                            labelId="slot-label"
+                                            labelId="semester-label"
                                             value={formData.specialisationId}
                                             onChange={handleSpecialisationChange}
                                             label="Specjalizacja"
@@ -121,7 +123,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                                     <TextField
                                         margin="normal"
                                         label="Specjalizacja"
-                                        value={formData.specialisationId}
+                                        value={formData.specialisationRepresentation}
                                         fullWidth
                                         disabled
                                     />
@@ -156,4 +158,5 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
         </Dialog>
     );
 };
+
 export default SemesterModal;
