@@ -30,7 +30,7 @@ const Subjects: React.FC = () => {
     }, [dispatch]);
 
     const handleViewClick = (id: number) => () => {
-        const subject = subjects.find((s) => s.subject_id === id);
+        const subject = subjects.find((s) => s.SubjectId === id);
         if (subject) {
             setSelectedSubject(subject);
             setIsAdding(false);
@@ -107,6 +107,7 @@ const Subjects: React.FC = () => {
                 loading={loading}
                 localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
                 slots={{ toolbar: TopToolbar }}
+                getRowId={(row) => row.SubjectId}
             />
             <ConfirmationDialog
                 open={isDialogOpen}
