@@ -18,7 +18,6 @@ public class Classroom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "classroom_id")
     public Integer classroomID;
-   // @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
     @ManyToOne
     @JoinColumn(name = "building_id")
     public Building building;

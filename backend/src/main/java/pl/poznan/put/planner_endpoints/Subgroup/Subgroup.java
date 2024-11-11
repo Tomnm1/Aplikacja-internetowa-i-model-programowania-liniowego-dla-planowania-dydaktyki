@@ -13,10 +13,10 @@ public class Subgroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public Integer id;
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne // Unidirectional
     @JoinColumn(name = "group_id")
     public Group group;
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne // Unidirectional
     @JoinColumn(name = "subgroup_id")
     public Group subgroup;
 }

@@ -16,7 +16,7 @@ public class SubjectType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "subject_types_id")
     public Integer subjectTypeId;
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne // Unidirectional
     @JoinColumn(name = "subject_id")
     public Subject subject;
     @Column(name = "number_of_hours")

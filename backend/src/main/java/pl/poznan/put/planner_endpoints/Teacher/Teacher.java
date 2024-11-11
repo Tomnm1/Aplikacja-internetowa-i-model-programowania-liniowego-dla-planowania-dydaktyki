@@ -29,7 +29,6 @@ public class Teacher {
     public String lastName;
 
     @Column(name = "degree")
-//    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Convert(converter = DegreeConverter.class)
     public Degree degree;
     @Column(name = "preferences", columnDefinition = "json")
