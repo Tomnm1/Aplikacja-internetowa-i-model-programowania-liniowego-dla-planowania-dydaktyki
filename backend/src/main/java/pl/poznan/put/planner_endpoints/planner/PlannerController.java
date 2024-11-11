@@ -1,17 +1,33 @@
 package pl.poznan.put.planner_endpoints.planner;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.poznan.put.or_planner.Planner;
 import pl.poznan.put.or_planner.data.PlannerData;
 import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
+import pl.poznan.put.or_planner.insert.InsertPlanToDbService;
+import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
+import pl.poznan.put.or_planner.insert.PlannedSlot;
+import pl.poznan.put.planner_endpoints.Plan.Plan;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/planner")
 public class PlannerController {
+    private final InsertPlanToDbService insertPlanToDbService;
+    private final PlanToExcelExportService planToExcelExportService;
+
+    @Autowired
+    PlannerController(
+            InsertPlanToDbService insertPlanToDbService,
+            PlanToExcelExportService planToExcelExportService
+    ){
+        this.insertPlanToDbService = insertPlanToDbService;
+        this.planToExcelExportService = planToExcelExportService;
+    }
 
     @PostMapping("/start")
     public ResponseEntity<Void> startScheduling(@RequestBody PlannerData plannerData) {
@@ -24,9 +40,13 @@ public class PlannerController {
 
             Planner planner = new Planner(groups, teachers, rooms, timeSlots, subjects);
 
-            List<String[]> optimizedSchedule = planner.optimizeSchedule();
+            List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
 
-            printScheduleAsTable(optimizedSchedule, groups, timeSlots);
+            Plan plan = insertPlanToDbService.insertSlots(optimizedSchedule);
+
+            planToExcelExportService.exportPlanToExcel(plan);
+
+//            printScheduleAsTable(optimizedSchedule, groups, timeSlots);
             System.out.println("done");
             return ResponseEntity.ok().build();
         } catch (Exception e) {

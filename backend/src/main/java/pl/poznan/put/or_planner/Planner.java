@@ -6,6 +6,7 @@ import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
 import pl.poznan.put.or_planner.constraints.ConstraintsManager;
 import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
+import pl.poznan.put.or_planner.insert.PlannedSlot;
 
 import java.util.*;
 
@@ -59,7 +60,7 @@ public class Planner {
 
     }
 
-    public List<String[]> optimizeSchedule() {
+    public List<PlannedSlot> optimizeSchedule() {
         MPSolver solver = MPSolver.createSolver("SCIP");
         MPObjective objective = solver.objective();
         objective.setMinimization();
@@ -106,30 +107,26 @@ public class Planner {
             return null;
         }
 
-        List<String[]> scheduleTable = new ArrayList<>();
+        List<PlannedSlot> scheduleTable = new ArrayList<>();
         for (int t = 0; t < numTimeSlots; ++t) {
-            String[] rowEven = new String[numGroups];
-            String[] rowOdd = new String[numGroups];
-
             for (int g = 0; g < numGroups; ++g) {
                 for (int s = 0; s < numRooms; ++s) {
                     for (int p = 0; p < numSubjects; ++p) {
                         for (int n = 0; n < numTeachers; ++n) {
                             if (xEven[g][s][t][p][n].solutionValue() == 1) {
-                                rowEven[g] = xEven[g][s][t][p][n].solutionValue() + "R " + rooms.get(s) + " " + subjects.get(p).getName()
-                                        + " " + teachers.get(n);
+                                PlannedSlot evenSlot = new PlannedSlot(timeSlots.get(t), groups.get(g), teachers.get(n),
+                                        rooms.get(s), subjects.get(p).getName(), true);
+                                scheduleTable.add(evenSlot);
                             }
                             if (xOdd[g][s][t][p][n].solutionValue() == 1) {
-                                rowOdd[g] = xOdd[g][s][t][p][n].solutionValue() + "R " + rooms.get(s) + " " + subjects.get(p).getName()
-                                        + " " + teachers.get(n);
+                                PlannedSlot oddSlot = new PlannedSlot(timeSlots.get(t), groups.get(g), teachers.get(n),
+                                        rooms.get(s), subjects.get(p).getName(), false);
+                                scheduleTable.add(oddSlot);
                             }
                         }
                     }
                 }
             }
-
-            scheduleTable.add(rowEven);
-            scheduleTable.add(rowOdd);
         }
 
         return scheduleTable;

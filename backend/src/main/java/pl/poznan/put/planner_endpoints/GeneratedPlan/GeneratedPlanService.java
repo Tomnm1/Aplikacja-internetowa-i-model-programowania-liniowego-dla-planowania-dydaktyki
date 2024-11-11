@@ -3,6 +3,7 @@ package pl.poznan.put.planner_endpoints.GeneratedPlan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.poznan.put.planner_endpoints.Plan.Plan;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,10 @@ public class GeneratedPlanService {
      * @return Optional - empty or with GeneratedPlan
      */
     public Optional<GeneratedPlan> getGeneratedPlanByID(Integer generatedPlanId) {return generatedPlanRepository.findById(generatedPlanId);}
+
+    public List<GeneratedPlan> getGeneratedPlansByPlanId(Plan plan){
+        return generatedPlanRepository.findAllByPlanOrderBySlotsDayAsc(plan);
+    }
 
     /**
      * Creates a generatedPlan
