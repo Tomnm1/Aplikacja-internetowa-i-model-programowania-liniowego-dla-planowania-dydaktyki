@@ -259,6 +259,7 @@ export interface Semester {
     id: number;
     number: string;
     specialisationId: number;
+    specialisationRepresentation?: string;
 }
 
 export interface BackendSemester {
@@ -266,6 +267,7 @@ export interface BackendSemester {
     number: string;
     specialisation: {
         specialisationId: number;
+        name?: string;
     };
 }
 
