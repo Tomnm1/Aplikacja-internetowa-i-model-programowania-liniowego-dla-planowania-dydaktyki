@@ -81,6 +81,12 @@ const routes: RouteItem[] = [
         roles: ['admin'],
     },
     {
+        name: "Semestry",
+        link: "/semesters",
+        icon: <AddToPhotosIcon />,
+        roles: ['admin'],
+    },
+    {
         name: "User Test",
         link: "/usertest",
         icon: <BadgeIcon />,

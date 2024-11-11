@@ -30,7 +30,7 @@ export enum Day {
     THURSDAY = 'thursday',
     FRIDAY = 'friday',
     SATURDAY = 'saturday',
-    SUNDAY = 'sunday ',
+    SUNDAY = 'sunday',
 }
 
 export const dayMapping: { [key in Day]: string } = {
@@ -251,3 +251,22 @@ export interface SlotsDayState {
     error: string | null;
 }
 
+export interface Semester {
+    id: number;
+    number: string;
+    specialisationId: number;
+}
+
+export interface BackendSemester {
+    semesterId?: number;
+    number: string;
+    specialisation: {
+        specialisationId: number;
+    };
+}
+
+export interface SemesterState {
+    rows: Semester[];
+    loading: boolean;
+    error: string | null;
+}
