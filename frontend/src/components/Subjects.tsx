@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     DataGrid, GridColDef, GridToolbarContainer,
@@ -10,29 +10,29 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import { RootState, AppDispatch } from '../app/store';
+import {Language, languageMapping, Subject} from '../utils/Interfaces';
 import { plPL } from '@mui/x-data-grid/locales';
-import { fetchTeachers, deleteTeacher } from '../app/slices/teacherSlice';
-import TeacherModal from './TeacherModal';
-import { degrees, Teacher } from '../utils/Interfaces';
+import { deleteSubject, fetchSubject } from "../app/slices/subjectSlice.ts";
+import SubjectModal from "./SubjectModal.tsx";
 
-const Teachers: React.FC = () => {
+const Subjects: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { rows: teachers, loading, error } = useSelector((state: RootState) => state.teachers);
+    const { rows: subjects, loading, error } = useSelector((state: RootState) => state.subjects);
 
-    const [isDialogOpen, setDialogOpen] = useState(false);
-    const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
-    const [isModalOpen, setModalOpen] = useState(false);
-    const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-    const [isAdding, setIsAdding] = useState(false);
+    const [isDialogOpen, setDialogOpen] = React.useState(false);
+    const [selectedRowId, setSelectedRowId] = React.useState<number | null>(null);
+    const [isModalOpen, setModalOpen] = React.useState(false);
+    const [selectedSubject, setSelectedSubject] = React.useState<Subject | null>(null);
+    const [isAdding, setIsAdding] = React.useState(false);
 
     useEffect(() => {
-        dispatch(fetchTeachers());
+        dispatch(fetchSubject());
     }, [dispatch]);
 
     const handleViewClick = (id: number) => () => {
-        const teacher = teachers.find((t) => t.id === id);
-        if (teacher) {
-            setSelectedTeacher(teacher);
+        const subject = subjects.find((s) => s.subject_id === id);
+        if (subject) {
+            setSelectedSubject(subject);
             setIsAdding(false);
             setModalOpen(true);
         }
@@ -45,41 +45,34 @@ const Teachers: React.FC = () => {
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteTeacher(selectedRowId));
+            dispatch(deleteSubject(selectedRowId));
         }
         setDialogOpen(false);
         setSelectedRowId(null);
     };
 
     const handleAddClick = () => {
-        setSelectedTeacher(null);
+        setSelectedSubject(null);
         setIsAdding(true);
         setModalOpen(true);
     };
 
     const columns: GridColDef[] = [
-        { field: 'firstName', headerName: 'Imię', width: 150 },
-        { field: 'lastName', headerName: 'Nazwisko', width: 150 },
         {
-            field: 'degree',
-            headerName: 'Stopień',
+            field: 'name',
+            headerName: 'Nazwa',
             width: 150,
-            valueFormatter: (params) => degrees[params as keyof typeof degrees] || '',
         },
-        // {
-        //     field: 'subjectTypesList',
-        //     headerName: 'Typy Przedmiotów',
-        //     width: 250,
-        //     valueFormatter: (params) =>
-        //         params.value
-        //             ? params.value.join(', ')
-        //             : '',
-        // },
+        {
+            field:  'language',
+            headerName: 'Język',
+            width: 150,
+            valueGetter: (params) => languageMapping[params as Language],
+        },
         {
             field: 'actions',
             type: 'actions',
             headerName: 'Akcje',
-            width: 100,
             getActions: (params: GridRowParams) => [
                 <GridActionsCellItem
                     icon={<VisibilityIcon />}
@@ -100,7 +93,7 @@ const Teachers: React.FC = () => {
     const TopToolbar = () => (
         <GridToolbarContainer>
             <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
-                Dodaj nauczyciela
+                Dodaj slot dnia
             </Button>
             <GridToolbar />
         </GridToolbarContainer>
@@ -109,7 +102,7 @@ const Teachers: React.FC = () => {
     return (
         <>
             <DataGrid
-                rows={teachers}
+                rows={subjects}
                 columns={columns}
                 loading={loading}
                 localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
@@ -119,14 +112,14 @@ const Teachers: React.FC = () => {
                 open={isDialogOpen}
                 onClose={handleDialogClose}
                 title="Potwierdzenie"
-                content="Czy na pewno chcesz usunąć tego nauczyciela?"
+                content="Czy na pewno chcesz usunąć ten slot dnia?"
                 action="Potwierdź"
             />
             {isModalOpen && (
-                <TeacherModal
+                <SubjectModal
                     open={isModalOpen}
                     onClose={() => setModalOpen(false)}
-                    teacher={selectedTeacher}
+                    subject={selectedSubject}
                     isAdding={isAdding}
                 />
             )}
@@ -135,4 +128,4 @@ const Teachers: React.FC = () => {
     );
 };
 
-export default Teachers;
+export default Subjects;

@@ -46,10 +46,12 @@ public final class Constans {
     }
 
     public static class EnumUtils {
-
-        public static <E extends Enum<E>> E fromString(Class<E> enumType, String label) {
+        public interface DisplayName {
+            String getDisplayName();
+        }
+        public static <E extends Enum<E> & DisplayName> E fromString(Class<E> enumType, String label) {
             for (E enumConstant : enumType.getEnumConstants()) {
-                if (enumConstant.toString().equalsIgnoreCase(label)) {
+                if (enumConstant.getDisplayName().equalsIgnoreCase(label)) {
                     return enumConstant;
                 }
             }
