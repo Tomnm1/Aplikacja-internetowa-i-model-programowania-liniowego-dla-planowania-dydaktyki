@@ -27,6 +27,6 @@ public class Subject {
     @Column(name = "planned")
     public Boolean planned;
     @JoinColumn(name = "semester_id")
-    @ManyToOne
+    @ManyToOne // Unidirectional
     public Semester semester;
 }

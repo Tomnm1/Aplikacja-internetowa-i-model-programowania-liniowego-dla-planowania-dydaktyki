@@ -18,22 +18,22 @@ public class GeneratedPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public Integer id;
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne
     @JoinColumn(name = "plan_id")
     public Plan plan;
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne
     @JoinColumn(name = "slot_day_id")
     public SlotsDay slotsDay;
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne
     @JoinColumn(name = "group_id")
     public Group group;
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne
     @JoinColumn(name = "teacher_id")
     public Teacher teacher;
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne
     @JoinColumn(name = "classroom_id")
     public Classroom classroom;
-    @ManyToOne(cascade = CascadeType.PERSIST) // Unidirectional
+    @ManyToOne
     @JoinColumn(name = "subject_type_id")
     public SubjectType subjectType;
     @Column(name = "even_week")
