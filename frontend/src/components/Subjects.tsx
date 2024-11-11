@@ -10,29 +10,29 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import { RootState, AppDispatch } from '../app/store';
-import { Semester} from '../utils/Interfaces';
+import {Language, languageMapping, Subject} from '../utils/Interfaces';
 import { plPL } from '@mui/x-data-grid/locales';
-import {deleteSemester, fetchSemesters} from "../app/slices/semesterSlice.ts";
-import SemesterModal from "./SemesterModal.tsx";
+import { deleteSubject, fetchSubject } from "../app/slices/subjectSlice.ts";
+import SubjectModal from "./SubjectModal.tsx";
 
-const Semesters: React.FC = () => {
+const Subjects: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { rows: semesters, loading, error } = useSelector((state: RootState) => state.semesters);
+    const { rows: subjects, loading, error } = useSelector((state: RootState) => state.subjects);
 
     const [isDialogOpen, setDialogOpen] = React.useState(false);
     const [selectedRowId, setSelectedRowId] = React.useState<number | null>(null);
     const [isModalOpen, setModalOpen] = React.useState(false);
-    const [selectedSemester, setSelectedSemester] = React.useState<Semester | null>(null);
+    const [selectedSubject, setSelectedSubject] = React.useState<Subject | null>(null);
     const [isAdding, setIsAdding] = React.useState(false);
 
     useEffect(() => {
-        dispatch(fetchSemesters());
+        dispatch(fetchSubject());
     }, [dispatch]);
 
     const handleViewClick = (id: number) => () => {
-        const semester = semesters.find((s) => s.id === id);
-        if (semester) {
-            setSelectedSemester(semester);
+        const subject = subjects.find((s) => s.subject_id === id);
+        if (subject) {
+            setSelectedSubject(subject);
             setIsAdding(false);
             setModalOpen(true);
         }
@@ -45,23 +45,29 @@ const Semesters: React.FC = () => {
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteSemester(selectedRowId));
+            dispatch(deleteSubject(selectedRowId));
         }
         setDialogOpen(false);
         setSelectedRowId(null);
     };
 
     const handleAddClick = () => {
-        setSelectedSemester(null);
+        setSelectedSubject(null);
         setIsAdding(true);
         setModalOpen(true);
     };
 
     const columns: GridColDef[] = [
         {
-            field: 'number',
-            headerName: 'Oznaczenie',
+            field: 'name',
+            headerName: 'Nazwa',
             width: 150,
+        },
+        {
+            field:  'language',
+            headerName: 'Język',
+            width: 150,
+            valueGetter: (params) => languageMapping[params as Language],
         },
         {
             field: 'actions',
@@ -87,7 +93,7 @@ const Semesters: React.FC = () => {
     const TopToolbar = () => (
         <GridToolbarContainer>
             <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
-                Dodaj semestr
+                Dodaj slot dnia
             </Button>
             <GridToolbar />
         </GridToolbarContainer>
@@ -96,7 +102,7 @@ const Semesters: React.FC = () => {
     return (
         <>
             <DataGrid
-                rows={semesters}
+                rows={subjects}
                 columns={columns}
                 loading={loading}
                 localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
@@ -106,14 +112,14 @@ const Semesters: React.FC = () => {
                 open={isDialogOpen}
                 onClose={handleDialogClose}
                 title="Potwierdzenie"
-                content="Czy na pewno chcesz usunąć ten semestr?"
+                content="Czy na pewno chcesz usunąć ten slot dnia?"
                 action="Potwierdź"
             />
             {isModalOpen && (
-                <SemesterModal
+                <SubjectModal
                     open={isModalOpen}
                     onClose={() => setModalOpen(false)}
-                    semester={selectedSemester}
+                    subject={selectedSubject}
                     isAdding={isAdding}
                 />
             )}
@@ -121,4 +127,5 @@ const Semesters: React.FC = () => {
         </>
     );
 };
-export default Semesters;
+
+export default Subjects;

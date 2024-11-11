@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
     SLOTS: `${API_BASE}/slots`,
     SLOTS_DAYS: `${API_BASE}/SlotsDays`,
     SEMESTERS: `${API_BASE}/semesters`,
+    SUBJECT: `${API_BASE}/subjects`,
 };
 
 export default API_ENDPOINTS;

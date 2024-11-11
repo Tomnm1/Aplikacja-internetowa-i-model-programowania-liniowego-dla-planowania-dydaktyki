@@ -15,6 +15,7 @@ import ProtectedRoute from "./ProtectedRoute.tsx";
 import Login from "./Login.tsx";
 import SlotsDays from "./SlotsDays.tsx";
 import Semesters from "./Semesters.tsx";
+import Subjects from "./Subjects.tsx";
 
 //https://blog.logrocket.com/authentication-react-router-v6/
 
@@ -110,6 +111,14 @@ const App: React.FC = () => {
                         element={
                             <ProtectedRoute allowedRoles={['admin']}>
                                 <Semesters />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/subjects"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Subjects />
                             </ProtectedRoute>
                         }
                     />

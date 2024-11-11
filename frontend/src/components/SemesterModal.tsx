@@ -102,7 +102,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                             <DialogContent>
                                 {isAdding ? (
                                     <FormControl fullWidth margin="normal" disabled={loading}>
-                                        <InputLabel id="semester-label">Slot</InputLabel>
+                                        <InputLabel id="semester-label">Specjalizacja</InputLabel>
                                         <Select
                                             labelId="slot-label"
                                             value={formData.specialisationId}
@@ -156,5 +156,4 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
         </Dialog>
     );
 };
-
 export default SemesterModal;

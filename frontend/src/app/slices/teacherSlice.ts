@@ -1,13 +1,9 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { GridRowId, GridRowModesModel } from '@mui/x-data-grid';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_ENDPOINTS } from '../urls';
-import { Teacher, TeachersState, BackendTeacher, SubjectType } from "../../utils/Interfaces.ts";
+import {Teacher, TeachersState, BackendTeacher} from "../../utils/Interfaces";
 
 const initialState: TeachersState = {
     rows: [],
-    rowModesModel: {},
-    selectedRowId: null,
-    selectedRowName: null,
     loading: false,
     error: null,
 };
@@ -18,22 +14,18 @@ export const fetchTeachers = createAsyncThunk<Teacher[]>('teachers/fetchTeachers
         throw new Error('Network response was not ok');
     }
     const data: BackendTeacher[] = await response.json();
-    const adjustedData: Teacher[] = data.map(teacher => ({
+    return  data.map(teacher => ({
         ...teacher,
-        subjectTypesList: teacher.subjectTypesList.map(st => st.id),
+        id: teacher.id!,
     }));
-    return adjustedData;
 });
 
-export const addTeacher = createAsyncThunk<{ tempId: GridRowId; teacher: Teacher }, Teacher>(
+export const addTeacher = createAsyncThunk<Teacher, BackendTeacher>(
     'teachers/addTeacher',
-    async (teacher: Teacher) => {
+    async (teacher) => {
         const teacherData = {
-            firstName: teacher.firstName,
-            lastName: teacher.lastName,
-            degree: teacher.degree,
+            ...teacher,
             preferences: teacher.preferences || {},
-            subjectTypesList: (teacher.subjectTypesList || []).map(id => ({ id } as SubjectType)),
         };
         const response = await fetch(API_ENDPOINTS.TEACHERS, {
             method: 'POST',
@@ -48,23 +40,16 @@ export const addTeacher = createAsyncThunk<{ tempId: GridRowId; teacher: Teacher
         const data: BackendTeacher = await response.json();
         const adjustedTeacher: Teacher = {
             ...data,
-            subjectTypesList: data.subjectTypesList.map(st => st.id),
+            id: teacher.id!,
         };
-        return { tempId: teacher.id, teacher: adjustedTeacher };
+        return adjustedTeacher;
     },
 );
 
-export const updateTeacher = createAsyncThunk<Teacher, Teacher>(
+export const updateTeacher = createAsyncThunk<Teacher, BackendTeacher>(
     'teachers/updateTeacher',
-    async (teacher: Teacher) => {
-        const teacherData = {
-            firstName: teacher.firstName,
-            lastName: teacher.lastName,
-            degree: teacher.degree,
-            preferences: teacher.preferences || {},
-            subjectTypesList: (teacher.subjectTypesList || []).map(id => ({ id } as SubjectType)),
-        };
-        const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${teacher.id}`, {
+    async (teacherData) => {
+        const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${teacherData.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -77,15 +62,15 @@ export const updateTeacher = createAsyncThunk<Teacher, Teacher>(
         const data: BackendTeacher = await response.json();
         const adjustedTeacher: Teacher = {
             ...data,
-            subjectTypesList: data.subjectTypesList.map(st => st.id),
+            id: data.id!,
         };
         return adjustedTeacher;
     },
 );
 
-export const deleteTeacher = createAsyncThunk<GridRowId, GridRowId>(
+export const deleteTeacher = createAsyncThunk<number, number>(
     'teachers/deleteTeacher',
-    async (id: GridRowId) => {
+    async (id: number) => {
         const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${id}`, {
             method: 'DELETE',
         });
@@ -99,32 +84,14 @@ export const deleteTeacher = createAsyncThunk<GridRowId, GridRowId>(
 const teacherSlice = createSlice({
     name: 'teachers',
     initialState,
-    reducers: {
-        setRowModesModel: (state, action: PayloadAction<GridRowModesModel>) => {
-            state.rowModesModel = action.payload;
-        },
-        setSelectedRow: (state, action: PayloadAction<{ id: GridRowId; name: string }>) => {
-            state.selectedRowId = action.payload.id;
-            state.selectedRowName = action.payload.name;
-        },
-        clearSelectedRow: (state) => {
-            state.selectedRowId = null;
-            state.selectedRowName = null;
-        },
-        addNewTeacher: (state, action: PayloadAction<Teacher>) => {
-            state.rows.push(action.payload);
-        },
-        removeNewTeacher: (state, action: PayloadAction<GridRowId>) => {
-            state.rows = state.rows.filter((row) => row.id !== action.payload);
-        },
-    },
+    reducers: {},
     extraReducers: (builder) => {
         builder
             .addCase(fetchTeachers.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchTeachers.fulfilled, (state, action: PayloadAction<Teacher[]>) => {
+            .addCase(fetchTeachers.fulfilled, (state, action) => {
                 state.loading = false;
                 state.rows = action.payload;
             })
@@ -133,46 +100,19 @@ const teacherSlice = createSlice({
                 state.error = action.error.message || 'Failed to fetch teachers';
             })
             .addCase(addTeacher.fulfilled, (state, action) => {
-                const { tempId, teacher } = action.payload;
-                const index = state.rows.findIndex((row) => row.id === tempId);
-                if (index !== -1) {
-                    state.rows[index] = teacher;
-                } else {
-                    state.rows.push(teacher);
-                }
-                if (state.rowModesModel[tempId]) {
-                    state.rowModesModel[teacher.id] = state.rowModesModel[tempId];
-                    delete state.rowModesModel[tempId];
-                }
+                state.rows.push(action.payload);
             })
-            .addCase(addTeacher.rejected, (state, action) => {
-                state.error = action.error.message || 'Failed to add teacher';
-            })
-            .addCase(updateTeacher.fulfilled, (state, action: PayloadAction<Teacher>) => {
+            .addCase(updateTeacher.fulfilled, (state, action) => {
                 const updatedTeacher = action.payload;
                 const index = state.rows.findIndex((row) => row.id === updatedTeacher.id);
                 if (index !== -1) {
                     state.rows[index] = updatedTeacher;
                 }
             })
-            .addCase(updateTeacher.rejected, (state, action) => {
-                state.error = action.error.message || 'Failed to update teacher';
-            })
-            .addCase(deleteTeacher.fulfilled, (state, action: PayloadAction<GridRowId>) => {
+            .addCase(deleteTeacher.fulfilled, (state, action) => {
                 state.rows = state.rows.filter((row) => row.id !== action.payload);
-            })
-            .addCase(deleteTeacher.rejected, (state, action) => {
-                state.error = action.error.message || 'Failed to delete teacher';
             });
     },
 });
-
-export const {
-    setRowModesModel,
-    setSelectedRow,
-    clearSelectedRow,
-    addNewTeacher,
-    removeNewTeacher,
-} = teacherSlice.actions;
 
 export default teacherSlice.reducer;
