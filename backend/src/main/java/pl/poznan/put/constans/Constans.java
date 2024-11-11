@@ -47,7 +47,7 @@ public final class Constans {
 
     public static class EnumUtils {
         public interface DisplayName {
-            String getDisplayName();
+           String getDisplayName();
         }
         public static <E extends Enum<E> & DisplayName> E fromString(Class<E> enumType, String label) {
             for (E enumConstant : enumType.getEnumConstants()) {
