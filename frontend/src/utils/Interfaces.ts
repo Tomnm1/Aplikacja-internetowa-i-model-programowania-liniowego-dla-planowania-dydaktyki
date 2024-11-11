@@ -30,9 +30,18 @@ export enum Day {
     THURSDAY = 'thursday',
     FRIDAY = 'friday',
     SATURDAY = 'saturday',
-    SUNDAY = 'sunday ',
+    SUNDAY = 'sunday',
 }
 
+export enum Language {
+    POLSKI = 'polski',
+    ANGIELSKI = 'angielski',
+}
+
+export const languageMapping: { [key in Language] : string} = {
+    [Language.ANGIELSKI]: 'angielski',
+    [Language.POLSKI]: 'polski',
+}
 export const dayMapping: { [key in Day]: string } = {
     [Day.MONDAY]: 'Poniedziałek',
     [Day.TUESDAY]: 'Wtorek',
@@ -95,7 +104,7 @@ export interface SubjectType {
 }
 
 export interface BackendTeacher {
-    id: number;
+    id?: number;
     firstName: string;
     lastName: string;
     degree: string;
@@ -104,20 +113,16 @@ export interface BackendTeacher {
 }
 
 export interface Teacher {
-    id: GridRowId;
+    id: number;
     firstName: string;
     lastName: string;
     degree: string;
     preferences: { [key: string]: string };
-    subjectTypesList: number[];
-    isNew?: boolean;
+    subjectTypesList: SubjectType[];
 }
 
 export interface TeachersState {
     rows: Teacher[];
-    rowModesModel: GridRowModesModel;
-    selectedRowId: GridRowId | null;
-    selectedRowName: string | null;
     loading: boolean;
     error: string | null;
 }
@@ -204,7 +209,6 @@ export interface BackendSpecialisation {
 
 export type LocalTime = string;
 
-
 export interface Slot {
     slot_id: GridRowId;
     start_time: LocalTime;
@@ -251,3 +255,48 @@ export interface SlotsDayState {
     error: string | null;
 }
 
+export interface Semester {
+    id: number;
+    number: string;
+    specialisationId: number;
+}
+
+export interface BackendSemester {
+    semesterId?: number;
+    number: string;
+    specialisation: {
+        specialisationId: number;
+    };
+}
+
+export interface SemesterState {
+    rows: Semester[];
+    loading: boolean;
+    error: string | null;
+}
+
+export interface Subject {
+    subject_id: number;
+    name: string;
+    language: Language;
+    exam: boolean;
+    mandatory: boolean;
+    planned: boolean;
+    semester: BackendSemester;
+}
+
+export interface BackendSubject {
+    subject_id?: number;
+    name: string;
+    language: Language;
+    exam: boolean;
+    mandatory: boolean;
+    planned: boolean;
+    semester: BackendSemester;
+}
+
+export interface SubjectState {
+    rows: Subject[];
+    loading: boolean;
+    error: string | null;
+}

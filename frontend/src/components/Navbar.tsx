@@ -81,6 +81,18 @@ const routes: RouteItem[] = [
         roles: ['admin'],
     },
     {
+        name: "Semestry",
+        link: "/semesters",
+        icon: <AddToPhotosIcon />,
+        roles: ['admin'],
+    },
+    {
+        name: "Przedmioty",
+        link: "/subjects",
+        icon: <AddToPhotosIcon />,
+        roles: ['admin'],
+    },
+    {
         name: "User Test",
         link: "/usertest",
         icon: <BadgeIcon />,
@@ -116,7 +128,9 @@ const Navbar: React.FC = () => {
 
     return (
         <nav className="bg-gray-100 px-5 pt-8 z-50">
-            <h2 className="font-semibold pb-6 flex flex-row items-center gap-4">
+            <h2 className={`font-semibold pb-6 flex items-center gap-4 ${
+                showMenu ? 'justify-start' : 'justify-center'
+            }`}>
                 <div
                     className="block text-gray-800 focus:outline-none cursor-pointer px-1"
                     onClick={handleMenuToggle}
