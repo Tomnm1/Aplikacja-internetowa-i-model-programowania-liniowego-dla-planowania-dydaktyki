@@ -156,5 +156,4 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
         </Dialog>
     );
 };
-
 export default SemesterModal;

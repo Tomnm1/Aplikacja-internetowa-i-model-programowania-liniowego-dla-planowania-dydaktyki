@@ -121,5 +121,4 @@ const Semesters: React.FC = () => {
         </>
     );
 };
-
 export default Semesters;
