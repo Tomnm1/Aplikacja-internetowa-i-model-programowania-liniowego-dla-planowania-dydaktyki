@@ -10,7 +10,7 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import { RootState, AppDispatch } from '../app/store';
-import {Language, languageMapping, Subject} from '../utils/Interfaces';
+import {BackendSemester, cycleMapping, Language, languageMapping, Subject} from '../utils/Interfaces';
 import { plPL } from '@mui/x-data-grid/locales';
 import { deleteSubject, fetchSubject } from "../app/slices/subjectSlice.ts";
 import SubjectModal from "./SubjectModal.tsx";
@@ -61,13 +61,55 @@ const Subjects: React.FC = () => {
         {
             field: 'name',
             headerName: 'Nazwa',
+            width: 300,
+        },
+        {
+            field: 'semester',
+            headerName: 'Semestr',
+            width: 100,
+            valueGetter: (value:BackendSemester) => value.number,
+        },
+        {
+            field: 'specialisation',
+            headerName: 'Specjalizacja',
+            width: 100,
+            valueGetter: (_value,row) => row.semester.specialisation.name || '',
+        },
+        {
+            field: 'fieldOfStudy',
+            headerName: 'Kierunek',
             width: 150,
+            valueGetter: (_value,row) => row.semester.specialisation?.fieldOfStudy?.name || '',
+        },
+        {
+            field: 'Cicle',
+            headerName: 'Cykl',
+            width: 100,
+            valueGetter: (_value,row:Subject) => cycleMapping[row.semester.specialisation?.cycle] || row.semester.specialisation?.cycle,
         },
         {
             field:  'language',
             headerName: 'Język',
-            width: 150,
+            width: 100,
             valueGetter: (params) => languageMapping[params as Language],
+        },
+        {
+            field:  'exam',
+            headerName: 'Egzamin',
+            type: 'boolean',
+            width: 100,
+        },
+        {
+            field:  'mandatory',
+            headerName: 'Obowiązkowy',
+            type: 'boolean',
+            width: 100,
+        },
+        {
+            field:  'planned',
+            headerName: 'Planowany',
+            type: 'boolean',
+            width: 100,
         },
         {
             field: 'actions',
@@ -92,10 +134,11 @@ const Subjects: React.FC = () => {
 
     const TopToolbar = () => (
         <GridToolbarContainer>
-            <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
-                Dodaj slot dnia
+            <Button color="primary" startIcon={<AddIcon/>} onClick={handleAddClick}>
+                Dodaj przedmiot
             </Button>
-            <GridToolbar />
+            <div style={{flexGrow: 1}}/>
+            <GridToolbar/>
         </GridToolbarContainer>
     );
 

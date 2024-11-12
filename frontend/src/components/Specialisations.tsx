@@ -18,7 +18,7 @@ import {
     fetchSpecialisations,
     deleteSpecialisation,
 } from '../app/slices/specialisationSlice';
-import {Cycle, Specialisation} from '../utils/Interfaces';
+import { cycleMapping, Specialisation} from '../utils/Interfaces';
 import { plPL } from '@mui/x-data-grid/locales';
 
 const Specialisations: React.FC = () => {
@@ -36,11 +36,6 @@ const Specialisations: React.FC = () => {
     useEffect(() => {
         dispatch(fetchSpecialisations());
     }, [dispatch]);
-
-    const cycleMapping: { [key in Cycle]: string } = {
-        [Cycle.FIRST]: 'Pierwszy',
-        [Cycle.SECOND]: 'Drugi',
-    };
 
     const handleViewClick = (id: number) => () => {
         const specialisation = specialisations.find((spec) => spec.id === id);

@@ -7,7 +7,7 @@ import {
 import CheckIcon from '@mui/icons-material/Check';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../app/store';
-import { BackendSpecialisation, Semester} from '../utils/Interfaces';
+import {BackendSpecialisation, cycleMapping, Semester} from '../utils/Interfaces';
 import SaveButton from '../utils/SaveButton';
 import { green } from "@mui/material/colors";
 import CancelButton from "../utils/CancelButton";
@@ -114,7 +114,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                                         >
                                             {specialisations.map((specialisation) => (
                                                 <MenuItem key={specialisation.specialisationId} value={specialisation!.specialisationId!.toString()}>
-                                                    {specialisation.name}
+                                                    {`${specialisation.name} (${specialisation.fieldOfStudy.name} - ${cycleMapping[specialisation.cycle] || specialisation.cycle})`}
                                                 </MenuItem>
                                             ))}
                                         </Select>

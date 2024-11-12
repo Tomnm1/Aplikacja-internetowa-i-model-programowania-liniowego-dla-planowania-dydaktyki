@@ -10,7 +10,7 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import { RootState, AppDispatch } from '../app/store';
-import { Semester} from '../utils/Interfaces';
+import {cycleMapping, Semester} from '../utils/Interfaces';
 import { plPL } from '@mui/x-data-grid/locales';
 import {deleteSemester, fetchSemesters} from "../app/slices/semesterSlice.ts";
 import SemesterModal from "./SemesterModal.tsx";
@@ -66,7 +66,18 @@ const Semesters: React.FC = () => {
         {
             field: 'specialisationRepresentation',
             headerName: 'Specjalizacja',
-            width: 250,
+            width: 100,
+        },
+        {
+            field: 'fieldOfStudyName',
+            headerName: 'Kierunek',
+            width: 150,
+        },
+        {
+            field: 'cycle',
+            headerName: 'Cykl',
+            width: 100,
+            valueGetter: (value) => cycleMapping[value] || value,
         },
         {
             field: 'actions',
@@ -91,10 +102,11 @@ const Semesters: React.FC = () => {
 
     const TopToolbar = () => (
         <GridToolbarContainer>
-            <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
+            <Button color="primary" startIcon={<AddIcon/>} onClick={handleAddClick}>
                 Dodaj semestr
             </Button>
-            <GridToolbar />
+            <div style={{flexGrow: 1}}/>
+            <GridToolbar/>
         </GridToolbarContainer>
     );
 
