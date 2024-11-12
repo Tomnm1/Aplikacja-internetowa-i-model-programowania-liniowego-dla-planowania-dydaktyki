@@ -7,7 +7,7 @@ import {
 import CheckIcon from '@mui/icons-material/Check';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../app/store';
-import { Subject, BackendSubject, Language, languageMapping, BackendSemester } from '../utils/Interfaces';
+import {Subject, BackendSubject, Language, languageMapping, BackendSemester, cycleMapping} from '../utils/Interfaces';
 import SaveButton from '../utils/SaveButton';
 import { green } from "@mui/material/colors";
 import CancelButton from "../utils/CancelButton";
@@ -147,7 +147,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
                                     >
                                         {semesters.map((semester) => (
                                             <MenuItem key={semester.semesterId} value={semester.semesterId?.toString()}>
-                                                {semester.number}
+                                                {`${semester.number} - (${semester.specialisation.name} - ${semester.specialisation.fieldOfStudy?.name} - ${cycleMapping[semester.specialisation.cycle] || semester.specialisation.cycle})`}
                                             </MenuItem>
                                         ))}
                                     </Select>

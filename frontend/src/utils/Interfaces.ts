@@ -38,6 +38,11 @@ export enum Language {
     ANGIELSKI = 'angielski',
 }
 
+export const cycleMapping: { [key in Cycle]: string } = {
+    [Cycle.FIRST]: 'Pierwszy',
+    [Cycle.SECOND]: 'Drugi',
+};
+
 export const languageMapping: { [key in Language] : string} = {
     [Language.ANGIELSKI]: 'angielski',
     [Language.POLSKI]: 'polski',
@@ -260,6 +265,8 @@ export interface Semester {
     number: string;
     specialisationId: number;
     specialisationRepresentation?: string;
+    fieldOfStudyName?: string;
+    cycle?:Cycle;
 }
 
 export interface BackendSemester {
@@ -268,6 +275,10 @@ export interface BackendSemester {
     specialisation: {
         specialisationId: number;
         name?: string;
+        cycle: Cycle;
+        fieldOfStudy?:{
+            name?:string;
+        }
     };
 }
 

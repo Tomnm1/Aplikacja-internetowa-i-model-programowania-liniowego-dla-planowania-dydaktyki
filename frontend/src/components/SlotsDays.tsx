@@ -88,10 +88,11 @@ const SlotsDays: React.FC = () => {
 
     const TopToolbar = () => (
         <GridToolbarContainer>
-            <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
+            <Button color="primary" startIcon={<AddIcon/>} onClick={handleAddClick}>
                 Dodaj slot dnia
             </Button>
-            <GridToolbar />
+            <div style={{flexGrow: 1}}/>
+            <GridToolbar/>
         </GridToolbarContainer>
     );
 
