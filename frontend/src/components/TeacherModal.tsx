@@ -36,7 +36,7 @@ const TeacherModal: React.FC<TeacherModalProps> = ({ open, onClose, teacher, isA
     const [success, setSuccess] = useState<boolean>(false);
 
     useEffect(() => {
-        fetch(API_ENDPOINTS.SUBJECT_TYPES)
+        fetch(API_ENDPOINTS.SUBJECT_TYPE)
             .then((res) => res.json())
             .then((data: SubjectType[]) => setSubjectTypes(data))
             .catch((err) => console.error('Failed to fetch subject types', err));

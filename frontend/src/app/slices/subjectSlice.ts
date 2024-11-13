@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_ENDPOINTS } from '../urls';
-import { Subject, SubjectState, BackendSubject } from '../../utils/Interfaces';
+import {Subject, SubjectState, BackendSubject, BackendSemester} from '../../utils/Interfaces';
 
 const initialState: SubjectState = {
     rows: [],
@@ -16,6 +16,7 @@ export const fetchSubject = createAsyncThunk<Subject[]>('subject/fetchSubjects',
     const data: BackendSubject[] = await response.json();
     return data.map((subject) => ({
         ...subject,
+        // TODO: to naprawia TSa, ale z serii what if - będziemy mieć tylko IDka?
         SubjectId: subject.SubjectId!,
     }));
 });
@@ -34,7 +35,9 @@ export const addSubject = createAsyncThunk<Subject, BackendSubject>(
         const data: BackendSubject = await response.json();
         return {
             ...data,
+            //TODO
             SubjectId: data.SubjectId!,
+            semester: data.semester as BackendSemester
         };
     }
 );
@@ -57,6 +60,8 @@ export const updateSubject = createAsyncThunk<Subject, BackendSubject>(
         return {
             ...data,
             SubjectId: data.SubjectId!,
+            //TODO
+            semester: subjectData.semester!,
         };
     }
 );

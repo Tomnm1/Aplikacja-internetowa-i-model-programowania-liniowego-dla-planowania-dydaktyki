@@ -1,5 +1,6 @@
 package pl.poznan.put.planner_endpoints.SubjectType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -27,7 +28,9 @@ public class SubjectType {
     @Column(name = "max_students")
     public Integer maxStudentsPerGroup;
     @ManyToMany(mappedBy = "subjectTypesList")
+    @JsonIgnore
     public List<Group> groupsList;
     @ManyToMany(mappedBy = "subjectTypesList")
+    @JsonIgnore
     public List<Teacher> teachersList;
 }

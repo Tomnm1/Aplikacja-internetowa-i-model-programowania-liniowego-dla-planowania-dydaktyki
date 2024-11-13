@@ -14,6 +14,7 @@ import {BackendSemester, cycleMapping, Language, languageMapping, Subject} from 
 import { plPL } from '@mui/x-data-grid/locales';
 import { deleteSubject, fetchSubject } from "../app/slices/subjectSlice.ts";
 import SubjectModal from "./SubjectModal.tsx";
+import {useSnackbar} from "notistack";
 
 const Subjects: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -24,10 +25,14 @@ const Subjects: React.FC = () => {
     const [isModalOpen, setModalOpen] = React.useState(false);
     const [selectedSubject, setSelectedSubject] = React.useState<Subject | null>(null);
     const [isAdding, setIsAdding] = React.useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
-        dispatch(fetchSubject());
-    }, [dispatch]);
+        dispatch(fetchSubject()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania przedmiotów: ${error.message}`, { variant: 'error' });
+        });
+    }, [dispatch, enqueueSnackbar]);
+
 
     const handleViewClick = (id: number) => () => {
         const subject = subjects.find((s) => s.SubjectId === id);
@@ -45,11 +50,19 @@ const Subjects: React.FC = () => {
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteSubject(selectedRowId));
+            dispatch(deleteSubject(selectedRowId))
+                .unwrap()
+                .then(() => {
+                    enqueueSnackbar('Przedmiot został pomyślnie usunięty', { variant: 'success' });
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas usuwania przedmiotu: ${error.message}`, { variant: 'error' });
+                });
         }
         setDialogOpen(false);
         setSelectedRowId(null);
     };
+
 
     const handleAddClick = () => {
         setSelectedSubject(null);
@@ -62,6 +75,7 @@ const Subjects: React.FC = () => {
             field: 'name',
             headerName: 'Nazwa',
             width: 300,
+            valueGetter: (_value,row) => row?.name || "NIE MA",
         },
         {
             field: 'semester',
@@ -69,12 +83,13 @@ const Subjects: React.FC = () => {
             width: 100,
             valueGetter: (value:BackendSemester) => value.number,
         },
-        {
-            field: 'specialisation',
-            headerName: 'Specjalizacja',
-            width: 100,
-            valueGetter: (_value,row) => row.semester.specialisation.name || '',
-        },
+        //TODO specialisation wywala, ale dlaczego?
+        // {
+        //     field: 'specialisation',
+        //     headerName: 'Specjalizacja',
+        //     width: 100,
+        //     valueGetter: (_value,row) => row.semester.specialisation.name || '',
+        // },
         {
             field: 'fieldOfStudy',
             headerName: 'Kierunek',
