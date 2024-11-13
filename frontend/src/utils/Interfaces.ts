@@ -23,6 +23,7 @@ export enum Cycle {
     SECOND = 'second',
 }
 
+
 export enum Day {
     MONDAY = 'monday',
     TUESDAY = 'tuesday',
@@ -63,6 +64,13 @@ export const dayMapping: { [key in Day]: string } = {
     [Day.SATURDAY]: 'Sobota',
     [Day.SUNDAY]: 'Niedziela',
 };
+
+export const typeMapping: { [key in Type]: string} = {
+    [Type.LECTURE]: 'Wykład',
+    [Type.EX]: 'Ćwiczenia',
+    [Type.LAB]: 'Laboratoria',
+    [Type.PROJECT]: 'Projekt',
+}
 
 export interface ClassroomRow {
     id: GridRowId;
@@ -307,7 +315,7 @@ export interface BackendSubject {
     exam: boolean;
     mandatory: boolean;
     planned: boolean;
-    semester: BackendSemester;
+    semester: BackendSemester | {semesterId : number};
 }
 
 export interface SubjectState {
@@ -329,7 +337,7 @@ export interface BackendSubjectType {
     numOfHours: number;
     type: Type;
     maxStudentsPerGroup: number;
-    subject: BackendSubject;
+    subject: BackendSubject | { SubjectId: number };
 }
 
 export interface SubjectTypeState {
