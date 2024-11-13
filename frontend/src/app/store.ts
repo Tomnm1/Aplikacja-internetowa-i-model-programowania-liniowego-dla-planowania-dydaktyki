@@ -9,6 +9,7 @@ import slotsReducer from './slices/slotsSlice.ts';
 import slotsDayReducer from './slices/slotsDaysSlice.ts';
 import semestersReducer from './slices/semesterSlice.ts';
 import subjectReducer from './slices/subjectSlice.ts'
+import subjectTypeReducer from './slices/subjectTypeSlice.ts'
 
 export const store = configureStore({
     reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
         slotsDays: slotsDayReducer,
         semesters: semestersReducer,
         subjects: subjectReducer,
+        subjectsTypes: subjectTypeReducer,
     },
 });
 

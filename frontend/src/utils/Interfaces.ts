@@ -38,6 +38,13 @@ export enum Language {
     ANGIELSKI = 'angielski',
 }
 
+export enum Type {
+    LECTURE = 'wykład',
+    EX = 'ćwiczenia',
+    LAB = 'laboratoria',
+    PROJECT = 'projekt',
+}
+
 export const cycleMapping: { [key in Cycle]: string } = {
     [Cycle.FIRST]: 'Pierwszy',
     [Cycle.SECOND]: 'Drugi',
@@ -101,11 +108,6 @@ export interface CalendarViewProps {
     rooms: Room[];
     hours: Hour[];
     schedules: Schedule[];
-}
-
-export interface SubjectType {
-    id: number;
-    name: string;
 }
 
 export interface BackendTeacher {
@@ -310,6 +312,28 @@ export interface BackendSubject {
 
 export interface SubjectState {
     rows: Subject[];
+    loading: boolean;
+    error: string | null;
+}
+
+export interface SubjectType {
+    subjectTypeId: number;
+    numOfHours: number;
+    type: Type;
+    maxStudentsPerGroup: number;
+    subject: BackendSubject;
+}
+
+export interface BackendSubjectType {
+    subjectTypeId?: number;
+    numOfHours: number;
+    type: Type;
+    maxStudentsPerGroup: number;
+    subject: BackendSubject;
+}
+
+export interface SubjectTypeState {
+    rows: SubjectType[];
     loading: boolean;
     error: string | null;
 }
