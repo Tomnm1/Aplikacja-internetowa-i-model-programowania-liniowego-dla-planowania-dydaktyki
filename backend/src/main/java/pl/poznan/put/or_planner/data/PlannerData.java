@@ -1,6 +1,7 @@
 package pl.poznan.put.or_planner.data;
 
 import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
+import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
 
 import java.util.List;
 
@@ -10,6 +11,15 @@ public class PlannerData {
     private List<String> rooms;
     private List<String> timeSlots;
     private List<PlannerSubject> subjects;
+    private List<TeacherLoad> teachersLoad;
+
+    public List<TeacherLoad> getTeachersLoad() {
+        return teachersLoad;
+    }
+
+    public void setTeachersLoad(List<TeacherLoad> teachersLoad) {
+        this.teachersLoad = teachersLoad;
+    }
 
     public List<String> getGroups() {
         return groups;

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.poznan.put.or_planner.Planner;
 import pl.poznan.put.or_planner.data.PlannerData;
 import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
+import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
 import pl.poznan.put.or_planner.insert.InsertPlanToDbService;
 import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
@@ -37,8 +38,9 @@ public class PlannerController {
             List<String> rooms = plannerData.getRooms();
             List<String> timeSlots = plannerData.getTimeSlots();
             List<PlannerSubject> subjects = plannerData.getSubjects();
+            List<TeacherLoad> teachersLoad = plannerData.getTeachersLoad();
 
-            Planner planner = new Planner(groups, teachers, rooms, timeSlots, subjects);
+            Planner planner = new Planner(groups, teachers, rooms, timeSlots, subjects, teachersLoad);
 
             List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
 
