@@ -11,7 +11,7 @@ public class PlannerClassType {
     private Map<String, List<String>> groupMappings;
 
     public PlannerClassType
-            (String type, String frequency, List<String> rooms, List<String> teachers, List<String> assignedGroups,
+            (String type, String frequency, List<String> rooms, List<String> teachers,
              Map<String, List<String>> groupMappings) {
         this.type = type;
         this.frequency = frequency;

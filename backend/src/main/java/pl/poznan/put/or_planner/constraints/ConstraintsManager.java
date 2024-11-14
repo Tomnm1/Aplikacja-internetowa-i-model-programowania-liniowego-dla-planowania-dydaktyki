@@ -4,6 +4,8 @@ import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
+import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
+import pl.poznan.put.or_planner.data.helpers.TeacherLoadSubject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,8 @@ public class ConstraintsManager {
     private final List<String> rooms;
     private final List<String> timeSlots;
     private final List<PlannerSubject> subjects;
+    private final List<TeacherLoad> teacherLoadList;
+    private final List<String> subjectNames;
 
     private final int numGroups;
     private final int numRooms;
@@ -31,13 +35,14 @@ public class ConstraintsManager {
 
 
     public ConstraintsManager(MPSolver solver, List<String> groups, List<String> teachers, List<String> rooms, List<String> timeSlots,
-                              List<PlannerSubject> subjects) {
+                              List<PlannerSubject> subjects, List<TeacherLoad> teacherLoadList) {
         this.solver = solver;
         this.groups = groups;
         this.teachers = teachers;
         this.rooms = rooms;
         this.timeSlots = timeSlots;
         this.subjects = subjects;
+        this.teacherLoadList = teacherLoadList;
 
         this.numGroups = groups.size();
         this.numSubjects = subjects.size();
@@ -51,6 +56,11 @@ public class ConstraintsManager {
         for (String slot : timeSlots) {
             evenTimeSlots.add(slot + "_even");
             oddTimeSlots.add(slot + "_odd");
+        }
+
+        this.subjectNames = new ArrayList<>();
+        for(PlannerSubject subject: this.subjects){
+            this.subjectNames.add(subject.getName());
         }
     }
 
@@ -209,6 +219,30 @@ public class ConstraintsManager {
                 ConstraintBuilder groupOddConstraint = new ConstraintBuilder(solver, "GroupOddConstraint_" + group, 0, 1);
 
                 iterateAllRoomsTeachersSubjects(groupEvenConstraint, groupOddConstraint, xEven, xOdd, 1, group, time, WEEKLY);
+            }
+        }
+    }
+
+    public void teachersLoadConstraint(MPVariable[][][][][] xEven, MPVariable[][][][][] xOdd){
+        for(TeacherLoad teacherLoad: this.teacherLoadList){
+            int teacherIndex = this.teachers.indexOf(teacherLoad.getTeacher());
+            for(TeacherLoadSubject teacherLoadSubject: teacherLoad.getTeacherLoadSubjectList()){
+                int subjectIndex = this.subjectNames.indexOf(teacherLoadSubject.getName());
+                int maxGroups = Integer.parseInt(teacherLoadSubject.getMaxGroups());
+                List<String> groups = teacherLoadSubject.getGroups();
+                List<Integer> groupsIndices = groups.stream()
+                        .map(this.groups::indexOf)
+                        .toList();
+                ConstraintBuilder teacherLoadEvenConstraint = new ConstraintBuilder(solver, "teacherLoadEvenConstraint", 0, maxGroups);
+                ConstraintBuilder teacherLoadOddConstraint = new ConstraintBuilder(solver, "teacherLoadEvenConstraint", 0, maxGroups);
+                for(int group: groupsIndices){
+                    for(int t = 0; t < numTimeSlots; ++t){
+                        for(int s = 0; s < numRooms; ++s){
+                            teacherLoadOddConstraint.setCoefficient(xOdd[group][s][t][subjectIndex][teacherIndex], 1);
+                            teacherLoadEvenConstraint.setCoefficient(xEven[group][s][t][subjectIndex][teacherIndex], 1);
+                        }
+                    }
+                }
             }
         }
     }
