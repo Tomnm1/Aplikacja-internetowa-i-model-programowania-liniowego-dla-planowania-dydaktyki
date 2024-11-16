@@ -4,41 +4,39 @@ import {
     Box, Checkbox, FormControlLabel
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
-import {Language, BackendSemester, languageMapping} from '../utils/Interfaces';
+import {Language, BackendSemester, languageMapping, Subject, cycleMapping} from '../utils/Interfaces';
 
 interface SubjectDetailsProps {
     formData: {
-        //TODO do przemyślenia czy na pewno string | number;
-        id: string | number;
+        SubjectId: number;
         name: string;
         language: Language;
         exam: boolean;
         mandatory: boolean;
         planned: boolean;
-        semesterId: string;
+        semester:BackendSemester | {semesterId: string  | number};
     };
-    setFormData: React.Dispatch<React.SetStateAction<any>>;
+    setFormData: React.Dispatch<React.SetStateAction<Subject>>;
     semesters: BackendSemester[];
     loading: boolean;
 }
 
 const SubjectDetails: React.FC<SubjectDetailsProps> = ({ formData, setFormData, semesters, loading }) => {
-    //TODO: poprawić 4x typ any
     const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData((prev: any) => ({ ...prev, name: event.target.value }));
+        setFormData((prev) => ({ ...prev, name: event.target.value }));
     };
 
     const handleLanguageChange = (event: SelectChangeEvent) => {
-        setFormData((prev: any) => ({ ...prev, language: event.target.value as Language }));
+        setFormData((prev) => ({ ...prev, language: event.target.value as Language }));
     };
 
     const handleSemesterChange = (event: SelectChangeEvent) => {
-        setFormData((prev: any) => ({ ...prev, semesterId: event.target.value }));
+        setFormData((prev) => ({ ...prev, semesterId: event.target.value }));
     };
 
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = event.target;
-        setFormData((prev: any) => ({ ...prev, [name]: checked }));
+        setFormData((prev) => ({ ...prev, [name]: checked }));
     };
 
     return (
@@ -72,14 +70,13 @@ const SubjectDetails: React.FC<SubjectDetailsProps> = ({ formData, setFormData, 
                 {/*TODO rozważyć/dostosować z Select na Autocomplete*/}
                 <Select
                     labelId="semester-label"
-                    value={formData.semesterId}
+                    value={formData.semester.semesterId!.toString()}
                     onChange={handleSemesterChange}
                     label="Semestr"
                 >
                     {semesters.map((semester) => (
                         <MenuItem key={semester.semesterId} value={semester.semesterId?.toString()}>
-                            {/*TODO dodać mapowanie semester.specialisation.cycle*/}
-                            {`${semester.number} - (${semester.specialisation.name} - ${semester.specialisation.fieldOfStudy?.name} - ${semester.specialisation.cycle})`}
+                            {`${semester.number} - (${semester.specialisation.name} - ${semester.specialisation.fieldOfStudy?.name} - ${cycleMapping[semester.specialisation.cycle]})`}
                         </MenuItem>
                     ))}
                 </Select>

@@ -20,7 +20,6 @@ export const fetchSubjectType = createAsyncThunk<SubjectType[]>('subjectType/fet
     const data: BackendSubjectType[] = await response.json();
     return data.map((subjectType) => ({
         ...subjectType,
-        //TODO
         subjectTypeId: subjectType.subjectTypeId!,
     }));
 });
@@ -39,7 +38,6 @@ export const addSubjectType = createAsyncThunk<SubjectType, BackendSubjectType>(
         const data: BackendSubjectType = await response.json();
         return {
             ...data,
-            //TODO
             subjectTypeId: data.subjectTypeId!,
         };
     }
@@ -62,7 +60,6 @@ export const updateSubjectType = createAsyncThunk<SubjectType, BackendSubjectTyp
         const data: BackendSubjectType = await response.json();
         return {
             ...data,
-            //TODO
             subjectTypeId: data.subjectTypeId!,
         };
     }
