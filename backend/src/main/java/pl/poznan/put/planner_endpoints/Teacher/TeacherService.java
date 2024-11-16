@@ -71,6 +71,9 @@ public class TeacherService {
             oldteacher.lastName = teacherParams.lastName;
             oldteacher.degree = teacherParams.degree;
             oldteacher.preferences = teacherParams.preferences;
+            oldteacher.secondName = teacherParams.secondName;
+            oldteacher.usosId = teacherParams.usosId;
+            oldteacher.innerId = teacherParams.innerId;
             return teacherRepository.save(oldteacher);
         } else {
             return null;
@@ -90,5 +93,17 @@ public class TeacherService {
      */
     public void deleteAllteachers(){
         teacherRepository.deleteAll();
+    }
+
+    public Teacher findByFirstNameAndLastNameAndSecondName(String firstName, String lastName, String secondName){
+        return teacherRepository.findByFirstNameAndLastNameAndSecondName(firstName, lastName, secondName);
+    }
+
+    public Teacher findByFirstNameAndLastName(String firstName, String lastName){
+        return teacherRepository.findByFirstNameAndLastName(firstName, lastName);
+    }
+
+    public Teacher findByUsosId(int usosId){
+        return teacherRepository.findByUsosId(usosId);
     }
 }

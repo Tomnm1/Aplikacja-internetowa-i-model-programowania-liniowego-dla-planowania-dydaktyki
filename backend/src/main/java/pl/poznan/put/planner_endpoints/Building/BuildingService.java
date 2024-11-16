@@ -68,9 +68,9 @@ public class BuildingService {
     }
 
     public Building createBuildingIfNotExists(Building building){
-        boolean exists = buildingRepository.existsByCode(building.code);
-        if(exists){
-            return null;
+        Building existingBuilding = buildingRepository.findByCode(building.code);
+        if(existingBuilding != null){
+            return existingBuilding;
         } else {
             createBuilding(building);
             return building;

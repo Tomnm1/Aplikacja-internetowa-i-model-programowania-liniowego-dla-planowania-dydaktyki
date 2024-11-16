@@ -38,6 +38,5 @@ public class XmlReaderService {
         buildingHandler.insertBuildings(buildings);
         List<Worker> workers = plan.getWorkers().getWorkers();
         teacherHandler.insertTeachers(workers);
-
     }
 }
