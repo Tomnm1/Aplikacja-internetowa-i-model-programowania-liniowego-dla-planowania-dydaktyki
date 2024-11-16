@@ -10,7 +10,7 @@ const Layout = ({children } : Props) => {
         <div className="h-screen flex flex-col">
             <Topper/>
             <div className="flex-1 flex overflow-hidden">
-                <div className="">
+                <div className="overflow-auto">
                     <Navbar/>
                 </div>
                 <div className="flex-1 overflow-hidden">

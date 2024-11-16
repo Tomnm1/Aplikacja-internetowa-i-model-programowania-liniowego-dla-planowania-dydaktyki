@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_ENDPOINTS } from '../urls';
-import { Subject, SubjectState, BackendSubject } from '../../utils/Interfaces';
+import {Subject, SubjectState, BackendSubject, BackendSemester} from '../../utils/Interfaces';
 
 const initialState: SubjectState = {
     rows: [],
@@ -16,7 +16,7 @@ export const fetchSubject = createAsyncThunk<Subject[]>('subject/fetchSubjects',
     const data: BackendSubject[] = await response.json();
     return data.map((subject) => ({
         ...subject,
-        subject_id: subject.subject_id!,
+        SubjectId: subject.SubjectId!,
     }));
 });
 
@@ -34,7 +34,8 @@ export const addSubject = createAsyncThunk<Subject, BackendSubject>(
         const data: BackendSubject = await response.json();
         return {
             ...data,
-            subject_id: data.subject_id!,
+            SubjectId: data.SubjectId!,
+            semester: data.semester as BackendSemester
         };
     }
 );
@@ -42,10 +43,10 @@ export const addSubject = createAsyncThunk<Subject, BackendSubject>(
 export const updateSubject = createAsyncThunk<Subject, BackendSubject>(
     'subject/updateSubject',
     async (subjectData) => {
-        if (!subjectData.subject_id) {
+        if (!subjectData.SubjectId) {
             throw new Error('subject_id is required for updating');
         }
-        const response = await fetch(`${API_ENDPOINTS.SUBJECT}/${subjectData.subject_id}`, {
+        const response = await fetch(`${API_ENDPOINTS.SUBJECT}/${subjectData.SubjectId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(subjectData),
@@ -56,7 +57,8 @@ export const updateSubject = createAsyncThunk<Subject, BackendSubject>(
         const data: BackendSubject = await response.json();
         return {
             ...data,
-            subject_id: data.subject_id!,
+            SubjectId: data.SubjectId!,
+            semester: subjectData.semester!,
         };
     }
 );
@@ -94,13 +96,13 @@ const subjectSlice = createSlice({
                 state.rows.push(action.payload);
             })
             .addCase(updateSubject.fulfilled, (state, action) => {
-                const index = state.rows.findIndex((row) => row.subject_id === action.payload.subject_id);
+                const index = state.rows.findIndex((row) => row.SubjectId === action.payload.SubjectId);
                 if (index !== -1) {
                     state.rows[index] = action.payload;
                 }
             })
             .addCase(deleteSubject.fulfilled, (state, action) => {
-                state.rows = state.rows.filter((row) => row.subject_id !== action.payload);
+                state.rows = state.rows.filter((row) => row.SubjectId !== action.payload);
             });
     },
 });

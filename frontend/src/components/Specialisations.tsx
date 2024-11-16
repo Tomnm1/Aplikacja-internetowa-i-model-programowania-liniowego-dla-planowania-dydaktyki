@@ -18,29 +18,27 @@ import {
     fetchSpecialisations,
     deleteSpecialisation,
 } from '../app/slices/specialisationSlice';
-import {Cycle, Specialisation} from '../utils/Interfaces';
+import { cycleMapping, Specialisation} from '../utils/Interfaces';
 import { plPL } from '@mui/x-data-grid/locales';
+import {useSnackbar} from "notistack";
 
 const Specialisations: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const specialisations = useSelector((state: RootState) => state.specialisations.rows);
     const loading = useSelector((state: RootState) => state.specialisations.loading);
-    const error = useSelector((state: RootState) => state.specialisations.error);
 
     const [isDialogOpen, setDialogOpen] = React.useState(false);
     const [selectedRowId, setSelectedRowId] = React.useState<number | null>(null);
     const [isModalOpen, setModalOpen] = React.useState(false);
     const [selectedSpecialisation, setSelectedSpecialisation] = React.useState<Specialisation | null>(null);
     const [isAdding, setIsAdding] = React.useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
-        dispatch(fetchSpecialisations());
-    }, [dispatch]);
-
-    const cycleMapping: { [key in Cycle]: string } = {
-        [Cycle.FIRST]: 'Pierwszy',
-        [Cycle.SECOND]: 'Drugi',
-    };
+        dispatch(fetchSpecialisations()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania specjalizacji: ${error.message}`, { variant: 'error' });
+        });
+    }, [dispatch, enqueueSnackbar]);
 
     const handleViewClick = (id: number) => () => {
         const specialisation = specialisations.find((spec) => spec.id === id);
@@ -58,7 +56,14 @@ const Specialisations: React.FC = () => {
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteSpecialisation(selectedRowId));
+            dispatch(deleteSpecialisation(selectedRowId))
+                .unwrap()
+                .then(() => {
+                    enqueueSnackbar('Specjalizacja została pomyślnie usunięta', { variant: 'success' });
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas usuwania specjalizacji: ${error.message}`, { variant: 'error' });
+                });
         }
         setDialogOpen(false);
         setSelectedRowId(null);
@@ -133,7 +138,6 @@ const Specialisations: React.FC = () => {
                     isAdding={isAdding}
                 />
             )}
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
         </>
     );
 };

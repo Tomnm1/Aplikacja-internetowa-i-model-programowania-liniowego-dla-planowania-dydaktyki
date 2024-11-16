@@ -24,6 +24,7 @@ import SaveButton from '../utils/SaveButton';
 import { green } from "@mui/material/colors";
 import CancelButton from "../utils/CancelButton";
 import {GridRowId} from "@mui/x-data-grid";
+import { useSnackbar } from 'notistack';
 
 interface SpecialisationModalProps {
     open: boolean;
@@ -34,6 +35,7 @@ interface SpecialisationModalProps {
 
 const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose, specialisation, isAdding }) => {
     const dispatch = useDispatch<AppDispatch>();
+    const { enqueueSnackbar } = useSnackbar();
     const [fieldOfStudies, setFieldOfStudies] = useState<BackendFieldOfStudies[]>([]);
     const [formData, setFormData] = useState<{
         id: GridRowId;
@@ -65,8 +67,10 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
                     }));
                 }
             })
-            .catch((err) => console.error('Failed to fetch fields of study', err));
-    }, [isAdding]);
+            .catch(err => {
+                enqueueSnackbar(`Wystąpił błąd przy pobieraniu specjalizacji: ${err}`, { variant: 'error' });
+            });
+    }, [enqueueSnackbar, isAdding]);
 
     useEffect(() => {
         if (specialisation && !isAdding) {
@@ -121,7 +125,7 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
 
     const handleSubmit = async () => {
         if (!formData.name || !formData.cycle || !formData.fieldOfStudyId) {
-            alert('Proszę wypełnić wszystkie pola.');
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
             return;
         }
 
@@ -164,8 +168,9 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
                 setSuccess(false);
                 onClose();
             }
-        } catch (error) {
-            alert('Wystąpił błąd podczas zapisywania specjalizacji.');
+            enqueueSnackbar(isAdding ? 'Dodano!' : 'Zaktualizowano!', { variant: 'success' });
+        } catch (error : any) {
+            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, { variant: 'error' });
             setLoading(false);
         }
     };

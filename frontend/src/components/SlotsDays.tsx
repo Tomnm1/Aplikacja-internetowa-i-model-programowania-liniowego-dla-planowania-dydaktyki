@@ -14,20 +14,24 @@ import {Day, dayMapping, SlotsDay} from '../utils/Interfaces';
 import { plPL } from '@mui/x-data-grid/locales';
 import { deleteSlotsDay, fetchSlotsDays } from "../app/slices/slotsDaysSlice";
 import SlotsDayModal from "./SlotsDayModal";
+import {useSnackbar} from "notistack";
 
 const SlotsDays: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { rows: slotsDays, loading, error } = useSelector((state: RootState) => state.slotsDays);
+    const { rows: slotsDays, loading } = useSelector((state: RootState) => state.slotsDays);
 
     const [isDialogOpen, setDialogOpen] = React.useState(false);
     const [selectedRowId, setSelectedRowId] = React.useState<number | null>(null);
     const [isModalOpen, setModalOpen] = React.useState(false);
     const [selectedSlotsDay, setSelectedSlotsDay] = React.useState<SlotsDay | null>(null);
     const [isAdding, setIsAdding] = React.useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
-        dispatch(fetchSlotsDays());
-    }, [dispatch]);
+        dispatch(fetchSlotsDays()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania slotów dnia: ${error.message}`, { variant: 'error' });
+        });
+    }, [dispatch, enqueueSnackbar]);
 
     const handleViewClick = (id: number) => () => {
         const slotsDay = slotsDays.find((sd) => sd.id === id);
@@ -45,7 +49,14 @@ const SlotsDays: React.FC = () => {
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteSlotsDay(selectedRowId));
+            dispatch(deleteSlotsDay(selectedRowId))
+                .unwrap()
+                .then(() => {
+                    enqueueSnackbar('Slot dnia został pomyślnie usunięty', { variant: 'success' });
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas usuwania slotu dnia: ${error.message}`, { variant: 'error' });
+                });
         }
         setDialogOpen(false);
         setSelectedRowId(null);
@@ -88,10 +99,11 @@ const SlotsDays: React.FC = () => {
 
     const TopToolbar = () => (
         <GridToolbarContainer>
-            <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
+            <Button color="primary" startIcon={<AddIcon/>} onClick={handleAddClick}>
                 Dodaj slot dnia
             </Button>
-            <GridToolbar />
+            <div style={{flexGrow: 1}}/>
+            <GridToolbar/>
         </GridToolbarContainer>
     );
 
@@ -119,7 +131,6 @@ const SlotsDays: React.FC = () => {
                     isAdding={isAdding}
                 />
             )}
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
         </>
     );
 };

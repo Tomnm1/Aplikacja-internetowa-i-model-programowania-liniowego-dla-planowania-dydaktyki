@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, FormControl, InputLabel, Select, MenuItem,
-    Typography, Box, Fade, Checkbox, FormControlLabel
+    Box, Fade, Button, Stepper, Step, StepLabel
 } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../app/store';
-import { Subject, BackendSubject, Language, languageMapping, BackendSemester } from '../utils/Interfaces';
-import SaveButton from '../utils/SaveButton';
-import { green } from "@mui/material/colors";
-import CancelButton from "../utils/CancelButton";
-import { fetchSubject, addSubject, updateSubject } from "../app/slices/subjectSlice";
+import {AppDispatch, store} from '../app/store';
+import {Subject, BackendSubject, Language, BackendSemester, BackendSubjectType} from '../utils/Interfaces';
+import ActionButton from "../utils/ActionButton.tsx";
+import { useSnackbar } from 'notistack';
+import SubjectDetails from './SubjectDetails';
+import SubjectTypesForm from './SubjectTypesForm';
+import { addSubject, updateSubject, fetchSubject } from "../app/slices/subjectSlice";
 import API_ENDPOINTS from '../app/urls';
-import { SelectChangeEvent } from '@mui/material/Select';
+import {addSubjectType, fetchSubjectType, updateSubjectType} from "../app/slices/subjectTypeSlice.ts";
+import ClearIcon from '@mui/icons-material/Clear';
+import SaveIcon from '@mui/icons-material/Save';
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
 
 interface SubjectModalProps {
     open: boolean;
@@ -22,191 +26,173 @@ interface SubjectModalProps {
     isAdding: boolean;
 }
 
+const steps = ['Szczegóły przedmiotu', 'Typy przedmiotu'];
+
 const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isAdding }) => {
     const dispatch = useDispatch<AppDispatch>();
+    const { enqueueSnackbar } = useSnackbar();
+    const [activeStep, setActiveStep] = useState(0);
     const [semesters, setSemesters] = useState<BackendSemester[]>([]);
-    const [formData, setFormData] = useState({
-        id: subject?.subject_id || '',
+    const [formData, setFormData] = useState<Subject>({
+        SubjectId: subject?.SubjectId || 0,
         name: subject?.name || '',
         language: subject?.language || Language.POLSKI,
         exam: subject?.exam || false,
         mandatory: subject?.mandatory || false,
         planned: subject?.planned || false,
-        semesterId: subject?.semester?.semesterId?.toString() || '',
+        semester: { semesterId: subject?.semester?.semesterId?.toString() || ''},
     });
+    const [subjectTypes, setSubjectTypes] = useState<BackendSubjectType[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const [success, setSuccess] = useState<boolean>(false);
 
     useEffect(() => {
-        fetch(API_ENDPOINTS.SEMESTERS)
-            .then(res => res.json())
-            .then((data: BackendSemester[]) => setSemesters(data))
-            .catch(err => console.error('Failed to fetch semesters', err));
-    }, []);
+        if (open) {
+            fetch(API_ENDPOINTS.SEMESTERS)
+                .then(res => res.json())
+                .then((data: BackendSemester[]) => setSemesters(data))
+                .catch(err => {
+                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu semestrów: ${err}`, { variant: 'error' });
+                });
 
-    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, name: event.target.value });
+            if (!isAdding && subject) {
+                dispatch(fetchSubjectType()).unwrap()
+                    .then(() => {
+                        const types = store.getState().subjectsTypes.rows.filter(st => st.subject.SubjectId === subject.SubjectId);
+                        setSubjectTypes(types.map(st => st as BackendSubjectType));
+                    })
+                    .catch(err => {
+                        enqueueSnackbar(`Wystąpił błąd przy pobieraniu typów przedmiotu: ${err}`, { variant: 'error' });
+                    });
+            } else {
+                setSubjectTypes([]);
+            }
+        }
+    }, [open, enqueueSnackbar, isAdding, subject, dispatch]);
+
+    const handleNext = () => {
+        if (!formData.name || !formData.language || !formData.semester.semesterId) {
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
+            return;
+        }
+        setActiveStep(prev => prev + 1);
     };
 
-    const handleLanguageChange = (event: SelectChangeEvent) => {
-        setFormData({ ...formData, language: event.target.value as Language });
-    };
-
-    const handleSemesterChange = (event: SelectChangeEvent) => {
-        setFormData({ ...formData, semesterId: event.target.value });
-    };
-
-    const handleExamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, exam: event.target.checked });
-    };
-
-    const handleMandatoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, mandatory: event.target.checked });
-    };
-
-    const handlePlannedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, planned: event.target.checked });
+    const handleBack = () => {
+        setActiveStep(prev => prev - 1);
     };
 
     const handleSubmit = async () => {
-        if (!formData.name || !formData.language || !formData.semesterId) {
-            alert('Proszę wypełnić wszystkie pola.');
+        if (!formData.name || !formData.language || !formData.semester.semesterId) {
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
             return;
         }
         setLoading(true);
 
         const subjectData: BackendSubject = {
-            ...(isAdding ? {} : { subject_id: Number(formData.id) }),
+            ...(isAdding ? {} : { SubjectId: Number(formData.SubjectId) }),
             name: formData.name,
             language: formData.language,
             exam: formData.exam,
             mandatory: formData.mandatory,
             planned: formData.planned,
             semester: {
-                semesterId: Number(formData.semesterId),
+                semesterId: Number(formData.semester.semesterId),
             },
         };
+
         console.log(subjectData);
+
         try {
             const action = isAdding ? addSubject : updateSubject;
-            await dispatch(action(subjectData)).unwrap();
+            const savedSubject = await dispatch(action(subjectData)).unwrap();
+
+            const subjectId = savedSubject.SubjectId;
+            if (!subjectId) {
+                enqueueSnackbar('SubjectId jest nieznane', { variant: 'error' });
+            }
+            for (const subjectType of subjectTypes) {
+                const subjectTypeData: BackendSubjectType = {
+                    ...subjectType,
+                    subject: { SubjectId: subjectId },
+                };
+
+                if (subjectType.subjectTypeId) {
+                    await dispatch(updateSubjectType(subjectTypeData)).unwrap();
+                } else {
+                    await dispatch(addSubjectType(subjectTypeData)).unwrap();
+                }
+            }
+            enqueueSnackbar(isAdding ? 'Dodano!' : 'Zaktualizowano!', { variant: 'success' });
             await dispatch(fetchSubject());
-            setSuccess(true);
-            setTimeout(() => {
-                setLoading(false);
-                setSuccess(false);
-                onClose();
-            }, 1000);
+            setLoading(false);
+            onClose();
+
         } catch (error) {
-            console.error(error);
-            alert('Wystąpił błąd podczas zapisywania przedmiotu.');
+            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, { variant: 'error' });
             setLoading(false);
         }
     };
 
+    const renderStepContent = (step: number) => {
+        switch (step) {
+            case 0:
+                return (
+                    <SubjectDetails
+                        formData={formData}
+                        setFormData={setFormData}
+                        semesters={semesters}
+                        loading={loading}
+                    />
+                );
+            case 1:
+                return (
+                    <SubjectTypesForm
+                        subjectTypes={subjectTypes}
+                        setSubjectTypes={setSubjectTypes}
+                        loading={loading}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
             <Fade in={open} timeout={500}>
-                <Box sx={{ position: 'relative', minHeight: '200px', padding: 4 }}>
-                    {!success ? (
-                        <>
-                            <DialogTitle>{isAdding ? 'Dodaj przedmiot' : 'Szczegóły przedmiotu'}</DialogTitle>
-                            <DialogContent>
-                                <TextField
-                                    margin="normal"
-                                    label="Nazwa"
-                                    value={formData.name}
-                                    onChange={handleNameChange}
-                                    fullWidth
-                                    disabled={loading}
-                                />
-                                <FormControl fullWidth margin="normal" disabled={loading}>
-                                    <InputLabel id="language-label">Język</InputLabel>
-                                    <Select
-                                        labelId="language-label"
-                                        value={formData.language}
-                                        onChange={handleLanguageChange}
-                                        label="Język"
-                                        variant="outlined"
-                                    >
-                                        {Object.values(Language).map((language) => (
-                                            <MenuItem key={language} value={language}>
-                                                {languageMapping[language]}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <FormControl fullWidth margin="normal" disabled={loading}>
-                                    <InputLabel id="semester-label">Semestr</InputLabel>
-                                    <Select
-                                        labelId="semester-label"
-                                        value={formData.semesterId}
-                                        onChange={handleSemesterChange}
-                                        label="Semestr"
-                                        variant="outlined"
-                                    >
-                                        {semesters.map((semester) => (
-                                            <MenuItem key={semester.semesterId} value={semester.semesterId?.toString()}>
-                                                {semester.number}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <FormControl margin="normal" disabled={loading}>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={formData.exam}
-                                                onChange={handleExamChange}
-                                                name="exam"
-                                                color="primary"
-                                            />
-                                        }
-                                        label="Egzamin"
-                                    />
-                                </FormControl>
-                                <FormControl margin="normal" disabled={loading}>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={formData.mandatory}
-                                                onChange={handleMandatoryChange}
-                                                name="mandatory"
-                                                color="primary"
-                                            />
-                                        }
-                                        label="Obowiązkowy"
-                                    />
-                                </FormControl>
-                                <FormControl margin="normal" disabled={loading}>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={formData.planned}
-                                                onChange={handlePlannedChange}
-                                                name="planned"
-                                                color="primary"
-                                            />
-                                        }
-                                        label="Planowany"
-                                    />
-                                </FormControl>
-                            </DialogContent>
-                            <DialogActions>
-                                <SaveButton onClick={handleSubmit} loading={loading} success={success} />
-                                <CancelButton onClick={onClose} disabled={loading} />
-                            </DialogActions>
-                        </>
-                    ) : (
-                        <Fade in={success} timeout={1000}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <CheckIcon sx={{ fontSize: 60, color: green[500], mb: 2 }} />
-                                <Typography variant="h6" color="green">
-                                    {isAdding ? 'Dodano!' : 'Zaktualizowano!'}
-                                </Typography>
-                            </Box>
-                        </Fade>
-                    )}
+                <Box sx={{ position: 'relative', minHeight: '400px', padding: 4 }}>
+                    <DialogTitle>{isAdding ? 'Dodaj przedmiot' : 'Edytuj przedmiot'}</DialogTitle>
+                    <Stepper activeStep={activeStep} alternativeLabel>
+                        {steps.map((label) => (
+                            <Step key={label}>
+                                <StepLabel>{label}</StepLabel>
+                            </Step>
+                        ))}
+                    </Stepper>
+                    <DialogContent>
+                        {renderStepContent(activeStep)}
+                    </DialogContent>
+                    <DialogActions className="flex justify-between">
+                        <Box>
+                            {activeStep > 0 && (
+                                <Button onClick={handleBack} disabled={loading}>
+                                    <ArrowBackIcon />
+                                    Powrót
+                                </Button>
+                            )}
+                        </Box>
+                        <Box>
+                            {activeStep < steps.length - 1 && (
+                                <ActionButton onClick={handleNext} disabled={loading} tooltipText={'Przejdź do następnego kroku'} icon={<NavigateNextIcon/>} colorScheme={'primary'} />
+                            )}
+                            {activeStep === steps.length - 1 && (
+                                <div className={"flex"}>
+                                    <ActionButton onClick={handleSubmit} disabled={loading} tooltipText={isAdding ? 'Dodaj' : 'Zaktualizuj'} icon={<SaveIcon/>} colorScheme={'primary'} />
+                                    <ActionButton onClick={onClose} disabled={loading} tooltipText={"Anuluj"} icon={<ClearIcon/>} colorScheme={'secondary'} />
+                                </div>
+                            )}
+                        </Box>
+                    </DialogActions>
                 </Box>
             </Fade>
         </Dialog>

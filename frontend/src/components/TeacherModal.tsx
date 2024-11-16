@@ -13,6 +13,7 @@ import { green } from "@mui/material/colors";
 import CancelButton from "../utils/CancelButton";
 import { addTeacher, updateTeacher, fetchTeachers } from '../app/slices/teacherSlice';
 import { API_ENDPOINTS } from '../app/urls';
+import { useSnackbar } from "notistack";
 
 interface TeacherModalProps {
     open: boolean;
@@ -23,6 +24,7 @@ interface TeacherModalProps {
 
 const TeacherModal: React.FC<TeacherModalProps> = ({ open, onClose, teacher, isAdding }) => {
     const dispatch = useDispatch<AppDispatch>();
+    const { enqueueSnackbar } = useSnackbar();
     const [subjectTypes, setSubjectTypes] = useState<SubjectType[]>([]);
     const [formData, setFormData] = useState({
         id: teacher?.id || '',
@@ -36,11 +38,13 @@ const TeacherModal: React.FC<TeacherModalProps> = ({ open, onClose, teacher, isA
     const [success, setSuccess] = useState<boolean>(false);
 
     useEffect(() => {
-        fetch(API_ENDPOINTS.SUBJECT_TYPES)
+        fetch(API_ENDPOINTS.SUBJECT_TYPE)
             .then((res) => res.json())
             .then((data: SubjectType[]) => setSubjectTypes(data))
-            .catch((err) => console.error('Failed to fetch subject types', err));
-    }, []);
+            .catch((err) => {
+                enqueueSnackbar(`Wystąpił błąd przy pobieraniu typów przedmiotu: ${err}`, { variant: 'error' });
+            });
+    }, [enqueueSnackbar]);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = event.target;
@@ -60,7 +64,7 @@ const TeacherModal: React.FC<TeacherModalProps> = ({ open, onClose, teacher, isA
 
     const handleSubmit = async () => {
         if (!formData.firstName || !formData.lastName) {
-            alert('Proszę wypełnić wszystkie pola.');
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
             return;
         }
 
@@ -68,7 +72,7 @@ const TeacherModal: React.FC<TeacherModalProps> = ({ open, onClose, teacher, isA
         try {
             preferencesObj = JSON.parse(formData.preferences);
         } catch (error) {
-            alert('Preferences must be a valid JSON object');
+            enqueueSnackbar("Preferences must be a valid JSON object", { variant: 'error' });
             return;
         }
 
@@ -89,13 +93,14 @@ const TeacherModal: React.FC<TeacherModalProps> = ({ open, onClose, teacher, isA
             await dispatch(fetchTeachers());
             setSuccess(true);
             setTimeout(() => {
+                enqueueSnackbar(isAdding ? 'Dodano!' : 'Zaktualizowano!', { variant: 'success' });
                 setLoading(false);
                 setSuccess(false);
                 onClose();
             }, 1000);
         } catch (error) {
             console.error(error);
-            alert('Wystąpił błąd podczas zapisywania nauczyciela.');
+            enqueueSnackbar('Wystąpił błąd podczas zapisywania nauczyciela.', { variant: 'error' });
             setLoading(false);
         }
     };

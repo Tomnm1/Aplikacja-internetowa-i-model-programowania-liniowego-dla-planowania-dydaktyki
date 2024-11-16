@@ -23,6 +23,7 @@ export enum Cycle {
     SECOND = 'second',
 }
 
+
 export enum Day {
     MONDAY = 'monday',
     TUESDAY = 'tuesday',
@@ -38,6 +39,18 @@ export enum Language {
     ANGIELSKI = 'angielski',
 }
 
+export enum Type {
+    LECTURE = 'wykład',
+    EX = 'ćwiczenia',
+    LAB = 'laboratoria',
+    PROJECT = 'projekt',
+}
+
+export const cycleMapping: { [key in Cycle]: string } = {
+    [Cycle.FIRST]: 'Pierwszy',
+    [Cycle.SECOND]: 'Drugi',
+};
+
 export const languageMapping: { [key in Language] : string} = {
     [Language.ANGIELSKI]: 'angielski',
     [Language.POLSKI]: 'polski',
@@ -51,6 +64,13 @@ export const dayMapping: { [key in Day]: string } = {
     [Day.SATURDAY]: 'Sobota',
     [Day.SUNDAY]: 'Niedziela',
 };
+
+export const typeMapping: { [key in Type]: string} = {
+    [Type.LECTURE]: 'Wykład',
+    [Type.EX]: 'Ćwiczenia',
+    [Type.LAB]: 'Laboratoria',
+    [Type.PROJECT]: 'Projekt',
+}
 
 export interface ClassroomRow {
     id: GridRowId;
@@ -96,11 +116,6 @@ export interface CalendarViewProps {
     rooms: Room[];
     hours: Hour[];
     schedules: Schedule[];
-}
-
-export interface SubjectType {
-    id: number;
-    name: string;
 }
 
 export interface BackendTeacher {
@@ -259,6 +274,9 @@ export interface Semester {
     id: number;
     number: string;
     specialisationId: number;
+    specialisationRepresentation?: string;
+    fieldOfStudyName?: string;
+    cycle?:Cycle;
 }
 
 export interface BackendSemester {
@@ -266,6 +284,11 @@ export interface BackendSemester {
     number: string;
     specialisation: {
         specialisationId: number;
+        name?: string;
+        cycle: Cycle;
+        fieldOfStudy?:{
+            name?:string;
+        }
     };
 }
 
@@ -276,27 +299,49 @@ export interface SemesterState {
 }
 
 export interface Subject {
-    subject_id: number;
+    SubjectId: number;
     name: string;
     language: Language;
     exam: boolean;
     mandatory: boolean;
     planned: boolean;
-    semester: BackendSemester;
+    semester: BackendSemester | {semesterId : number | string, specialisation?: BackendSpecialisation};
 }
 
 export interface BackendSubject {
-    subject_id?: number;
+    SubjectId?: number;
     name: string;
     language: Language;
     exam: boolean;
     mandatory: boolean;
     planned: boolean;
-    semester: BackendSemester;
+    semester: BackendSemester | {semesterId : number};
 }
 
 export interface SubjectState {
     rows: Subject[];
+    loading: boolean;
+    error: string | null;
+}
+
+export interface SubjectType {
+    subjectTypeId: number;
+    numOfHours: number;
+    type: Type;
+    maxStudentsPerGroup: number;
+    subject: BackendSubject | { SubjectId: number };
+}
+
+export interface BackendSubjectType {
+    subjectTypeId?: number;
+    numOfHours: number;
+    type: Type;
+    maxStudentsPerGroup: number;
+    subject: BackendSubject | { SubjectId: number };
+}
+
+export interface SubjectTypeState {
+    rows: SubjectType[];
     loading: boolean;
     error: string | null;
 }

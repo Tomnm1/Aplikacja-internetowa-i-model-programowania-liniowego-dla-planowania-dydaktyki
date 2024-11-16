@@ -7,13 +7,14 @@ import {
 import CheckIcon from '@mui/icons-material/Check';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../app/store';
-import { BackendSpecialisation, Semester} from '../utils/Interfaces';
+import {BackendSpecialisation, cycleMapping, Semester} from '../utils/Interfaces';
 import SaveButton from '../utils/SaveButton';
 import { green } from "@mui/material/colors";
 import CancelButton from "../utils/CancelButton";
 import API_ENDPOINTS from '../app/urls';
 import { SelectChangeEvent } from '@mui/material/Select';
 import {addSemester, fetchSemesters, updateSemester} from "../app/slices/semesterSlice.ts";
+import {useSnackbar} from "notistack";
 
 interface SemesterModalProps {
     open: boolean;
@@ -24,11 +25,13 @@ interface SemesterModalProps {
 
 const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, isAdding }) => {
     const dispatch = useDispatch<AppDispatch>();
+    const { enqueueSnackbar } = useSnackbar();
     const [specialisations, setSpecialisations] = useState<BackendSpecialisation[]>([]);
     const [formData, setFormData] = useState({
         id: semester?.id || '',
         number: semester?.number || '',
         specialisationId: semester?.specialisationId?.toString() || '',
+        specialisationRepresentation: semester?.specialisationRepresentation || '',
     });
     const [loading, setLoading] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
@@ -38,9 +41,11 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
             fetch(API_ENDPOINTS.SPECIALISATIONS)
                 .then(res => res.json())
                 .then((data: BackendSpecialisation[]) => setSpecialisations(data))
-                .catch(err => console.error('Failed to fetch specialisations', err));
+                .catch(err => {
+                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu specjalizacji: ${err}`, { variant: 'error' });
+                });
         }
-    }, [isAdding]);
+    }, [enqueueSnackbar, isAdding]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const value = e.target.value;
@@ -52,16 +57,17 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
 
     const handleSpecialisationChange = (event: SelectChangeEvent) => {
         const selectedSpecialisationId = event.target.value as string;
-        //const selectedSpecialisation = specialisations.find(specialisation => specialisation!.specialisationId!.toString() === selectedSpecialisationId);
+        const selectedSpecialisation = specialisations.find(specialisation => specialisation!.specialisationId!.toString() === selectedSpecialisationId);
         setFormData({
             ...formData,
             specialisationId: selectedSpecialisationId,
+            specialisationRepresentation: selectedSpecialisation?.name || selectedSpecialisationId,
         });
     };
 
     const handleSubmit = async () => {
         if (!formData.specialisationId) {
-            alert('Proszę wypełnić wszystkie pola.');
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
             return;
         }
 
@@ -85,9 +91,8 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                 setSuccess(false);
                 onClose();
             }, 1000);
-        } catch (error) {
-            console.log(error)
-            alert('Wystąpił błąd podczas zapisywania semestru.');
+        } catch (error : any) {
+            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, { variant: 'error' });
             setLoading(false);
         }
     };
@@ -104,7 +109,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                                     <FormControl fullWidth margin="normal" disabled={loading}>
                                         <InputLabel id="semester-label">Specjalizacja</InputLabel>
                                         <Select
-                                            labelId="slot-label"
+                                            labelId="semester-label"
                                             value={formData.specialisationId}
                                             onChange={handleSpecialisationChange}
                                             label="Specjalizacja"
@@ -112,7 +117,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                                         >
                                             {specialisations.map((specialisation) => (
                                                 <MenuItem key={specialisation.specialisationId} value={specialisation!.specialisationId!.toString()}>
-                                                    {specialisation.name}
+                                                    {`${specialisation.name} (${specialisation.fieldOfStudy.name} - ${cycleMapping[specialisation.cycle] || specialisation.cycle})`}
                                                 </MenuItem>
                                             ))}
                                         </Select>
@@ -121,7 +126,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                                     <TextField
                                         margin="normal"
                                         label="Specjalizacja"
-                                        value={formData.specialisationId}
+                                        value={formData.specialisationRepresentation}
                                         fullWidth
                                         disabled
                                     />
@@ -156,4 +161,5 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
         </Dialog>
     );
 };
+
 export default SemesterModal;

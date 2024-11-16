@@ -14,6 +14,7 @@ import CancelButton from "../utils/CancelButton";
 import {addSlotsDay, fetchSlotsDays, updateSlotsDay} from "../app/slices/slotsDaysSlice";
 import API_ENDPOINTS from '../app/urls';
 import { SelectChangeEvent } from '@mui/material/Select';
+import { useSnackbar } from 'notistack';
 
 interface SlotsDayModalProps {
     open: boolean;
@@ -24,6 +25,7 @@ interface SlotsDayModalProps {
 
 const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, isAdding }) => {
     const dispatch = useDispatch<AppDispatch>();
+    const { enqueueSnackbar } = useSnackbar();
     const [slots, setSlots] = useState<BackendSlot[]>([]);
     const [formData, setFormData] = useState({
         id: slotsDay?.id || '',
@@ -39,9 +41,11 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
             fetch(API_ENDPOINTS.SLOTS)
                 .then(res => res.json())
                 .then((data: BackendSlot[]) => setSlots(data))
-                .catch(err => console.error('Failed to fetch slots', err));
+                .catch(err => {
+                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu slotów: ${err}`, { variant: 'error' });
+                });
         }
-    }, [isAdding]);
+    }, [enqueueSnackbar, isAdding]);
 
     const handleDayChange = (event: SelectChangeEvent) => {
         setFormData({ ...formData, day: event.target.value as Day });
@@ -59,7 +63,7 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
 
     const handleSubmit = async () => {
         if (!formData.slotId) {
-            alert('Proszę wypełnić wszystkie pola.');
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
             return;
         }
 
@@ -83,9 +87,9 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
                 setSuccess(false);
                 onClose();
             }, 1000);
-        } catch (error) {
+        } catch (error : any) {
             console.log(error)
-            alert('Wystąpił błąd podczas zapisywania slotu dnia.');
+            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, { variant: 'error' });
             setLoading(false);
         }
     };
