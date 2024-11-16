@@ -69,9 +69,9 @@ public class SemesterService {
     }
 
     public Semester createSemesterIfNotExists(Semester semester){
-        boolean exists = semesterRepository.existsByNumberAndSpecialisation(semester.number, semester.specialisation);
-        if(exists){
-            return null;
+        Semester existingSemester = semesterRepository.findByNumberAndSpecialisation(semester.number, semester.specialisation);
+        if(existingSemester != null){
+            return existingSemester;
         } else {
             createSemester(semester);
             return semester;

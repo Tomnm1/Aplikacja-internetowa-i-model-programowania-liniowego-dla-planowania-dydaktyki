@@ -68,9 +68,9 @@ public class FieldOfStudyService {
     }
 
     public FieldOfStudy createFieldOfStudyIfNotExists(FieldOfStudy fieldOfStudy){
-        boolean exists = fieldOfStudyRepository.existsByName(fieldOfStudy.name);
-        if(exists){
-            return null;
+        FieldOfStudy existingFieldOfStudy = fieldOfStudyRepository.findByName(fieldOfStudy.name);
+        if(existingFieldOfStudy != null){
+            return existingFieldOfStudy;
         } else {
             createFieldOfStudy(fieldOfStudy);
             return fieldOfStudy;

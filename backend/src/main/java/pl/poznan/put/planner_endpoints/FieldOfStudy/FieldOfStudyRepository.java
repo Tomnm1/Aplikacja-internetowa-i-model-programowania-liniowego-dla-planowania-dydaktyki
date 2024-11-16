@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Interface to communicate with DB
  */
 public interface FieldOfStudyRepository extends JpaRepository<FieldOfStudy, Integer> {
-    boolean existsByName(String name);
+    FieldOfStudy findByName(String name);
 }

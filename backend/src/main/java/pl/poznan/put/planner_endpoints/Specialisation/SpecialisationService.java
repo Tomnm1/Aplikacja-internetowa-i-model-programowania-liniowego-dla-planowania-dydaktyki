@@ -70,9 +70,9 @@ public class SpecialisationService {
     }
 
     public Specialisation createSpecialisationIfNotExists(Specialisation specialisation){
-        boolean exists = specialisationRepository.existsByNameAndCycleAndFieldOfStudy(specialisation.name, specialisation.cycle, specialisation.fieldOfStudy);
-        if(exists){
-            return null;
+        Specialisation existingSpecialisation = specialisationRepository.findByNameAndCycleAndFieldOfStudy(specialisation.name, specialisation.cycle, specialisation.fieldOfStudy);
+        if(existingSpecialisation != null){
+            return existingSpecialisation;
         } else {
             createSpecialisation(specialisation);
             return specialisation;

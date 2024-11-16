@@ -7,5 +7,5 @@ import pl.poznan.put.planner_endpoints.FieldOfStudy.FieldOfStudy;
  * Interface to communicate with DB
  */
 public interface SpecialisationRepository extends JpaRepository<Specialisation, Integer> {
-    boolean existsByNameAndCycleAndFieldOfStudy(String name, Cycle cycle, FieldOfStudy fieldOfStudy);
+    Specialisation findByNameAndCycleAndFieldOfStudy(String name, Cycle cycle, FieldOfStudy fieldOfStudy);
 }

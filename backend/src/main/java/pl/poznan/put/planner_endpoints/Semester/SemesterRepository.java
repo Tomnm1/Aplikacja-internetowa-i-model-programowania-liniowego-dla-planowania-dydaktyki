@@ -7,5 +7,5 @@ import pl.poznan.put.planner_endpoints.Specialisation.Specialisation;
  * Interface to communicate with DB
  */
 public interface SemesterRepository extends JpaRepository<Semester, Integer> {
-    boolean existsByNumberAndSpecialisation(String number, Specialisation specialisation);
+    Semester findByNumberAndSpecialisation(String number, Specialisation specialisation);
 }

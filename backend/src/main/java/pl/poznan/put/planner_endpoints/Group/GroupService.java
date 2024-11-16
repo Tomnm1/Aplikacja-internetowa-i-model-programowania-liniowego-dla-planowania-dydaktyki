@@ -87,4 +87,14 @@ public class GroupService {
     public void deleteAllGroups(){
         groupRepository.deleteAll();
     }
+
+    public Group createGroupIfNotExists(Group group){
+        Group existingGroup = groupRepository.findByCodeAndSemester(group.code, group.semester);
+        if(existingGroup != null){
+            return existingGroup;
+        } else {
+            createGroup(group);
+            return group;
+        }
+    }
 }

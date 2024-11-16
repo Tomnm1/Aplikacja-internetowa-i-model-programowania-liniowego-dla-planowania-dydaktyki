@@ -72,6 +72,20 @@ public class ExcelToDbService {
         this.groupsHandler = groupsHandler;
     }
     public void startSheetProcessing(Sheet sheet){
+        cycle = "";
+        semesterNumber = "";
+        type = "";
+        exam = false;
+        subjectName = "";
+
+        fieldOfStudy = null;
+        fieldOfStudyName = "";
+        specialisation = null;
+        specialisationName = "";
+        semester = null;
+        subject = null;
+        subjectTypes.clear();
+
         Row headerRow = sheet.getRow(2);
         Row headerRowHelper = sheet.getRow(3);
         processHeaderRow(headerRow, headerRowHelper);
@@ -86,11 +100,13 @@ public class ExcelToDbService {
         this.fieldOfStudy = assignIfNotNull(fieldOfStudyHandler.insertFieldOfStudy(fieldOfStudyName), this.fieldOfStudy);
         this.specialisation = assignIfNotNull(specialisationHandler.insertSpecialisation(specialisationName, cycle, fieldOfStudy), this.specialisation);
         Semester newSemester = semesterHandler.insertSemester(semesterNumber, specialisation);
-        if (newSemester != null){
-            if(this.semester != null)
-                this.groupsHandler.processAndInsertGroups(this.groupsCounter, this.semester);
-            this.semester = newSemester;
+        if (this.semester != null
+                && !Objects.equals(newSemester.specialisation.specialisationId, this.semester.specialisation.specialisationId)
+                && !Objects.equals(newSemester.number, this.semester.number)){
+            this.groupsHandler.processAndInsertGroups(this.groupsCounter, this.semester);
+            groupsCounter.clear();
         }
+        this.semester = newSemester;
 //        this.semester = assignIfNotNull(semesterHandler.insertSemester(semesterNumber, specialisation), this.semester);
         this.subject = assignIfNotNull(subjectHandler.insertSubject(subjectName, exam, false, false, Language.polski, semester), this.subject);
         if(!subjectTypes.isEmpty())

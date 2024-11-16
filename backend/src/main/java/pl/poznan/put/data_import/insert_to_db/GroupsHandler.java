@@ -26,7 +26,7 @@ public class GroupsHandler {
                 Group group = new Group();
                 group.code = g + i;
                 group.semester = semester;
-                groupService.createGroup(group);
+                groupService.createGroupIfNotExists(group);
             }
         }
     }

@@ -7,5 +7,5 @@ import pl.poznan.put.planner_endpoints.Semester.Semester;
  * Interface to communicate with DB
  */
 public interface SubjectRepository extends JpaRepository<Subject, Integer> {
-    boolean existsByNameAndSemester(String name, Semester semester);
+    Subject findByNameAndSemester(String name, Semester semester);
 }

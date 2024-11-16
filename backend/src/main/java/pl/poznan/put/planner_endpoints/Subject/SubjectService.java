@@ -94,9 +94,9 @@ public class SubjectService {
     }
 
     public Subject createSubjectIfNotExists(Subject subject){
-        boolean exists = subjectRepository.existsByNameAndSemester(subject.name, subject.semester);
-        if(exists){
-            return null;
+        Subject existingSubject = subjectRepository.findByNameAndSemester(subject.name, subject.semester);
+        if(existingSubject != null){
+            return existingSubject;
         } else {
             createSubject(subject);
             return subject;

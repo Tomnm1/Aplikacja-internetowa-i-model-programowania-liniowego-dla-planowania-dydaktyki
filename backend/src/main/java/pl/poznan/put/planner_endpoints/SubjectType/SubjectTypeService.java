@@ -95,4 +95,14 @@ public class SubjectTypeService {
     public void deleteAllsubjectTypes(){
         subjectTypeRepository.deleteAll();
     }
+
+    public SubjectType createsubjectTypeIfNotExists(SubjectType subjectType){
+        SubjectType existingSubjectType = subjectTypeRepository.findSubjectTypeBySubjectAndType(subjectType.subject, subjectType.type);
+        if(existingSubjectType != null){
+            return existingSubjectType;
+        } else {
+            createsubjectType(subjectType);
+            return subjectType;
+        }
+    }
 }
