@@ -10,7 +10,7 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import { RootState, AppDispatch } from '../app/store';
-import {BackendSemester, cycleMapping, Language, languageMapping, Subject} from '../utils/Interfaces';
+import {BackendSemester, Cycle, cycleMapping, Language, languageMapping, Subject} from '../utils/Interfaces';
 import { plPL } from '@mui/x-data-grid/locales';
 import { deleteSubject, fetchSubject } from "../app/slices/subjectSlice.ts";
 import SubjectModal from "./SubjectModal.tsx";
@@ -83,13 +83,12 @@ const Subjects: React.FC = () => {
             width: 100,
             valueGetter: (value:BackendSemester) => value.number,
         },
-        //TODO specialisation wywala, ale dlaczego?
-        // {
-        //     field: 'specialisation',
-        //     headerName: 'Specjalizacja',
-        //     width: 100,
-        //     valueGetter: (_value,row) => row.semester.specialisation.name || '',
-        // },
+        {
+            field: 'specialisation',
+            headerName: 'Specjalizacja',
+            width: 100,
+            valueGetter: (_value,row) => row.semester.specialisation.name || '',
+        },
         {
             field: 'fieldOfStudy',
             headerName: 'Kierunek',
@@ -100,7 +99,7 @@ const Subjects: React.FC = () => {
             field: 'Cicle',
             headerName: 'Cykl',
             width: 100,
-            valueGetter: (_value,row:Subject) => cycleMapping[row.semester.specialisation?.cycle] || row.semester.specialisation?.cycle,
+            valueGetter: (_value,row:Subject) => cycleMapping[row.semester.specialisation?.cycle as Cycle] ||  row.semester.specialisation?.cycle,
         },
         {
             field:  'language',

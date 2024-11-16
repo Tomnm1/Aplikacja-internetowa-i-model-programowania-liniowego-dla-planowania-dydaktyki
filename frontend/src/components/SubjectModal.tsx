@@ -33,14 +33,14 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
     const { enqueueSnackbar } = useSnackbar();
     const [activeStep, setActiveStep] = useState(0);
     const [semesters, setSemesters] = useState<BackendSemester[]>([]);
-    const [formData, setFormData] = useState({
-        id: subject?.SubjectId || '',
+    const [formData, setFormData] = useState<Subject>({
+        SubjectId: subject?.SubjectId || 0,
         name: subject?.name || '',
         language: subject?.language || Language.POLSKI,
         exam: subject?.exam || false,
         mandatory: subject?.mandatory || false,
         planned: subject?.planned || false,
-        semesterId: subject?.semester?.semesterId?.toString() || '',
+        semester: { semesterId: subject?.semester?.semesterId?.toString() || ''},
     });
     const [subjectTypes, setSubjectTypes] = useState<BackendSubjectType[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -70,7 +70,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
     }, [open, enqueueSnackbar, isAdding, subject, dispatch]);
 
     const handleNext = () => {
-        if (!formData.name || !formData.language || !formData.semesterId) {
+        if (!formData.name || !formData.language || !formData.semester.semesterId) {
             enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
             return;
         }
@@ -82,21 +82,21 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
     };
 
     const handleSubmit = async () => {
-        if (!formData.name || !formData.language || !formData.semesterId) {
+        if (!formData.name || !formData.language || !formData.semester.semesterId) {
             enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
             return;
         }
         setLoading(true);
 
         const subjectData: BackendSubject = {
-            ...(isAdding ? {} : { SubjectId: Number(formData.id) }),
+            ...(isAdding ? {} : { SubjectId: Number(formData.SubjectId) }),
             name: formData.name,
             language: formData.language,
             exam: formData.exam,
             mandatory: formData.mandatory,
             planned: formData.planned,
             semester: {
-                semesterId: Number(formData.semesterId),
+                semesterId: Number(formData.semester.semesterId),
             },
         };
 
@@ -127,7 +127,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
             setLoading(false);
             onClose();
 
-        } catch (error: any) {
+        } catch (error) {
             enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, { variant: 'error' });
             setLoading(false);
         }

@@ -305,7 +305,7 @@ export interface Subject {
     exam: boolean;
     mandatory: boolean;
     planned: boolean;
-    semester: BackendSemester;
+    semester: BackendSemester | {semesterId : number | string, specialisation?: BackendSpecialisation};
 }
 
 export interface BackendSubject {
@@ -329,7 +329,7 @@ export interface SubjectType {
     numOfHours: number;
     type: Type;
     maxStudentsPerGroup: number;
-    subject: BackendSubject;
+    subject: BackendSubject | { SubjectId: number };
 }
 
 export interface BackendSubjectType {
