@@ -31,7 +31,11 @@ const SubjectDetails: React.FC<SubjectDetailsProps> = ({ formData, setFormData, 
     };
 
     const handleSemesterChange = (event: SelectChangeEvent) => {
-        setFormData((prev) => ({ ...prev, semesterId: event.target.value }));
+        console.log(event.target.value );
+        setFormData((prev) => ({
+            ...prev,
+            semester: {semesterId: event.target.value}
+        }));
     };
 
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,6 +61,7 @@ const SubjectDetails: React.FC<SubjectDetailsProps> = ({ formData, setFormData, 
                     value={formData.language}
                     onChange={handleLanguageChange}
                     label="Język"
+                    variant="outlined"
                 >
                     {Object.values(Language).map((language) => (
                         <MenuItem key={language} value={language}>
@@ -73,6 +78,7 @@ const SubjectDetails: React.FC<SubjectDetailsProps> = ({ formData, setFormData, 
                     value={formData.semester.semesterId!.toString()}
                     onChange={handleSemesterChange}
                     label="Semestr"
+                    variant="outlined"
                 >
                     {semesters.map((semester) => (
                         <MenuItem key={semester.semesterId} value={semester.semesterId?.toString()}>
