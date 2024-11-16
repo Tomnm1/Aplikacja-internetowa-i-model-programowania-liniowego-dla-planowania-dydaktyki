@@ -37,6 +37,7 @@ import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
+import {useSnackbar} from "notistack";
 
 const Slots: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -44,14 +45,16 @@ const Slots: React.FC = () => {
     const rowModesModel = useSelector((state: RootState) => state.slots.rowModesModel);
     const selectedRowId = useSelector((state: RootState) => state.slots.selectedRowId);
     const loading = useSelector((state: RootState) => state.slots.loading);
-    const error = useSelector((state: RootState) => state.slots.error);
     const [isDialogOpen, setDialogOpen] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     const [rowIdCounter, setRowIdCounter] = useState(-1);
 
     useEffect(() => {
-        dispatch(fetchSlots());
-    }, [dispatch]);
+        dispatch(fetchSlots()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania slotów: ${error.message}`, { variant: 'error' });
+        });
+    }, [dispatch, enqueueSnackbar]);
 
     const handleEditClick = (id: GridRowId) => () => {
         dispatch(setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } }));
@@ -103,7 +106,7 @@ const Slots: React.FC = () => {
         const endTime = dayjs(updatedRow.end_time, 'HH:mm');
 
         if (!startTime.isBefore(endTime)) {
-            throw new Error('Czas "Od" musi być wcześniejszy niż czas "Do".');
+            enqueueSnackbar(`Czas "Od" musi być wcześniejszy niż czas "Do".`, { variant: 'error' });
         }
 
         if (updatedRow.isNew) {
@@ -112,14 +115,14 @@ const Slots: React.FC = () => {
                 const { slot } = resultAction.payload;
                 return slot;
             } else {
-                throw new Error('Failed to add slot');
+                enqueueSnackbar(`Wystąpił błąd przy dodawaniu rekordu`, { variant: 'error' });
             }
         } else {
             const resultAction = await dispatch(updateSlot(updatedRow));
             if (updateSlot.fulfilled.match(resultAction)) {
                 return resultAction.payload;
             } else {
-                throw new Error('Failed to update slot');
+                enqueueSnackbar(`Wystąpił błąd przy aktualizacji rekordu`, { variant: 'error' });
             }
         }
     };
@@ -293,7 +296,6 @@ const Slots: React.FC = () => {
                 content={`Czy na pewno chcesz usunąć slot?`}
                 action="Potwierdź"
             />
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
         </>
     );
 };

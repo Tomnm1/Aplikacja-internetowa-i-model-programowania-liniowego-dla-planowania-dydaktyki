@@ -14,6 +14,7 @@ import CancelButton from "../utils/CancelButton";
 import API_ENDPOINTS from '../app/urls';
 import { SelectChangeEvent } from '@mui/material/Select';
 import {addSemester, fetchSemesters, updateSemester} from "../app/slices/semesterSlice.ts";
+import {useSnackbar} from "notistack";
 
 interface SemesterModalProps {
     open: boolean;
@@ -24,6 +25,7 @@ interface SemesterModalProps {
 
 const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, isAdding }) => {
     const dispatch = useDispatch<AppDispatch>();
+    const { enqueueSnackbar } = useSnackbar();
     const [specialisations, setSpecialisations] = useState<BackendSpecialisation[]>([]);
     const [formData, setFormData] = useState({
         id: semester?.id || '',
@@ -39,9 +41,11 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
             fetch(API_ENDPOINTS.SPECIALISATIONS)
                 .then(res => res.json())
                 .then((data: BackendSpecialisation[]) => setSpecialisations(data))
-                .catch(err => console.error('Failed to fetch specialisations', err));
+                .catch(err => {
+                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu specjalizacji: ${err}`, { variant: 'error' });
+                });
         }
-    }, [isAdding]);
+    }, [enqueueSnackbar, isAdding]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const value = e.target.value;
@@ -63,7 +67,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
 
     const handleSubmit = async () => {
         if (!formData.specialisationId) {
-            alert('Proszę wypełnić wszystkie pola.');
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
             return;
         }
 
@@ -87,9 +91,8 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                 setSuccess(false);
                 onClose();
             }, 1000);
-        } catch (error) {
-            console.log(error)
-            alert('Wystąpił błąd podczas zapisywania semestru.');
+        } catch (error : any) {
+            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, { variant: 'error' });
             setLoading(false);
         }
     };

@@ -14,20 +14,24 @@ import {cycleMapping, Semester} from '../utils/Interfaces';
 import { plPL } from '@mui/x-data-grid/locales';
 import {deleteSemester, fetchSemesters} from "../app/slices/semesterSlice.ts";
 import SemesterModal from "./SemesterModal.tsx";
+import {useSnackbar} from "notistack";
 
 const Semesters: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { rows: semesters, loading, error } = useSelector((state: RootState) => state.semesters);
+    const { rows: semesters, loading } = useSelector((state: RootState) => state.semesters);
 
     const [isDialogOpen, setDialogOpen] = React.useState(false);
     const [selectedRowId, setSelectedRowId] = React.useState<number | null>(null);
     const [isModalOpen, setModalOpen] = React.useState(false);
     const [selectedSemester, setSelectedSemester] = React.useState<Semester | null>(null);
     const [isAdding, setIsAdding] = React.useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
-        dispatch(fetchSemesters());
-    }, [dispatch]);
+        dispatch(fetchSemesters()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania semestrów: ${error.message}`, { variant: 'error' });
+        });
+    }, [dispatch, enqueueSnackbar]);
 
     const handleViewClick = (id: number) => () => {
         const semester = semesters.find((s) => s.id === id);
@@ -45,7 +49,14 @@ const Semesters: React.FC = () => {
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteSemester(selectedRowId));
+            dispatch(deleteSemester(selectedRowId))
+                .unwrap()
+                .then(() => {
+                    enqueueSnackbar('Semestr został pomyślnie usunięty', { variant: 'success' });
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas usuwania semestru: ${error.message}`, { variant: 'error' });
+                });
         }
         setDialogOpen(false);
         setSelectedRowId(null);
@@ -134,7 +145,6 @@ const Semesters: React.FC = () => {
                     isAdding={isAdding}
                 />
             )}
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
         </>
     );
 };

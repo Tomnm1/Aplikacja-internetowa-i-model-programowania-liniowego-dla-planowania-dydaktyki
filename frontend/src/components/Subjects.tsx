@@ -18,7 +18,7 @@ import {useSnackbar} from "notistack";
 
 const Subjects: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { rows: subjects, loading, error } = useSelector((state: RootState) => state.subjects);
+    const { rows: subjects, loading } = useSelector((state: RootState) => state.subjects);
 
     const [isDialogOpen, setDialogOpen] = React.useState(false);
     const [selectedRowId, setSelectedRowId] = React.useState<number | null>(null);
@@ -181,7 +181,6 @@ const Subjects: React.FC = () => {
                     isAdding={isAdding}
                 />
             )}
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
         </>
     );
 };

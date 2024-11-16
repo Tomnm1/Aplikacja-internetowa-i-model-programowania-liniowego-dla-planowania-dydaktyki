@@ -33,6 +33,7 @@ import {
 } from '../app/slices/fieldOfStudySlice.ts';
 import {FieldOfStudy} from '../utils/Interfaces.ts';
 import {plPL} from "@mui/x-data-grid/locales";
+import {useSnackbar} from "notistack";
 
 const FieldOfStudies: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -41,14 +42,16 @@ const FieldOfStudies: React.FC = () => {
     const selectedRowName = useSelector((state: RootState) => state.fields.selectedRowName);
     const selectedRowId = useSelector((state: RootState) => state.fields.selectedRowId);
     const loading = useSelector((state: RootState) => state.fields.loading);
-    const error = useSelector((state: RootState) => state.fields.error);
     const [isDialogOpen, setDialogOpen] = React.useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     const [rowIdCounter, setRowIdCounter] = React.useState(-1);
 
     useEffect(() => {
-        dispatch(fetchFOS());
-    }, [dispatch]);
+        dispatch(fetchFOS()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania kierunków studiów: ${error.message}`, { variant: 'error' });
+        });
+    }, [dispatch, enqueueSnackbar]);
 
 
     const handleEditClick = (id: GridRowId) => () => {
@@ -69,7 +72,14 @@ const FieldOfStudies: React.FC = () => {
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteFOS(selectedRowId));
+            dispatch(deleteFOS(selectedRowId))
+                .unwrap()
+                .then(() => {
+                    enqueueSnackbar('Kierunek został pomyślnie usunięty', { variant: 'success' });
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas usuwania kierunku: ${error.message}`, { variant: 'error' });
+                });
         }
         setDialogOpen(false);
         dispatch(clearSelectedRow());
@@ -102,14 +112,14 @@ const FieldOfStudies: React.FC = () => {
                 const { fos } = resultAction.payload;
                 return fos;
             } else {
-                throw new Error('Failed to add field of study');
+                enqueueSnackbar(`Wystąpił błąd przy dodawaniu kierunku`, { variant: 'error' });
             }
         } else {
             const resultAction = await dispatch(updateFOS(updatedRow));
             if (updateFOS.fulfilled.match(resultAction)) {
                 return resultAction.payload;
             } else {
-                throw new Error('Failed to update field of study');
+                enqueueSnackbar(`Wystąpił błąd przy aktualizacji kierunku`, { variant: 'error' });
             }
         }
     };
@@ -216,7 +226,6 @@ const FieldOfStudies: React.FC = () => {
                 content={`Czy na pewno chcesz usunąć kierunek studiów? ${selectedRowName}?`}
                 action="Potwierdź"
             />
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
         </>
     );
 };
