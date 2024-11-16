@@ -33,6 +33,7 @@ import {
 } from '../app/slices/buildingSlice';
 import {Building} from '../utils/Interfaces.ts';
 import {plPL} from "@mui/x-data-grid/locales";
+import {useSnackbar} from "notistack";
 
 const Buildings: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -43,12 +44,15 @@ const Buildings: React.FC = () => {
     const loading = useSelector((state: RootState) => state.buildings.loading);
     const error = useSelector((state: RootState) => state.buildings.error);
     const [isDialogOpen, setDialogOpen] = React.useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     const [rowIdCounter, setRowIdCounter] = React.useState(-1);
 
     useEffect(() => {
-        dispatch(fetchBuildings());
-    }, [dispatch]);
+        dispatch(fetchBuildings()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania budynków: ${error.message}`, { variant: 'error' });
+        });
+    }, [dispatch, enqueueSnackbar]);
 
 
     const handleEditClick = (id: GridRowId) => () => {
@@ -69,7 +73,14 @@ const Buildings: React.FC = () => {
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteBuilding(selectedRowId));
+            dispatch(deleteBuilding(selectedRowId))
+                .unwrap()
+                .then(() => {
+                    enqueueSnackbar('Budynek został pomyślnie usunięty', { variant: 'success' });
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas usuwania budynku: ${error.message}`, { variant: 'error' });
+                });
         }
         setDialogOpen(false);
         dispatch(clearSelectedRow());
@@ -102,14 +113,14 @@ const Buildings: React.FC = () => {
                 const { building } = resultAction.payload;
                 return building;
             } else {
-                throw new Error('Failed to add building');
+                enqueueSnackbar(`Wystąpił błąd przy dodawaniu budynku`, { variant: 'error' });
             }
         } else {
             const resultAction = await dispatch(updateBuilding(updatedRow));
             if (updateBuilding.fulfilled.match(resultAction)) {
                 return resultAction.payload;
             } else {
-                throw new Error('Failed to update building');
+                enqueueSnackbar(`Wystąpił błąd przy aktualizacji budynku`, { variant: 'error' });
             }
         }
     };
@@ -216,7 +227,6 @@ const Buildings: React.FC = () => {
                 content={`Czy na pewno chcesz usunąć budynek ${selectedRowCode}?`}
                 action="Potwierdź"
             />
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
         </>
     );
 };

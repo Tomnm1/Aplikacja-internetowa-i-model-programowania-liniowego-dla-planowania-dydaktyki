@@ -25,6 +25,7 @@ import { GridRowId } from '@mui/x-data-grid';
 import SaveButton from '../utils/SaveButton';
 import {green} from "@mui/material/colors";
 import CancelButton from "../utils/CancelButton.tsx";
+import {useSnackbar} from "notistack";
 
 interface ClassroomModalProps {
     open: boolean;
@@ -35,6 +36,7 @@ interface ClassroomModalProps {
 
 const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroom, isAdding }) => {
     const dispatch = useDispatch<AppDispatch>();
+    const { enqueueSnackbar } = useSnackbar();
     const [buildings, setBuildings] = useState<BackendBuilding[]>([]);
     const [formData, setFormData] = useState<{
         id: GridRowId;
@@ -79,7 +81,9 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                         }));
                     }
                 })
-                .catch((err) => console.error('Failed to fetch buildings', err));
+                .catch(err => {
+                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu budynków: ${err}`, { variant: 'error' });
+                });
         } else if (classroom) {
             fetch(`${API_ENDPOINTS.BUILDINGS}/${classroom.buildingId}`)
                 .then((res) => res.json())
@@ -89,9 +93,11 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                         buildingCode: data.code,
                     }));
                 })
-                .catch((err) => console.error('Failed to fetch building', err));
+                .catch(err => {
+                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu budynku nr ${classroom.buildingId}$: ${err}`, { variant: 'error' });
+                });
         }
-    }, [isAdding, classroom]);
+    }, [isAdding, classroom, enqueueSnackbar]);
 
     useEffect(() => {
         if (classroom && !isAdding) {
@@ -152,7 +158,7 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
 
     const handleSubmit = async () => {
         if (!formData.buildingId || !formData.code) {
-            alert('Proszę wypełnić wszystkie pola.');
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
             return;
         }
 
@@ -202,8 +208,8 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                 setSuccess(false);
                 onClose();
             }
-        } catch (error) {
-            alert('Wystąpił błąd podczas zapisywania sali.');
+        } catch (error : any) {
+            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, { variant: 'error' });
             setLoading(false);
         }
     };

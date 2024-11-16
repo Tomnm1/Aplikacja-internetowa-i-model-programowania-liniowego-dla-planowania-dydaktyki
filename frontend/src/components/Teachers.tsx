@@ -14,20 +14,24 @@ import { plPL } from '@mui/x-data-grid/locales';
 import { fetchTeachers, deleteTeacher } from '../app/slices/teacherSlice';
 import TeacherModal from './TeacherModal';
 import { degrees, Teacher } from '../utils/Interfaces';
+import { useSnackbar } from "notistack";
 
 const Teachers: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { rows: teachers, loading, error } = useSelector((state: RootState) => state.teachers);
+    const { rows: teachers, loading } = useSelector((state: RootState) => state.teachers);
 
     const [isDialogOpen, setDialogOpen] = useState(false);
     const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
     const [isModalOpen, setModalOpen] = useState(false);
     const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
     const [isAdding, setIsAdding] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
-        dispatch(fetchTeachers());
-    }, [dispatch]);
+        dispatch(fetchTeachers()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania przedmiotów: ${error.message}`, { variant: 'error' });
+        });
+    }, [dispatch, enqueueSnackbar]);
 
     const handleViewClick = (id: number) => () => {
         const teacher = teachers.find((t) => t.id === id);
@@ -45,7 +49,14 @@ const Teachers: React.FC = () => {
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteTeacher(selectedRowId));
+            dispatch(deleteTeacher(selectedRowId))
+                .unwrap()
+                .then(() => {
+                    enqueueSnackbar('Pracownik został pomyślnie usunięty', { variant: 'success' });
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas usuwania pracownika: ${error.message}`, { variant: 'error' });
+                });
         }
         setDialogOpen(false);
         setSelectedRowId(null);
@@ -130,7 +141,6 @@ const Teachers: React.FC = () => {
                     isAdding={isAdding}
                 />
             )}
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
         </>
     );
 };
