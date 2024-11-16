@@ -23,23 +23,26 @@ import {
 } from '../app/slices/classroomSlice';
 import { Classroom } from '../utils/Interfaces.ts';
 import { plPL } from '@mui/x-data-grid/locales';
+import {useSnackbar} from "notistack";
 
 
 const Classrooms: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const classrooms = useSelector((state: RootState) => state.classrooms.rows);
     const loading = useSelector((state: RootState) => state.classrooms.loading);
-    const error = useSelector((state: RootState) => state.classrooms.error);
 
     const [isDialogOpen, setDialogOpen] = React.useState(false);
     const [selectedRowId, setSelectedRowId] = React.useState<GridRowId | null>(null);
     const [isModalOpen, setModalOpen] = React.useState(false);
     const [selectedClassroom, setSelectedClassroom] = React.useState<Classroom | null>(null);
     const [isAdding, setIsAdding] = React.useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
-        dispatch(fetchClassrooms());
-    }, [dispatch]);
+        dispatch(fetchClassrooms()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania sal: ${error.message}`, { variant: 'error' });
+        });
+    }, [dispatch, enqueueSnackbar]);
 
     const handleViewClick = (id: GridRowId) => () => {
         const classroom = classrooms.find((cls) => cls.id === id);
@@ -58,7 +61,14 @@ const Classrooms: React.FC = () => {
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
             if (typeof selectedRowId === "number") {
-                dispatch(deleteClassroom(selectedRowId));
+                dispatch(deleteClassroom(selectedRowId))
+                    .unwrap()
+                    .then(() => {
+                        enqueueSnackbar('Sala została pomyślnie usunięta', { variant: 'success' });
+                    })
+                    .catch((error) => {
+                        enqueueSnackbar(`Błąd podczas usuwania sali: ${error.message}`, { variant: 'error' });
+                    });
             }
         }
         setDialogOpen(false);
@@ -129,7 +139,6 @@ const Classrooms: React.FC = () => {
                     isAdding={isAdding}
                 />
             )}
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
         </>
     );
 };
