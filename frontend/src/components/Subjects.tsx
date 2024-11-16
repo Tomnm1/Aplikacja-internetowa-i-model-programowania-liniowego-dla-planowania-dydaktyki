@@ -87,7 +87,7 @@ const Subjects: React.FC = () => {
             field: 'specialisation',
             headerName: 'Specjalizacja',
             width: 100,
-            valueGetter: (_value,row) => row.semester.specialisation.name || '',
+            valueGetter: (_value,row) => row.semester.specialisation?.name || '',
         },
         {
             field: 'fieldOfStudy',
