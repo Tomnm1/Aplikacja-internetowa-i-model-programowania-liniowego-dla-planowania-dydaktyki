@@ -1,12 +1,9 @@
 package pl.poznan.put.planner_endpoints.Teacher;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.jna.platform.unix.solaris.LibKstat;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
-import org.hibernate.type.SqlTypes;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 
 import java.util.HashMap;
@@ -27,6 +24,12 @@ public class Teacher {
     public String firstName;
     @Column(name = "last_name")
     public String lastName;
+    @Column(name = "second_name")
+    public String secondName;
+    @Column(name = "usos_id")
+    public Integer usosId;
+    @Column(name = "inner_id")
+    public Integer innerId;
 
     @Column(name = "degree")
     @Convert(converter = DegreeConverter.class)
