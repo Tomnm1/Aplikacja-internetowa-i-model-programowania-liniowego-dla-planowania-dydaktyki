@@ -26,13 +26,19 @@ public class TeacherHandler {
             Teacher teacher = new Teacher();
             teacher.firstName = worker.getName();
             teacher.lastName = worker.getSurname();
+            teacher.usosId = worker.getWorkerId();
             try {
                 teacher.degree = Constans.EnumUtils.fromString(Degree.class, worker.getTitleDegree());
             } catch (IllegalArgumentException e) {
                 System.err.println("Unknown degree: " + worker.getTitleDegree());
                 teacher.degree = Degree.BRAK;
             }
-            teacherService.createteacher(teacher);
+            Teacher teacher1 = teacherService.findByUsosId(teacher.usosId);
+            if (teacher1 == null) {
+                teacherService.createteacher(teacher);
+            } else {
+                System.out.println("Teacher with usosId: " + teacher.usosId + " already exists.");
+            }
         }
     }
 }
