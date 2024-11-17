@@ -20,11 +20,12 @@ import { Specialisation, BackendSpecialisation, BackendFieldOfStudies, Cycle } f
 import { addSpecialisation, updateSpecialisation } from '../app/slices/specialisationSlice';
 import { API_ENDPOINTS } from '../app/urls';
 import { SelectChangeEvent } from '@mui/material/Select';
-import SaveButton from '../utils/SaveButton';
 import { green } from "@mui/material/colors";
-import CancelButton from "../utils/CancelButton";
 import {GridRowId} from "@mui/x-data-grid";
 import { useSnackbar } from 'notistack';
+import ActionButton from "../utils/ActionButton.tsx";
+import SaveIcon from "@mui/icons-material/Save";
+import ClearIcon from "@mui/icons-material/Clear";
 
 interface SpecialisationModalProps {
     open: boolean;
@@ -235,8 +236,13 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
                                 </FormControl>
                             </DialogContent>
                             <DialogActions>
-                                <SaveButton onClick={handleSubmit} loading={loading} success={success} />
-                                <CancelButton onClick={onClose} disabled={loading} />
+                                <div className={"flex"}>
+                                    <ActionButton onClick={handleSubmit} disabled={loading}
+                                                  tooltipText={isAdding ? 'Dodaj' : 'Zaktualizuj'} icon={<SaveIcon/>}
+                                                  colorScheme={'primary'}/>
+                                    <ActionButton onClick={onClose} disabled={loading} tooltipText={"Anuluj"}
+                                                  icon={<ClearIcon/>} colorScheme={'secondary'}/>
+                                </div>
                             </DialogActions>
                         </>
                     ) : (

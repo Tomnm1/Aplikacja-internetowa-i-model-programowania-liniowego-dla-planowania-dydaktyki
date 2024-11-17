@@ -15,7 +15,8 @@ import {
     Build as BuildIcon,
     VerifiedUser as VerifiedUserIcon,
 } from '@mui/icons-material';
-import SaveButton from '../utils/SaveButton.tsx';
+import ActionButton from "../utils/ActionButton.tsx";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 
 const steps = ['Sprawdź ograniczenia', 'Budowanie', 'Sukces lub Błąd'];
 
@@ -112,11 +113,9 @@ const Home: React.FC = () => {
                         <Typography variant="h6" className="mb-4">
                             Sprawdź Ograniczenia
                         </Typography>
-                        <SaveButton
-                            onClick={checkRestrictions}
-                            loading={checkLoading}
-                            success={checkSuccess}
-                        />
+                        <ActionButton onClick={checkRestrictions} disabled={checkLoading}
+                                      tooltipText={'Przejdź do następnego kroku'} icon={<NavigateNextIcon/>}
+                                      colorScheme={'primary'} />
                         {error && (
                             <Typography color="error" className="mt-4">
                                 {error}
@@ -131,11 +130,9 @@ const Home: React.FC = () => {
                             Budowanie
                         </Typography>
                         {!buildLoading && !buildSuccess ? (
-                            <SaveButton
-                                onClick={startBuilding}
-                                loading={buildLoading}
-                                success={buildSuccess}
-                            />
+                            <ActionButton onClick={startBuilding} disabled={buildLoading}
+                                          tooltipText={'Zbuduj'} icon={<NavigateNextIcon/>}
+                                          colorScheme={'primary'} />
                         ) : (
                             <div className="w-full mt-6">
                                 <div className="bg-gray-100 p-4 rounded-lg shadow-inner">
