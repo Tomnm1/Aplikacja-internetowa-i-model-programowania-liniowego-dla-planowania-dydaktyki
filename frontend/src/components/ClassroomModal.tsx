@@ -22,10 +22,11 @@ import { addClassroom, updateClassroom } from '../app/slices/classroomSlice';
 import { API_ENDPOINTS } from '../app/urls';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { GridRowId } from '@mui/x-data-grid';
-import SaveButton from '../utils/SaveButton';
 import {green} from "@mui/material/colors";
-import CancelButton from "../utils/CancelButton.tsx";
 import {useSnackbar} from "notistack";
+import ActionButton from "../utils/ActionButton.tsx";
+import SaveIcon from "@mui/icons-material/Save";
+import ClearIcon from "@mui/icons-material/Clear";
 
 interface ClassroomModalProps {
     open: boolean;
@@ -312,8 +313,13 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                                 </FormControl>
                             </DialogContent>
                             <DialogActions>
-                                <SaveButton onClick={handleSubmit} loading={loading} success={success} />
-                                <CancelButton onClick={onClose} disabled={loading} />
+                                <div className={"flex"}>
+                                    <ActionButton onClick={handleSubmit} disabled={loading}
+                                                  tooltipText={isAdding ? 'Dodaj' : 'Zaktualizuj'} icon={<SaveIcon/>}
+                                                  colorScheme={'primary'}/>
+                                    <ActionButton onClick={onClose} disabled={loading} tooltipText={"Anuluj"}
+                                                  icon={<ClearIcon/>} colorScheme={'secondary'}/>
+                                </div>
                             </DialogActions>
                         </>
                     ) : (

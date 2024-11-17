@@ -8,13 +8,14 @@ import CheckIcon from '@mui/icons-material/Check';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../app/store';
 import {BackendSpecialisation, cycleMapping, Semester} from '../utils/Interfaces';
-import SaveButton from '../utils/SaveButton';
 import { green } from "@mui/material/colors";
-import CancelButton from "../utils/CancelButton";
 import API_ENDPOINTS from '../app/urls';
 import { SelectChangeEvent } from '@mui/material/Select';
 import {addSemester, fetchSemesters, updateSemester} from "../app/slices/semesterSlice.ts";
 import {useSnackbar} from "notistack";
+import ActionButton from "../utils/ActionButton.tsx";
+import SaveIcon from "@mui/icons-material/Save";
+import ClearIcon from "@mui/icons-material/Clear";
 
 interface SemesterModalProps {
     open: boolean;
@@ -142,14 +143,19 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                                 />
                             </DialogContent>
                             <DialogActions>
-                                <SaveButton onClick={handleSubmit} loading={loading} success={success} />
-                                <CancelButton onClick={onClose} disabled={loading} />
+                                <div className={"flex"}>
+                                    <ActionButton onClick={handleSubmit} disabled={loading}
+                                                  tooltipText={isAdding ? 'Dodaj' : 'Zaktualizuj'} icon={<SaveIcon/>}
+                                                  colorScheme={'primary'}/>
+                                    <ActionButton onClick={onClose} disabled={loading} tooltipText={"Anuluj"}
+                                                  icon={<ClearIcon/>} colorScheme={'secondary'}/>
+                                </div>
                             </DialogActions>
                         </>
                     ) : (
                         <Fade in={success} timeout={1000}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <CheckIcon sx={{ fontSize: 60, color: green[500], mb: 2 }} />
+                            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                <CheckIcon sx={{fontSize: 60, color: green[500], mb: 2}}/>
                                 <Typography variant="h6" color="green">
                                     Dodano!
                                 </Typography>
