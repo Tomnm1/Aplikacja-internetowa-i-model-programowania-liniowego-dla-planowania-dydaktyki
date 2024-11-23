@@ -23,7 +23,7 @@ public class SubjectTypeHandler {
     public void insertSubjectTypes(List<SubjectType> subjectTypeList, Subject subject){
         for (SubjectType subjectType: subjectTypeList){
             subjectType.subject = subject;
-            subjectTypeService.createsubjectType(subjectType);
+            subjectTypeService.createsubjectType(subjectType.convertToDTO());
         }
     }
 }
