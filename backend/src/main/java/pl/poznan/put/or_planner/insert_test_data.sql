@@ -10,7 +10,7 @@ INSERT INTO semesters (semester_id, number, specialisation_id) OVERRIDING SYSTEM
 
 -- Insert groups
 INSERT INTO groups (group_id, code, semester_id) OVERRIDING SYSTEM VALUE VALUES
-(1, 'w1', 1), (2, 'ćw1', 1), (3, 'ćw2', 1), (4, 'l1', 1), (5, 'l2', 1), (6, 'l3', 1), (7, 'l4', 1);
+(1, 'l1', 1), (2, 'l2', 1), (3, 'l3', 1), (4, 'l4', 1);
 
 -- Insert teachers
 INSERT INTO teachers (teacher_id, first_name, last_name) OVERRIDING SYSTEM VALUE VALUES

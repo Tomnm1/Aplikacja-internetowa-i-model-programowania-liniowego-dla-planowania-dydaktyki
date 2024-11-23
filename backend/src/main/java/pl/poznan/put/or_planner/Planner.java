@@ -5,8 +5,11 @@ import com.google.ortools.linearsolver.MPObjective;
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
 import pl.poznan.put.or_planner.constraints.ConstraintsManager;
+import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
+import pl.poznan.put.planner_endpoints.Subject.Subject;
+import pl.poznan.put.planner_endpoints.Subject.SubjectService;
 
 import java.util.*;
 
@@ -22,7 +25,7 @@ public class Planner {
     private final List<String> teachers;
     private final List<String> rooms;
     private final List<String> timeSlots;
-    private final List<PlannerSubject> subjects;
+    private final List<PlannerClassType> subjects;
 
     private final int numGroups;
     private final int numRooms;
@@ -35,7 +38,7 @@ public class Planner {
 
 
     public Planner(List<String> groups, List<String> teachers, List<String> rooms, List<String> timeSlots,
-                   List<PlannerSubject> subjects) {
+                   List<PlannerClassType> subjects) {
         Loader.loadNativeLibraries();
 
         this.groups = groups;
@@ -114,14 +117,36 @@ public class Planner {
                     for (int p = 0; p < numSubjects; ++p) {
                         for (int n = 0; n < numTeachers; ++n) {
                             if (xEven[g][s][t][p][n].solutionValue() == 1) {
+                                PlannerClassType plannerClassType = subjects.get(p);
+                                String subjectId = plannerClassType.getId();
+                                Map<String, List<String>> groupMappings = plannerClassType.getGroupMappings();
+                                List<String> groupsToAssign = groupMappings.get(groups.get(g));
+
                                 PlannedSlot evenSlot = new PlannedSlot(timeSlots.get(t), groups.get(g), teachers.get(n),
-                                        rooms.get(s), subjects.get(p).getName(), true);
+                                        rooms.get(s), subjectId, true);
                                 scheduleTable.add(evenSlot);
+
+                                for(String group: groupsToAssign){
+                                    PlannedSlot evenGroupSlot = new PlannedSlot(timeSlots.get(t), group, teachers.get(n),
+                                            rooms.get(s), subjectId, true);
+                                    scheduleTable.add(evenGroupSlot);
+                                }
                             }
                             if (xOdd[g][s][t][p][n].solutionValue() == 1) {
+                                PlannerClassType plannerClassType = subjects.get(p);
+                                String subjectId = plannerClassType.getId();
+                                Map<String, List<String>> groupMappings = plannerClassType.getGroupMappings();
+                                List<String> groupsToAssign = groupMappings.get(groups.get(g));
+
                                 PlannedSlot oddSlot = new PlannedSlot(timeSlots.get(t), groups.get(g), teachers.get(n),
-                                        rooms.get(s), subjects.get(p).getName(), false);
+                                        rooms.get(s), subjectId, false);
                                 scheduleTable.add(oddSlot);
+
+                                for(String group: groupsToAssign){
+                                    PlannedSlot evenGroupSlot = new PlannedSlot(timeSlots.get(t), group, teachers.get(n),
+                                            rooms.get(s), subjectId, false);
+                                    scheduleTable.add(evenGroupSlot);
+                                }
                             }
                         }
                     }

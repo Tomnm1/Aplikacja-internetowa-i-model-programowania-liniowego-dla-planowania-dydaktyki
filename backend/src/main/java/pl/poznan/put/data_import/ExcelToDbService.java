@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.poznan.put.data_import.insert_to_db.*;
+import pl.poznan.put.data_import.model.subjects.SubjectWithGroupData;
 import pl.poznan.put.planner_endpoints.FieldOfStudy.FieldOfStudy;
 import pl.poznan.put.planner_endpoints.Semester.Semester;
 import pl.poznan.put.planner_endpoints.Specialisation.Specialisation;
@@ -31,7 +32,7 @@ public class ExcelToDbService {
     private String columnName;
 
     private final Map<String, Integer> columnIndices = new HashMap<>();
-    private final Map<String, Consumer<Cell>> columnActions = new HashMap<>();
+    private final Map<String, Consumer<Cell>> columnActions = new LinkedHashMap<>();
 
     private final FieldOfStudyHandler fieldOfStudyHandler;
     private final SpecialisationHandler specialisationHandler;
@@ -54,6 +55,7 @@ public class ExcelToDbService {
     private Subject subject;
     private final List<SubjectType> subjectTypes = new ArrayList<>();
     private Map<String, Integer> groupsCounter;
+    private final Map<String, List<SubjectWithGroupData>> groupTypesData = new LinkedHashMap<>();
 
     @Autowired
     public ExcelToDbService(
@@ -97,20 +99,31 @@ public class ExcelToDbService {
     }
 
     private void insertData(){
+        boolean groupsFlag = false;
         this.fieldOfStudy = assignIfNotNull(fieldOfStudyHandler.insertFieldOfStudy(fieldOfStudyName), this.fieldOfStudy);
         this.specialisation = assignIfNotNull(specialisationHandler.insertSpecialisation(specialisationName, cycle, fieldOfStudy), this.specialisation);
         Semester newSemester = semesterHandler.insertSemester(semesterNumber, specialisation);
-        if (this.semester != null
-                && !Objects.equals(newSemester.specialisation.specialisationId, this.semester.specialisation.specialisationId)
-                && !Objects.equals(newSemester.number, this.semester.number)){
-            this.groupsHandler.processAndInsertGroups(this.groupsCounter, this.semester);
-            groupsCounter.clear();
+        Semester tempSemester = this.semester;
+        if ((this.semester != null
+                && !Objects.equals(newSemester.specialisation.specialisationId, this.semester.specialisation.specialisationId))
+                || (this.semester != null && Objects.equals(newSemester.specialisation.specialisationId, this.semester.specialisation.specialisationId)
+                && !Objects.equals(newSemester.number, this.semester.number))){
+            groupsFlag = true;
         }
         this.semester = newSemester;
 //        this.semester = assignIfNotNull(semesterHandler.insertSemester(semesterNumber, specialisation), this.semester);
         this.subject = assignIfNotNull(subjectHandler.insertSubject(subjectName, exam, false, false, Language.polski, semester), this.subject);
         if(!subjectTypes.isEmpty())
             subjectTypeHandler.insertSubjectTypes(this.subjectTypes, this.subject);
+
+        if(groupsFlag){
+            List <SubjectWithGroupData> tempSubject = groupTypesData.get(subjectName);
+            groupTypesData.remove(subjectName);
+            this.groupsHandler.processAndInsertGroups(this.groupsCounter, tempSemester, this.groupTypesData);
+            groupsCounter.clear();
+            groupTypesData.clear();
+            groupTypesData.put(subjectName, tempSubject);
+        }
     }
 
     private void processAllRows(Sheet sheet, int startingRow){
@@ -133,8 +146,8 @@ public class ExcelToDbService {
     }
 
     private void prepareColumnActions(){
-        columnActions.put(FIELD_OF_STUDY, this::processFieldOfStudy);
         columnActions.put(TYPE_FACULTY, this::processTypeFaculty);
+        columnActions.put(FIELD_OF_STUDY, this::processFieldOfStudy);
         columnActions.put(TERM, this::processTerm);
         columnActions.put(SUBJECT, this::processSubject);
         columnActions.put(HOURS+ LECTURE_LETTER, this::processSubjectTypeLecture);
@@ -158,38 +171,63 @@ public class ExcelToDbService {
 
     private void processSubjectTypeLecture(Cell cell){
         int cellValue = (int) cell.getNumericCellValue();
+        Cell groupCell = this.row.getCell(columnIndices.get(GROUPS + LECTURE_LETTER));
+        int numGroups = 0;
+        if (groupCell != null && groupCell.getCellType() == CellType.NUMERIC) {
+            numGroups = (int) groupCell.getNumericCellValue();
+        }
+
         if(cellValue != 0) {
-            createSubjectType(ClassTypeOwn.wykład, cellValue, MAX_LECTURE);
+            createSubjectType(ClassTypeOwn.wykład, cellValue, MAX_LECTURE, numGroups);
         }
     }
 
     private void processSubjectTypeExercise(Cell cell){
         int cellValue = (int) cell.getNumericCellValue();
+        Cell groupCell = this.row.getCell(columnIndices.get(GROUPS + EXERCISE_DOT_LETTER));
+        int numGroups = 0;
+        if (groupCell != null && groupCell.getCellType() == CellType.NUMERIC) {
+            numGroups = (int) groupCell.getNumericCellValue();
+        }
         if(cellValue != 0) {
-            createSubjectType(ClassTypeOwn.ćwiczenia, cellValue, MAX_EXERCISE);
+            createSubjectType(ClassTypeOwn.ćwiczenia, cellValue, MAX_EXERCISE, numGroups);
         }
     }
 
     private void processSubjectTypeLab(Cell cell){
         int cellValue = (int) cell.getNumericCellValue();
+        Cell groupCell = this.row.getCell(columnIndices.get(GROUPS + LAB_LETTER));
+        int numGroups = 0;
+        if (groupCell != null && groupCell.getCellType() == CellType.NUMERIC) {
+            numGroups = (int) groupCell.getNumericCellValue();
+        }
         if(cellValue != 0) {
-            createSubjectType(ClassTypeOwn.laboratoria, cellValue, MAX_LABORATORY);
+            createSubjectType(ClassTypeOwn.laboratoria, cellValue, MAX_LABORATORY, numGroups);
         }
     }
 
     private void processSubjectTypeProject(Cell cell){
         int cellValue = (int) cell.getNumericCellValue();
+        Cell groupCell = this.row.getCell(columnIndices.get(GROUPS + PROJECT_LETTER));
+        int numGroups = 0;
+        if (groupCell != null && groupCell.getCellType() == CellType.NUMERIC) {
+            numGroups = (int) groupCell.getNumericCellValue();
+        }
         if(cellValue != 0) {
-            createSubjectType(ClassTypeOwn.projekt, cellValue, MAX_PROJECT);
+            createSubjectType(ClassTypeOwn.projekt, cellValue, MAX_PROJECT, numGroups);
         }
     }
 
-    private void createSubjectType(ClassTypeOwn type, int cellValue, int maxNumberOfStudents){
+    private void createSubjectType(ClassTypeOwn type, int cellValue, int maxNumberOfStudents, int numGroups){
         SubjectType subjectType = new SubjectType();
         subjectType.type = type;
         subjectType.numOfHours = cellValue;
         subjectType.maxStudentsPerGroup = maxNumberOfStudents;
         subjectTypes.add(subjectType);
+
+        SubjectWithGroupData subjectWithGroupData = new SubjectWithGroupData(subjectType, type, numGroups);
+        this.groupTypesData.computeIfAbsent(this.subjectName, k -> new ArrayList<>())
+                .add(subjectWithGroupData);
     }
 
     private void processLectureGroups(Cell cell){

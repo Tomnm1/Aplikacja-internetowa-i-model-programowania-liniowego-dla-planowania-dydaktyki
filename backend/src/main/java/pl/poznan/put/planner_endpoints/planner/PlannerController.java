@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.poznan.put.or_planner.Planner;
 import pl.poznan.put.or_planner.data.PlannerData;
+import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
 import pl.poznan.put.or_planner.insert.InsertPlanToDbService;
 import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
@@ -36,7 +37,7 @@ public class PlannerController {
             List<String> teachers = plannerData.getTeachers();
             List<String> rooms = plannerData.getRooms();
             List<String> timeSlots = plannerData.getTimeSlots();
-            List<PlannerSubject> subjects = plannerData.getSubjects();
+            List<PlannerClassType> subjects = plannerData.getSubjects();
 
             Planner planner = new Planner(groups, teachers, rooms, timeSlots, subjects);
 

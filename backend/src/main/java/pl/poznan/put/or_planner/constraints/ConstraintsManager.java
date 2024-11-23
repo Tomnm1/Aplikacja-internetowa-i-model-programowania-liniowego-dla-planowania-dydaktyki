@@ -3,7 +3,6 @@ package pl.poznan.put.or_planner.constraints;
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
-import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ public class ConstraintsManager {
     private final List<String> teachers;
     private final List<String> rooms;
     private final List<String> timeSlots;
-    private final List<PlannerSubject> subjects;
+    private final List<PlannerClassType> subjects;
 
     private final int numGroups;
     private final int numRooms;
@@ -31,7 +30,7 @@ public class ConstraintsManager {
 
 
     public ConstraintsManager(MPSolver solver, List<String> groups, List<String> teachers, List<String> rooms, List<String> timeSlots,
-                              List<PlannerSubject> subjects) {
+                              List<PlannerClassType> subjects) {
         this.solver = solver;
         this.groups = groups;
         this.teachers = teachers;
@@ -71,39 +70,34 @@ public class ConstraintsManager {
 
     public void assignSubjectsToGroupsAndBlockGroupsConstraint(MPVariable[][][][][] xEven, MPVariable[][][][][] xOdd){
         for (int p = 0; p < numSubjects; ++p) {
-            PlannerSubject subject = subjects.get(p);
-            List<PlannerClassType> classTypes = subject.getTypesOfClasses();
+            String frequency = subjects.get(p).getFrequency();
+            List<String> classRooms = subjects.get(p).getRooms();
+            List<String> classTeachers = subjects.get(p).getTeachers();
+            Map<String, List<String>> groupMappings = subjects.get(p).getGroupMappings();
+            Set<String> assignedGroups = groupMappings.keySet();
 
-            for (PlannerClassType classType : classTypes) {
-                String frequency = classType.getFrequency();
-                List<String> classRooms = classType.getRooms();
-                List<String> classTeachers = classType.getTeachers();
-                Map<String, List<String>> groupMappings = classType.getGroupMappings();
-                Set<String> assignedGroups = groupMappings.keySet();
+            List<Integer> roomIndices = classRooms.stream()
+                    .map(rooms::indexOf)
+                    .toList();
 
-                List<Integer> roomIndices = classRooms.stream()
-                        .map(rooms::indexOf)
-                        .toList();
+            List<Integer> teacherIndices = classTeachers.stream()
+                    .map(teachers::indexOf)
+                    .toList();
 
-                List<Integer> teacherIndices = classTeachers.stream()
-                        .map(teachers::indexOf)
-                        .toList();
+            List<Integer> assignedGroupsIndices = assignedGroups.stream()
+                    .map(groups::indexOf)
+                    .toList();
+            for (int assignedGroupIndex : assignedGroupsIndices) {
+                assignSubjectToGroupConstraint(xEven, xOdd, roomIndices, teacherIndices, assignedGroupIndex, p, frequency);
 
-                List<Integer> assignedGroupsIndices = assignedGroups.stream()
+                List<String> blockedGroups = groupMappings.get(groups.get(assignedGroupIndex));
+                List<Integer> blockedGroupsIndices = blockedGroups.stream()
                         .map(groups::indexOf)
                         .toList();
-                for (int assignedGroupIndex : assignedGroupsIndices) {
-                    assignSubjectToGroupConstraint(xEven, xOdd, roomIndices, teacherIndices, assignedGroupIndex, p, frequency);
+                blockGroupsConstraint(xEven, xOdd, blockedGroupsIndices, assignedGroupIndex, p, frequency);
 
-                    List<String> blockedGroups = groupMappings.get(groups.get(assignedGroupIndex));
-                    List<Integer> blockedGroupsIndices = blockedGroups.stream()
-                            .map(groups::indexOf)
-                            .toList();
-                    blockGroupsConstraint(xEven, xOdd, blockedGroupsIndices, assignedGroupIndex, p, frequency);
-
-                    groupsMustHaveAllRequiredSubjectsConstraint(xEven, xOdd, roomIndices, teacherIndices,
-                            assignedGroupIndex, p, frequency);
-                }
+                groupsMustHaveAllRequiredSubjectsConstraint(xEven, xOdd, roomIndices, teacherIndices,
+                        assignedGroupIndex, p, frequency);
             }
         }
     }

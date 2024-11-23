@@ -109,7 +109,7 @@ public class PlanToExcelExportService {
             Cell cell = row.createCell(groups.get(planObject.group));
             cell.setCellValue(
                     planObject.classroom.code + " " + planObject.subjectType.subject.name + " " +
-                            planObject.teacher.firstName + " " + planObject.teacher.lastName
+                    planObject.teacher.firstName + " " + planObject.teacher.lastName + " " + planObject.subjectType.type
             );
             cell.setCellStyle(cellStyle);
             sheet.autoSizeColumn(groups.get(planObject.group));
