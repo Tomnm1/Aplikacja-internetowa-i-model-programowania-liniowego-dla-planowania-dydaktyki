@@ -330,6 +330,18 @@ export interface SubjectType {
     type: Type;
     maxStudentsPerGroup: number;
     subject: BackendSubject | { SubjectId: number };
+    teachersList:teacherListDTO[];
+    frontId?: string;
+}
+
+export interface teacherListDTO{
+    id: number;
+    teacherId: number;
+    teacherFirstName: string;
+    teacherLastName: string;
+    subjectTypeId: number;
+    numHours: number;
+    frontId?: string;
 }
 
 export interface BackendSubjectType {
@@ -338,6 +350,8 @@ export interface BackendSubjectType {
     type: Type;
     maxStudentsPerGroup: number;
     subject: BackendSubject | { SubjectId: number };
+    teachersList:teacherListDTO[];
+    frontId?: string;
 }
 
 export interface SubjectTypeState {

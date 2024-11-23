@@ -3,7 +3,8 @@ import {
     Box, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, Paper, IconButton
 } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
+import { Edit, Delete,PersonAddAlt } from '@mui/icons-material';
+import ErrorIcon from '@mui/icons-material/Error';
 import { BackendSubjectType, typeMapping } from '../utils/Interfaces';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../app/store';
@@ -11,6 +12,7 @@ import { deleteSubjectType } from '../app/slices/subjectTypeSlice';
 import { useSnackbar } from 'notistack';
 import TypeModal from "./TypeModal.tsx";
 import AddIcon from "@mui/icons-material/Add";
+import SubjectTypesTeachersList from "./SubjectTypesTeachersList.tsx";
 
 interface SubjectTypesFormProps {
     subjectTypes: BackendSubjectType[];
@@ -22,6 +24,7 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSu
     const dispatch = useDispatch<AppDispatch>();
     const { enqueueSnackbar } = useSnackbar();
     const [openTypeModal, setOpenTypeModal] = useState(false);
+    const [openTeachersList, setOpenTeachersList] = useState(false);
     const [currentType, setCurrentType] = useState<BackendSubjectType | null>(null);
 
     const handleAdd = () => {
@@ -32,6 +35,11 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSu
     const handleEdit = (type: BackendSubjectType) => {
         setCurrentType(type);
         setOpenTypeModal(true);
+    };
+
+    const handleTeachers = (type: BackendSubjectType) => {
+        currentType === type ? setCurrentType(null) : setCurrentType(type);
+        currentType === type ? setOpenTeachersList(false) : setOpenTeachersList(true);
     };
 
     const handleDelete = async (id: number) => {
@@ -69,7 +77,10 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSu
                     </TableHead>
                     <TableBody>
                         {subjectTypes.map((type) => (
-                            <TableRow key={type.type}>
+                            <>
+                                {console.log(type.teachersList.reduce((sum, t) => {return sum + t.numHours;}, 0))}
+                                {console.log( type.numOfHours)}
+                            <TableRow key={type.type} style={currentType === type ? { backgroundColor:"#dddddd" } : {}}>
                                 <TableCell>{typeMapping[type.type]}</TableCell>
                                 <TableCell>{type.numOfHours}</TableCell>
                                 <TableCell>{type.maxStudentsPerGroup}</TableCell>
@@ -77,6 +88,10 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSu
                                     <div className={"flex"}>
                                         <IconButton onClick={() => handleEdit(type)} disabled={loading}>
                                             <Edit />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleTeachers(type)} disabled={loading}>
+                                            <PersonAddAlt />
+                                            {type.teachersList.reduce((sum, t) => {return sum + t.numHours;}, 0) != type.numOfHours && (<ErrorIcon style={{position: 'absolute', top: -5, right: -5, fontSize: 20, color: 'red'}}/>)}
                                         </IconButton>
                                         {/*TODO dodać zabezpieczenie pytające czy chcesz usunąć rekord <ConfirmationDialog>*/}
                                         {/*TODO Dodać możliwość usuwania rekordków które nie są jeszcze dodane - tj takie których jeszcze nie ma w bazie, bo główny przedmiot nie został dodany*/}
@@ -86,6 +101,14 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSu
                                     </div>
                                 </TableCell>
                             </TableRow>
+                        {currentType === type && openTeachersList && (
+                            <SubjectTypesTeachersList
+                        teachersList={currentType?.teachersList ? currentType.teachersList : []}
+                        typeData={currentType}
+                        setSubjectTypes={setSubjectTypes}
+                        loading={loading}
+                        />)}
+                            </>
                         ))}
                         {subjectTypes.length === 0 && (
                             <TableRow>

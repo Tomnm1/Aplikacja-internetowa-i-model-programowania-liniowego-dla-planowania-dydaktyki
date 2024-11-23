@@ -24,6 +24,8 @@ const TypeModal: React.FC<TypeModalProps> = ({ open, onClose, typeData, onSave }
         type: typeData?.type || Type.LECTURE,
         maxStudentsPerGroup: typeData?.maxStudentsPerGroup || 0,
         subject: typeData?.subject || { SubjectId: 0 },
+        teachersList: typeData?.teachersList || [],
+        frontId: typeData?.frontId || `ID-${Date.now()}`,
     });
 
     useEffect(() => {
@@ -35,6 +37,8 @@ const TypeModal: React.FC<TypeModalProps> = ({ open, onClose, typeData, onSave }
                 type: Type.LECTURE,
                 maxStudentsPerGroup: 0,
                 subject: { SubjectId: 0 },
+                teachersList: [],
+                frontId: `ID-${Date.now()}`,
             });
         }
     }, [typeData]);
