@@ -7,6 +7,7 @@ import com.google.ortools.linearsolver.MPVariable;
 import pl.poznan.put.or_planner.constraints.ConstraintsManager;
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
+import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
 import pl.poznan.put.planner_endpoints.Subject.Subject;
 import pl.poznan.put.planner_endpoints.Subject.SubjectService;
@@ -26,6 +27,7 @@ public class Planner {
     private final List<String> rooms;
     private final List<String> timeSlots;
     private final List<PlannerClassType> subjects;
+    private final List<TeacherLoad> teacherLoadList;
 
     private final int numGroups;
     private final int numRooms;
@@ -38,7 +40,7 @@ public class Planner {
 
 
     public Planner(List<String> groups, List<String> teachers, List<String> rooms, List<String> timeSlots,
-                   List<PlannerClassType> subjects) {
+                   List<PlannerClassType> subjects, List<TeacherLoad> teacherLoadList) {
         Loader.loadNativeLibraries();
 
         this.groups = groups;
@@ -46,6 +48,7 @@ public class Planner {
         this.rooms = rooms;
         this.timeSlots = timeSlots;
         this.subjects = subjects;
+        this.teacherLoadList = teacherLoadList;
 
         this.numGroups = groups.size();
         this.numSubjects = subjects.size();
@@ -90,7 +93,8 @@ public class Planner {
             }
         }
 
-        ConstraintsManager constraintsManager = new ConstraintsManager(solver, groups, teachers, rooms, timeSlots, subjects);
+        ConstraintsManager constraintsManager = new ConstraintsManager(solver, groups, teachers, rooms, timeSlots,
+                subjects, teacherLoadList);
 
         constraintsManager.addRoomOccupationConstraint(xEven, xOdd);
 
@@ -99,6 +103,8 @@ public class Planner {
         constraintsManager.oneTeacherOneClassConstraint(xEven, xOdd);
 
         constraintsManager.oneGroupOneClassConstraint(xEven, xOdd);
+
+        constraintsManager.teachersLoadConstraint(xEven, xOdd);
 
 
         MPSolver.ResultStatus status = solver.solve();

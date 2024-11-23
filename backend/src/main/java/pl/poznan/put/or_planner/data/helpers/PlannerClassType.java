@@ -12,7 +12,7 @@ public class PlannerClassType {
     private Map<String, List<String>> groupMappings;
 
     public PlannerClassType
-            (String id, String type, String frequency, List<String> rooms, List<String> teachers, List<String> assignedGroups,
+            (String id, String type, String frequency, List<String> rooms, List<String> teachers,
              Map<String, List<String>> groupMappings) {
         this.id = id;
         this.type = type;
