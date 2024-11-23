@@ -44,12 +44,6 @@ public class SubjectType_Teacher {
     }
 
     @Override
-    public String toString() {
-        return id.toString();
-        //return id.toString() + " - " + teacher.id.toString() + " - " + subjectType.subjectTypeId.toString();
-    }
-
-    @Override
     public boolean equals(Object obj) {
         SubjectType_Teacher stt = (SubjectType_Teacher) obj;
         if (stt.id == null) return false;

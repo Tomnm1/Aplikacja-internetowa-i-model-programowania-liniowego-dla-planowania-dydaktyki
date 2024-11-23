@@ -36,9 +36,6 @@ public class SubjectTypeService {
     @Autowired
     private SubjectType_TeacherRepository subjectTypeTeacherRepository;
 
-//    @PersistenceContext
-//    private EntityManager entityManager;
-
 
     /**
      * Returns all subjectTypes
@@ -102,12 +99,6 @@ public class SubjectTypeService {
             oldsubjectType.numOfHours = subjectTypeParams.numOfHours;
             oldsubjectType.maxStudentsPerGroup = subjectTypeParams.maxStudentsPerGroup;
             List<SubjectType_Teacher> teachersList = subjectTypeParams.teachersList.stream().map(this::toSubjectType_Teacher).collect(Collectors.toList());
-//            for (int i = 0; i < subjectTypeParams.teachersList.size(); i++) {
-//                System.out.println(subjectTypeParams.teachersList.get(i) + " ");
-//            }
-//            List<SubjectType_Teacher> teachersList2 = subjectTypeTeacherRepository.findBySubjectType(oldsubjectType);
-//            System.out.println("Wielkosć "+teachersList.size());
-//            System.out.println("Wielkosć2 "+teachersList2.size());
             for(SubjectType_Teacher stt : oldsubjectType.teachersList ){
                 if (!teachersList.contains(stt)){
                     subjectTypeTeacherRepository.delete(stt);
