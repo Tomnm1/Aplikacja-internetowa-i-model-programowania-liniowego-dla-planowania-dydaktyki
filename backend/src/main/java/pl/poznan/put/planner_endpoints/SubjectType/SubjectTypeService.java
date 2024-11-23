@@ -1,13 +1,24 @@
 package pl.poznan.put.planner_endpoints.SubjectType;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectTypeTeacherDTO;
+import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_Teacher;
+import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_TeacherRepository;
+import pl.poznan.put.planner_endpoints.Teacher.Teacher;
+import pl.poznan.put.planner_endpoints.Teacher.TeacherRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Business logic for subjectTypes
@@ -19,13 +30,23 @@ public class SubjectTypeService {
      */
     @Autowired
     private SubjectTypeRepository subjectTypeRepository;
+    @Autowired
+    private TeacherRepository teacherRepository;
+
+    @Autowired
+    private SubjectType_TeacherRepository subjectTypeTeacherRepository;
+
+//    @PersistenceContext
+//    private EntityManager entityManager;
+
 
     /**
      * Returns all subjectTypes
      * @return list of SubjectType
      */
-    public List<SubjectType> getAllsubjectType(){
-        return subjectTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "subjectTypeId"));
+    @Transactional
+    public List<SubjectTypeDTO> getAllsubjectType(){
+        return subjectTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "subjectTypeId")).stream().map(SubjectType::convertToDTO).toList();
     }
 
     /**
@@ -49,11 +70,20 @@ public class SubjectTypeService {
 
     /**
      * Creates a SubjectType
-     * @param subjectType object to be inserted into DB
+     * @param SubjectTypeDTO object to be inserted into DB
      * @return saved SubjectType
      */
-    public SubjectType createsubjectType(SubjectType subjectType){
-        return subjectTypeRepository.save(subjectType);
+    @Transactional
+    public SubjectTypeDTO createsubjectType(SubjectTypeDTO subjectTypeDTO){
+        SubjectType st = toSubjectType(subjectTypeDTO,false);
+        SubjectType saved = subjectTypeRepository.save(st);
+        List<SubjectType_Teacher> teachersList = subjectTypeDTO.teachersList.stream().map(this::toSubjectType_Teacher).toList();
+        for(SubjectType_Teacher stt : teachersList ){
+            stt.subjectType = saved;
+            subjectTypeTeacherRepository.save(stt);
+        }
+        saved.teachersList = teachersList;
+        return saved.convertToDTO();
     }
 
     /**
@@ -62,7 +92,8 @@ public class SubjectTypeService {
      * @param subjectTypeParams new values in JSON format
      * @return saved SubjectType or null
      */
-    public SubjectType updatesubjectTypeByID(Integer id, SubjectType subjectTypeParams){
+    @Transactional
+    public SubjectTypeDTO updatesubjectTypeByID(Integer id, SubjectTypeDTO subjectTypeParams){
         Optional<SubjectType> subjectType = subjectTypeRepository.findById(id);
         if (subjectType.isPresent()) {
             SubjectType oldsubjectType = subjectType.get();
@@ -70,10 +101,46 @@ public class SubjectTypeService {
             oldsubjectType.type = subjectTypeParams.type;
             oldsubjectType.numOfHours = subjectTypeParams.numOfHours;
             oldsubjectType.maxStudentsPerGroup = subjectTypeParams.maxStudentsPerGroup;
-            return subjectTypeRepository.save(oldsubjectType);
+            List<SubjectType_Teacher> teachersList = subjectTypeParams.teachersList.stream().map(this::toSubjectType_Teacher).collect(Collectors.toList());
+//            for (int i = 0; i < subjectTypeParams.teachersList.size(); i++) {
+//                System.out.println(subjectTypeParams.teachersList.get(i) + " ");
+//            }
+//            List<SubjectType_Teacher> teachersList2 = subjectTypeTeacherRepository.findBySubjectType(oldsubjectType);
+//            System.out.println("Wielkosć "+teachersList.size());
+//            System.out.println("Wielkosć2 "+teachersList2.size());
+            for(SubjectType_Teacher stt : oldsubjectType.teachersList ){
+                if (!teachersList.contains(stt)){
+                    subjectTypeTeacherRepository.delete(stt);
+                }
+            }
+            for(SubjectType_Teacher stt : teachersList ){
+                subjectTypeTeacherRepository.save(stt);
+            }
+            oldsubjectType.teachersList = teachersList;
+            return subjectTypeRepository.save(oldsubjectType).convertToDTO();
         } else {
             return null;
         }
+    }
+
+    public SubjectType_Teacher toSubjectType_Teacher(SubjectTypeTeacherDTO dto){
+        SubjectType_Teacher stt = new SubjectType_Teacher();
+        if (dto.id != 0) stt.id = dto.id;
+        stt.teacher = teacherRepository.findById(dto.teacherId).orElseThrow(() -> new IllegalArgumentException("Teacher not found"));
+        if(subjectTypeRepository.findById(dto.subjectTypeId).isPresent()) stt.subjectType =subjectTypeRepository.findById(dto.subjectTypeId).get() ;
+        stt.numHours = dto.numHours;
+        return stt;
+    }
+
+    public SubjectType toSubjectType(SubjectTypeDTO dto,boolean withTeacherList){
+        SubjectType st = new SubjectType();
+        st.subjectTypeId = dto.subjectTypeId;
+        st.subject = dto.subject;
+        st.numOfHours = dto.numOfHours;
+        st.type = dto.type;
+        st.maxStudentsPerGroup = dto.maxStudentsPerGroup;
+        if(withTeacherList) st.teachersList = dto.teachersList.stream().map(this::toSubjectType_Teacher).collect(Collectors.toList());
+        return st;
     }
 
     /**
