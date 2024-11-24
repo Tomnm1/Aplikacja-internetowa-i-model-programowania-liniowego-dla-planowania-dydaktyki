@@ -35,6 +35,7 @@ public final class Constans {
             public static final String EXERCISE_DOT_LETTER = "ćw.";
             public static final String LAB_LETTER = "l";
             public static final String PROJECT_LETTER = "p";
+            public static final String SUMMARY = "bilans";
         }
 
         public static final class subjectTypeStudentQuantity{

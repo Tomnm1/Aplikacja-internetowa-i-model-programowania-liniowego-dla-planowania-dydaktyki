@@ -62,18 +62,6 @@ public class InsertPlanToDbService {
             generatedPlan.group = groupService.getGroupByID(plannedSlot.getGroupId()).get();
             generatedPlan.teacher = teacherService.getteacherByID(plannedSlot.getTeacherId()).get();
             generatedPlan.classroom = classroomService.getRoomByID(plannedSlot.getClassroomId()).get();
-//            if (generatedPlan.group.code.startsWith(LECTURE_LETTER))
-//                generatedPlan.subjectType = subjectTypeService.getSubjectTypeBySubjectAndType(
-//                        subjectService.getSubjectByID(plannedSlot.getSubjectTypeId()).get(), ClassTypeOwn.wykład);
-//            else if (generatedPlan.group.code.startsWith(EXERCISE_LETTER))
-//                generatedPlan.subjectType = subjectTypeService.getSubjectTypeBySubjectAndType(
-//                        subjectService.getSubjectByID(plannedSlot.getSubjectTypeId()).get(), ClassTypeOwn.ćwiczenia);
-//            else if (generatedPlan.group.code.startsWith(LAB_LETTER))
-//                generatedPlan.subjectType = subjectTypeService.getSubjectTypeBySubjectAndType(
-//                        subjectService.getSubjectByID(plannedSlot.getSubjectTypeId()).get(), ClassTypeOwn.laboratoria);
-//            else if (generatedPlan.group.code.startsWith(PROJECT_LETTER))
-//                generatedPlan.subjectType = subjectTypeService.getSubjectTypeBySubjectAndType(
-//                        subjectService.getSubjectByID(plannedSlot.getSubjectTypeId()).get(), ClassTypeOwn.projekt);
             generatedPlan.subjectType = subjectTypeService.getsubjectTypeByID(plannedSlot.getSubjectTypeId()).get();
             generatedPlan.isEvenWeek = plannedSlot.getEvenWeek();
             generatedPlanService.createGeneratedPlan(generatedPlan);

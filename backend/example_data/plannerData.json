@@ -113,8 +113,8 @@
       "teacher": "1",
       "teacherLoadSubjectList": [
         {
-          "name": "1",
-          "groups": ["4", "5", "6", "7"],
+          "name": "6",
+          "groups": ["1", "2", "3", "4"],
           "maxGroups": "3"
         }
       ]
@@ -123,8 +123,8 @@
       "teacher": "2",
       "teacherLoadSubjectList": [
         {
-          "name": "1",
-          "groups": ["4", "5", "6", "7"],
+          "name": "6",
+          "groups": ["1", "2", "3", "4"],
           "maxGroups": "1"
         }
       ]

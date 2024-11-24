@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.poznan.put.data_import.insert_to_db.*;
 import pl.poznan.put.data_import.model.subjects.SubjectWithGroupData;
+import pl.poznan.put.data_import.model.subjects.TeacherWithInnerId;
 import pl.poznan.put.planner_endpoints.FieldOfStudy.FieldOfStudy;
 import pl.poznan.put.planner_endpoints.Semester.Semester;
 import pl.poznan.put.planner_endpoints.Specialisation.Specialisation;
@@ -18,6 +19,7 @@ import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static pl.poznan.put.constans.Constans.ExcelToDb.ColumnNames.*;
 import static pl.poznan.put.constans.Constans.ExcelToDb.HeaderHelper.*;
@@ -223,11 +225,131 @@ public class ExcelToDbService {
         subjectType.type = type;
         subjectType.numOfHours = cellValue;
         subjectType.maxStudentsPerGroup = maxNumberOfStudents;
+        subjectType.groupsList = new ArrayList<>();
+        subjectType.teachersList = new ArrayList<>();
         subjectTypes.add(subjectType);
 
-        SubjectWithGroupData subjectWithGroupData = new SubjectWithGroupData(subjectType, type, numGroups);
+        List<TeacherWithInnerId> assignedTeachers = new ArrayList<>();
+        if(type == ClassTypeOwn.wykład){
+            assignedTeachers = assignTeachersForLecture();
+        } else {
+            assignedTeachers = assignTeachersForOtherClasses(subjectType, numGroups);
+        }
+
+        SubjectWithGroupData subjectWithGroupData = new SubjectWithGroupData(subjectType, type, numGroups, assignedTeachers);
         this.groupTypesData.computeIfAbsent(this.subjectName, k -> new ArrayList<>())
                 .add(subjectWithGroupData);
+    }
+
+    private List<TeacherWithInnerId> assignTeachersForLecture(){
+        List<TeacherWithInnerId> assignedTeachers = new ArrayList<>();
+        List<Integer> filteredColumnIndices = columnIndices.entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(LEC_TEACHER_PR))
+                .map(Map.Entry::getValue)
+                .toList();
+
+        for(Integer columnIndex: filteredColumnIndices){
+            String teacherInnerId = getCellValue(columnIndex);
+
+            String teacherHours = getCellValue(columnIndex + 1);
+
+            if (!teacherInnerId.isEmpty() && !teacherHours.isEmpty()) {
+                assignedTeachers.add(new TeacherWithInnerId(teacherInnerId, Integer.parseInt(teacherHours)));
+            }
+        }
+        if(assignedTeachers.isEmpty()){
+            assignedTeachers.add(new TeacherWithInnerId("123456789", 123456789)); // dummy
+        }
+        return assignedTeachers;
+    }
+
+    private List<TeacherWithInnerId> assignTeachersForOtherClasses(SubjectType subjectType, int numGroups){
+        List<TeacherWithInnerId> assignedTeachers = new ArrayList<>();
+        List<Integer> filteredColumnIndices = columnIndices.entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(TEACHER_PR))
+                .map(Map.Entry::getValue)
+                .toList();
+
+        for(Integer columnIndex: filteredColumnIndices){
+            String teacherInnerId = getCellValue(columnIndex);
+
+            String teacherHours = getCellValue(columnIndex + 1);
+
+            if (!teacherInnerId.isEmpty() && !teacherHours.isEmpty()) {
+                assignedTeachers.add(new TeacherWithInnerId(teacherInnerId, Integer.parseInt(teacherHours)));
+            }
+        }
+        if(assignedTeachers.isEmpty()){
+            assignedTeachers.add(new TeacherWithInnerId("123456789", 123456789)); // dummy
+            return assignedTeachers;
+        } else {
+            int missingHours = 0;
+            try {
+                missingHours = Integer.parseInt(getCellValue(columnIndices.get(SUMMARY)));
+            } catch(java.lang.NumberFormatException ignored){}
+
+            Integer totalNumHours = subjectType.numOfHours * numGroups - missingHours;
+            List<TeacherWithInnerId> newAssignedTeachers = findMatchingTeachers(assignedTeachers, totalNumHours);
+            if (newAssignedTeachers.isEmpty()){
+                int fixedHours = subjectType.numOfHours * numGroups / assignedTeachers.size();
+                for (TeacherWithInnerId teacherWithInnerId: assignedTeachers){
+                    teacherWithInnerId.setNumHours(fixedHours);
+                }
+                return assignedTeachers;
+            }
+            else if (missingHours != 0){
+                int toAdd = missingHours / subjectType.numOfHours;
+                for(int i = 0; i < toAdd; i++){
+                    TeacherWithInnerId teacher = newAssignedTeachers.get(0);
+                    teacher.setNumHours(teacher.getNumHours() + subjectType.numOfHours);
+                }
+            }
+            return newAssignedTeachers;
+        }
+    }
+
+    private List<TeacherWithInnerId> findMatchingTeachers(List<TeacherWithInnerId> teachers, Integer totalHours) {
+        List<TeacherWithInnerId> numericTeachers = teachers.stream()
+                .map(t -> new TeacherWithInnerId(t.getInnerId(), t.getNumHours()))
+                .collect(Collectors.toList());
+
+        List<TeacherWithInnerId> result = new ArrayList<>();
+        findCombination(numericTeachers, totalHours, new ArrayList<>(), result);
+        return result;
+    }
+
+    private void findCombination(List<TeacherWithInnerId> teachers, int target, List<TeacherWithInnerId> current, List<TeacherWithInnerId> result) {
+        int sum = current.stream().mapToInt(TeacherWithInnerId::getNumHours).sum();
+
+        if (sum == target) {
+            result.addAll(current);
+            return;
+        }
+
+        if (sum > target) {
+            return;
+        }
+
+        for (int i = 0; i < teachers.size(); i++) {
+            List<TeacherWithInnerId> remaining = new ArrayList<>(teachers.subList(i + 1, teachers.size()));
+            List<TeacherWithInnerId> newCurrent = new ArrayList<>(current);
+            newCurrent.add(teachers.get(i));
+            findCombination(remaining, target, newCurrent, result);
+            if (!result.isEmpty()) return;
+        }
+    }
+
+    private String getCellValue(int index){
+        Cell cell = this.row.getCell(index);
+        String result = "";
+        if (cell != null) {
+            result = switch (cell.getCellType()) {
+                case NUMERIC -> String.valueOf((int) cell.getNumericCellValue());
+                case STRING -> cell.getStringCellValue();
+                default -> "";
+            };
+        }
+        return result;
     }
 
     private void processLectureGroups(Cell cell){

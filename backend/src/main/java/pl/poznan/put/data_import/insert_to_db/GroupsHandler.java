@@ -6,87 +6,111 @@ import pl.poznan.put.data_import.model.subjects.SubjectWithGroupData;
 import pl.poznan.put.planner_endpoints.Group.Group;
 import pl.poznan.put.planner_endpoints.Group.GroupService;
 import pl.poznan.put.planner_endpoints.Semester.Semester;
-import pl.poznan.put.planner_endpoints.Subgroup.Subgroup;
-import pl.poznan.put.planner_endpoints.Subgroup.SubgroupService;
-import pl.poznan.put.planner_endpoints.SubjectType.ClassTypeOwn;
+import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
+import pl.poznan.put.planner_endpoints.SubjectType.SubjectTypeService;
+import pl.poznan.put.planner_endpoints.SubjectTypeGroup.SubjectTypeGroup;
+import pl.poznan.put.planner_endpoints.SubjectTypeGroup.SubjectTypeGroupService;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static org.apache.commons.math3.util.ArithmeticUtils.lcm;
-import static pl.poznan.put.constans.Constans.ExcelToDb.ColumnNames.LECTURE_LETTER;
+import static pl.poznan.put.constans.Constans.ExcelToDb.ColumnNames.LAB_LETTER;
+
 
 @Component
 public class GroupsHandler {
     private final GroupService groupService;
-    private final SubgroupService subgroupService;
+    private final SubjectTypeService subjectTypeService;
+    private final SubjectTypeGroupService subjectTypeGroupService;
 
     @Autowired
     public GroupsHandler(
             GroupService groupService,
-            SubgroupService subgroupService
+            SubjectTypeService subjectTypeService,
+            SubjectTypeGroupService subjectTypeGroupService
     ){
         this.groupService = groupService;
-        this.subgroupService = subgroupService;
+        this.subjectTypeService = subjectTypeService;
+        this.subjectTypeGroupService = subjectTypeGroupService;
     }
 
     public void processAndInsertGroups(Map<String, Integer> groups, Semester semester,
                                        Map<String, List<SubjectWithGroupData>> groupTypesData){
-        setMainLectureGroup(groups, semester, groupTypesData);
-//        for(String g: groups.keySet()){
-//            for(int i = 1; i <= groups.get(g); i++) {
-//                Group group = new Group();
-//                group.code = g + i;
-//                group.semester = semester;
-//                groupService.createGroupIfNotExists(group);
-//            }
-//        }
+        List<Group> groupList = new ArrayList<>();
+        Map.Entry<String, Integer> maxNumGroups = groups.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .orElse(null);
+        for(int i = 1; i <= Objects.requireNonNull(maxNumGroups).getValue(); i++) {
+            Group group = new Group();
+            group.code = LAB_LETTER + i;
+            group.semester = semester;
+            Group returnedGroup = groupService.createGroupIfNotExists(group);
+            groupList.add(returnedGroup);
+        }
+        assignSubjectToGroup(groups, semester,groupTypesData, groupList);
     }
 
-    private void setMainLectureGroup(Map<String, Integer> groups, Semester semester,
-                                     Map<String, List<SubjectWithGroupData>> groupTypesData){
-        Map<String, Integer> electiveSubjectsLectureGroupsCounter = new HashMap<>();
-
-        Group rootLectureGroup = new Group();
-        rootLectureGroup.semester = semester;
-        rootLectureGroup.subjectTypesList = new ArrayList<>();
-        rootLectureGroup.code = "MainRoot";
-
-        //create exercise groups
-//        for(int i = 0; i < groups.get(EXERCISE_LETTER); i++){
-//
-//        }
-
-        //TODO: Do zmiany tu wszystko praktycznie
+    private void assignSubjectToGroup(Map<String, Integer> groups, Semester semester,
+                                     Map<String, List<SubjectWithGroupData>> groupTypesData, List<Group> groupList){
+        Map<String, List<List<SubjectWithGroupData>>> electiveFilter = new HashMap<>();
         for(String subject: groupTypesData.keySet()){
-            if(subject.matches("PO\\d{1,2}.*") || subject.matches("PO\\d{1,2} -.*") || subject.matches("Przedmiot obieralny \\d{1,2}:.*")) {
-                for(SubjectWithGroupData subjectType: groupTypesData.get(subject)){
-                    if(subjectType.type() == ClassTypeOwn.wykład){
-                        String prefix = obtainPrefix(subject) + LECTURE_LETTER;
-                        electiveSubjectsLectureGroupsCounter.put(prefix,
-                                electiveSubjectsLectureGroupsCounter.getOrDefault(prefix, 0) + 1);
+            List<SubjectWithGroupData> subjectWithGroupDataList = groupTypesData.get(subject);
+            String electivePrefix = obtainPrefix(subject);
+            if(electivePrefix != null){
+                electiveFilter.computeIfAbsent(electivePrefix, key -> new ArrayList<>())
+                        .add(subjectWithGroupDataList);
+            } else {
+                for(SubjectWithGroupData subjectWithGroupData: subjectWithGroupDataList){
+                    SubjectType subjectType = subjectWithGroupData.subjectType();
+                    for(Group group: groupList) {
+                        addGroupToSubject(subjectType, group);
                     }
-                }
-                continue;
-            }
-            for(SubjectWithGroupData subjectType: groupTypesData.get(subject)){
-                if(subjectType.type() == ClassTypeOwn.wykład){
-                    rootLectureGroup.group_type = ClassTypeOwn.wykład;
-                    rootLectureGroup.subjectTypesList.add(subjectType.subjectType());
                 }
             }
         }
-        groupService.createGroup(rootLectureGroup);
+        if(!electiveFilter.isEmpty()){
+            handleElectiveSubjects(electiveFilter, groupList);
+        }
+    }
 
+    private void handleElectiveSubjects(Map<String, List<List<SubjectWithGroupData>>> electiveFilter,
+                                        List<Group> groupList){
+        for(String elective: electiveFilter.keySet()){
+            List<Integer> groupsRatio = new ArrayList<>();
+            for(List<SubjectWithGroupData> subjects: electiveFilter.get(elective)){
+                groupsRatio.add(subjects.getLast().numGroups());
+            }
+//            Integer groupRatio = (int) Math.ceil((double) groupsRatio.stream().reduce(0, Integer::sum) / groupList.size());
+            Integer groupRatio = (groupList.size() / groupsRatio.stream().reduce(0, Integer::sum));
+
+            int firstGroupIndex = 0;
+            int ratioIndex = 0;
+            for(List<SubjectWithGroupData> subjects: electiveFilter.get(elective)){
+                int lastGroupIndex = firstGroupIndex + groupRatio * groupsRatio.get(ratioIndex);
+                for(SubjectWithGroupData subjectWithGroupData: subjects){
+                    for(int i = firstGroupIndex; i < lastGroupIndex; i++){
+                        addGroupToSubject(subjectWithGroupData.subjectType(), groupList.get(i));
+                    }
+                }
+                firstGroupIndex = lastGroupIndex;
+                ratioIndex++;
+            }
+        }
+    }
+
+    private void addGroupToSubject(SubjectType subjectType, Group group){
+        SubjectTypeGroup subjectTypeGroup = new SubjectTypeGroup();
+        subjectTypeGroup.subjectType = subjectType;
+        subjectTypeGroup.group = group;
+        subjectTypeGroupService.createSubjectTypeGroup(subjectTypeGroup);
     }
 
     private String obtainPrefix(String subject) {
         String[] patterns = {
-                "PO\\d+:",
-                "PO\\d+ -",
-                "Przedmiot obieralny \\d+:"
+                "PO\\d+",
+                "Przedmiot obieralny \\d+"
         };
 
         for (String pattern : patterns) {
@@ -100,5 +124,4 @@ public class GroupsHandler {
 
         return null;
     }
-
 }
