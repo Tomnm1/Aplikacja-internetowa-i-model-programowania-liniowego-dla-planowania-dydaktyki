@@ -94,6 +94,7 @@ const Subjects: React.FC = () => {
             headerName: 'Kierunek',
             width: 150,
             valueGetter: (_value,row) => row.semester.specialisation?.fieldOfStudy?.name || '',
+
         },
         {
             field: 'Cicle',

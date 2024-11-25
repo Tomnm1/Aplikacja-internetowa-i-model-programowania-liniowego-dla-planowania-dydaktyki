@@ -162,7 +162,7 @@ const Slots: React.FC = () => {
 
     const renderTimeEditCell = (params: GridRenderEditCellParams) => {
         const { id, field, value } = params;
-
+        //TODO zmienić rozsprzęglenie
         const handleChange = (newValue: Dayjs | null) => {
             const timeString = newValue ? newValue.format('HH:mm') : '';
 
