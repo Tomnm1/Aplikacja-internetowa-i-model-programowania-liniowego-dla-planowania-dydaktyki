@@ -38,7 +38,7 @@ public class ExcelToInnerIdTeacherService {
         if (teacherData.isBlank() || teacherData.isEmpty()){
             return;
         }
-        String[] teacherDataList = teacherData.split(" ");
+        String[] teacherDataList = teacherData.replaceAll("  ", " ").split(" ");
         String lastName = teacherDataList[0].trim();
         String firstName = teacherDataList[1].trim();
         String secondName = (teacherDataList.length > 2 && teacherDataList[2] != null)

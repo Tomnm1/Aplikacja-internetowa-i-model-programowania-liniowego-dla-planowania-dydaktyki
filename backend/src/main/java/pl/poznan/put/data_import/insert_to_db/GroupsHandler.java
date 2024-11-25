@@ -3,6 +3,7 @@ package pl.poznan.put.data_import.insert_to_db;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.poznan.put.data_import.model.subjects.SubjectWithGroupData;
+import pl.poznan.put.data_import.model.subjects.TeacherWithInnerId;
 import pl.poznan.put.planner_endpoints.Group.Group;
 import pl.poznan.put.planner_endpoints.Group.GroupService;
 import pl.poznan.put.planner_endpoints.Semester.Semester;
@@ -10,6 +11,10 @@ import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectTypeService;
 import pl.poznan.put.planner_endpoints.SubjectTypeGroup.SubjectTypeGroup;
 import pl.poznan.put.planner_endpoints.SubjectTypeGroup.SubjectTypeGroupService;
+import pl.poznan.put.planner_endpoints.SubjectTypeTeacher.SubjectTypeTeacher;
+import pl.poznan.put.planner_endpoints.SubjectTypeTeacher.SubjectTypeTeacherService;
+import pl.poznan.put.planner_endpoints.Teacher.Teacher;
+import pl.poznan.put.planner_endpoints.Teacher.TeacherService;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -23,16 +28,22 @@ public class GroupsHandler {
     private final GroupService groupService;
     private final SubjectTypeService subjectTypeService;
     private final SubjectTypeGroupService subjectTypeGroupService;
+    private final TeacherService teacherService;
+    private final SubjectTypeTeacherService subjectTypeTeacherService;
 
     @Autowired
     public GroupsHandler(
             GroupService groupService,
             SubjectTypeService subjectTypeService,
-            SubjectTypeGroupService subjectTypeGroupService
+            SubjectTypeGroupService subjectTypeGroupService,
+            TeacherService teacherService,
+            SubjectTypeTeacherService subjectTypeTeacherService
     ){
         this.groupService = groupService;
         this.subjectTypeService = subjectTypeService;
         this.subjectTypeGroupService = subjectTypeGroupService;
+        this.teacherService = teacherService;
+        this.subjectTypeTeacherService = subjectTypeTeacherService;
     }
 
     public void processAndInsertGroups(Map<String, Integer> groups, Semester semester,
@@ -49,7 +60,7 @@ public class GroupsHandler {
             Group returnedGroup = groupService.createGroupIfNotExists(group);
             groupList.add(returnedGroup);
         }
-        assignSubjectToGroup(groups, semester,groupTypesData, groupList);
+        assignSubjectToGroup(groups, semester, groupTypesData, groupList);
     }
 
     private void assignSubjectToGroup(Map<String, Integer> groups, Semester semester,
@@ -69,9 +80,29 @@ public class GroupsHandler {
                     }
                 }
             }
+            assignTeachersToSubjectType(subjectWithGroupDataList);
         }
         if(!electiveFilter.isEmpty()){
             handleElectiveSubjects(electiveFilter, groupList);
+        }
+    }
+
+    private void assignTeachersToSubjectType(List<SubjectWithGroupData> subjectWithGroupDataList){
+        for(SubjectWithGroupData subjectWithGroupData: subjectWithGroupDataList){
+            List<TeacherWithInnerId> assignedTeachers = subjectWithGroupData.assignedTeachers();
+            for (TeacherWithInnerId teacherWithInnerId: assignedTeachers){
+                Teacher teacher = new Teacher();
+                if (Objects.equals(teacherWithInnerId.getInnerId(), "123456789")){
+                    teacher = teacherService.findRandomTeacher();
+                } else {
+                    teacher = teacherService.findByInnerId(Integer.parseInt(teacherWithInnerId.getInnerId()));
+                }
+                SubjectTypeTeacher subjectTypeTeacher = new SubjectTypeTeacher();
+                subjectTypeTeacher.subjectType = subjectWithGroupData.subjectType();
+                subjectTypeTeacher.teacher = teacher;
+                subjectTypeTeacher.numHours = teacherWithInnerId.getNumHours();
+                subjectTypeTeacherService.createSubjectTypeTeacher(subjectTypeTeacher);
+            }
         }
     }
 

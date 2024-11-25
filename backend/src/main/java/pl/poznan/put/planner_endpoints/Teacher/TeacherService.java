@@ -106,4 +106,15 @@ public class TeacherService {
     public Teacher findByUsosId(int usosId){
         return teacherRepository.findByUsosId(usosId);
     }
+
+    public Teacher findRandomTeacher(){ return teacherRepository.findRandomTeacher(); }
+
+    public Teacher findByInnerId(int innerId){
+        Teacher teacher = teacherRepository.findByInnerId(innerId);
+        if(teacher == null){
+            System.err.println("Teacher with innerId: " + innerId + " does not exist!");
+            teacher = teacherRepository.findRandomTeacher();
+        }
+        return teacher;
+    }
 }
