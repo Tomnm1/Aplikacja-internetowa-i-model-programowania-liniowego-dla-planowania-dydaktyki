@@ -200,10 +200,8 @@ const Home: React.FC = () => {
 
     return (
         <div className="min-h-full flex flex-col items-center justify-center p-4">
-            {/*todo work in progress, ale jak ktoś chce może dokończyć  :33 */}
-            <p>work in progress, ale jak ktoś chce może dokończyć :33</p>
             <div className="w-full max-w-4xl">
-                <div className="bg-white rounded-lg shadow-lg p-6">
+                <div className="bg-gradient-to-tr backdrop-blur from-10% to-90% rounded-lg shadow-lg p-6">
                     <Stepper activeStep={activeStep} alternativeLabel>
                         {steps.map((label, index) => (
                             <Step key={label}>

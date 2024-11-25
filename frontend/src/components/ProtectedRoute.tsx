@@ -3,11 +3,11 @@ import { Navigate } from 'react-router-dom';
 import { useAppSelector } from '../hooks/hooks';
 
 interface ProtectedRouteProps {
-    children: JSX.Element;
+    children: React.ReactNode
     allowedRoles?: ('admin' | 'user')[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+const ProtectedRoute = ({ children, allowedRoles } : ProtectedRouteProps) => {
     const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
     const role = useAppSelector((state) => state.auth.role);
 

@@ -72,50 +72,9 @@ export const typeMapping: { [key in Type]: string} = {
     [Type.PROJECT]: 'Projekt',
 }
 
-export interface ClassroomRow {
-    id: GridRowId;
-    name: string;
-    capacity: number;
-    floor: string;
-    isNew: boolean;
-}
-
-export interface ClassroomState {
-    rows: ClassroomRow[];
-    rowModesModel: Record<GridRowId, { mode: string }>;
-}
-
-
-export interface Room {
-    id: number;
-    name: string;
-}
-
-export interface Hour {
-    id: number;
-    timeRange: string;
-}
-
 export interface Group {
     id: number;
     name: string;
-}
-
-export interface Schedule {
-    id: number;
-    teacherIds: number[];
-    groupIds: number[];
-    roomId: number;
-    hourId: number;
-}
-
-
-export interface CalendarViewProps {
-    teachers: Teacher[];
-    groups: Group[];
-    rooms: Room[];
-    hours: Hour[];
-    schedules: Schedule[];
 }
 
 export interface BackendTeacher {
@@ -344,4 +303,31 @@ export interface SubjectTypeState {
     rows: SubjectType[];
     loading: boolean;
     error: string | null;
+}
+
+// export interface GeneratedPlan {
+//     id: number;
+//     plan: Plan;
+//     slotsDay: BackendSlotsDay;
+//     group: Group;
+//     teacher: BackendTeacher;
+//     classroom: BackendClassroom;
+//     subjectType: BackendSubjectType;
+//     isEvenWeek: boolean;
+// }
+
+export interface GeneratedPlan {
+    id: number;
+    plan: Plan;
+    slotsDay: SlotsDay;
+    group: Group;
+    teacher: Teacher;
+    classroom: Classroom;
+    subjectType: SubjectType;
+    isEvenWeek: boolean;
+}
+export interface Plan {
+    planId: number;
+    name: string;
+    creationDate: string;
 }
