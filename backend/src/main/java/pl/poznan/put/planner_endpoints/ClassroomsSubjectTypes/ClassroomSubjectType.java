@@ -13,8 +13,8 @@ public class ClassroomSubjectType {
     public Integer id;
     @ManyToOne
     @JoinColumn(name = "classroom_id")
-    Classroom classroom;
+    public Classroom classroom;
     @ManyToOne
     @JoinColumn(name = "subject_type_id")
-    SubjectType subjectType;
+    public SubjectType subjectType;
 }

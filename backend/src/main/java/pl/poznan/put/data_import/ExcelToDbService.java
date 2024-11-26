@@ -47,6 +47,7 @@ public class ExcelToDbService {
     private String semesterNumber = "";
     private String type = ""; //stacjo - niestacjo
     private boolean exam;
+    private Integer numStudents;
     private String subjectName = "";
 
     private FieldOfStudy fieldOfStudy;
@@ -80,6 +81,7 @@ public class ExcelToDbService {
         semesterNumber = "";
         type = "";
         exam = false;
+        numStudents = MAX_LECTURE;
         subjectName = "";
 
         fieldOfStudy = null;
@@ -167,6 +169,7 @@ public class ExcelToDbService {
         if(!cellValue.isEmpty()) {
             subjectName = cellValue;
             String examValue = row.getCell(columnIndices.get(HOURS+EXAM_LETTER)).getStringCellValue();
+            numStudents = (int) row.getCell(columnIndices.get(HOURS)).getNumericCellValue();
             exam = !examValue.isBlank() && examValue.equals(EXAM_LETTER);
         }
     }
@@ -227,6 +230,11 @@ public class ExcelToDbService {
         subjectType.maxStudentsPerGroup = maxNumberOfStudents;
         subjectType.groupsList = new ArrayList<>();
         subjectType.teachersList = new ArrayList<>();
+        if (type == ClassTypeOwn.wykład){
+            subjectType.maxStudentsPerGroup = numStudents;
+        }else{
+            subjectType.maxStudentsPerGroup = numStudents / numGroups;
+        }
         subjectTypes.add(subjectType);
 
         List<TeacherWithInnerId> assignedTeachers = new ArrayList<>();

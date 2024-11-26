@@ -101,4 +101,8 @@ public class ClassroomService {
             return classroom;
         }
     }
+
+    public List<Classroom> findRandomClassroomWithCapacity(int capacity){
+        return classroomRepository.findRandomClassroomWithCapacity(capacity);
+    }
 }
