@@ -14,6 +14,7 @@ import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
 import pl.poznan.put.planner_endpoints.planner.service.ClassroomAssignmentService;
+import pl.poznan.put.planner_endpoints.planner.service.PlanningDataAssemblingService;
 
 import java.util.List;
 
@@ -23,20 +24,52 @@ public class PlannerController {
     private final InsertPlanToDbService insertPlanToDbService;
     private final PlanToExcelExportService planToExcelExportService;
     private final ClassroomAssignmentService classroomAssignmentService;
+    private final PlanningDataAssemblingService planningDataAssemblingService;
 
     @Autowired
     PlannerController(
             InsertPlanToDbService insertPlanToDbService,
             PlanToExcelExportService planToExcelExportService,
-            ClassroomAssignmentService classroomAssignmentService
+            ClassroomAssignmentService classroomAssignmentService,
+            PlanningDataAssemblingService planningDataAssemblingService
     ){
         this.insertPlanToDbService = insertPlanToDbService;
         this.planToExcelExportService = planToExcelExportService;
         this.classroomAssignmentService = classroomAssignmentService;
+        this.planningDataAssemblingService = planningDataAssemblingService;
     }
 
     @PostMapping("/start")
     public ResponseEntity<Void> startScheduling(@RequestBody PlannerData plannerData) {
+        try {
+            List<String> groups = plannerData.getGroups();
+            List<String> teachers = plannerData.getTeachers();
+            List<String> rooms = plannerData.getRooms();
+            List<String> timeSlots = plannerData.getTimeSlots();
+            List<PlannerClassType> subjects = plannerData.getSubjects();
+            List<TeacherLoad> teachersLoad = plannerData.getTeachersLoad();
+
+            Planner planner = new Planner(groups, teachers, rooms, timeSlots, subjects, teachersLoad);
+
+            List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
+
+            Plan plan = insertPlanToDbService.insertSlots(optimizedSchedule);
+
+            planToExcelExportService.exportPlanToExcel(plan);
+
+//            printScheduleAsTable(optimizedSchedule, groups, timeSlots);
+            System.out.println("done");
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/startPlanningBasedOnDb")
+    public ResponseEntity<Void> startPlanningBasedOnDb(){
+        PlannerData plannerData = planningDataAssemblingService.startAssembling("N");
         try {
             List<String> groups = plannerData.getGroups();
             List<String> teachers = plannerData.getTeachers();
