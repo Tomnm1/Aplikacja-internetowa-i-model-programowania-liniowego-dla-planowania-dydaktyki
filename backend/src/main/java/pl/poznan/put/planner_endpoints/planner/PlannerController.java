@@ -13,6 +13,7 @@ import pl.poznan.put.or_planner.insert.InsertPlanToDbService;
 import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
+import pl.poznan.put.planner_endpoints.planner.service.ClassroomAssignmentService;
 
 import java.util.List;
 
@@ -21,14 +22,17 @@ import java.util.List;
 public class PlannerController {
     private final InsertPlanToDbService insertPlanToDbService;
     private final PlanToExcelExportService planToExcelExportService;
+    private final ClassroomAssignmentService classroomAssignmentService;
 
     @Autowired
     PlannerController(
             InsertPlanToDbService insertPlanToDbService,
-            PlanToExcelExportService planToExcelExportService
+            PlanToExcelExportService planToExcelExportService,
+            ClassroomAssignmentService classroomAssignmentService
     ){
         this.insertPlanToDbService = insertPlanToDbService;
         this.planToExcelExportService = planToExcelExportService;
+        this.classroomAssignmentService = classroomAssignmentService;
     }
 
     @PostMapping("/start")
@@ -53,7 +57,19 @@ public class PlannerController {
             System.out.println("done");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
+            System.out.println(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/assignClassroomsBasedOnCapacity")
+    public ResponseEntity<Void> assignClassroomsBasedOnCapacity(){
+        try {
+            classroomAssignmentService.assignClassroomsBasedOnCapacity();
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
             System.out.println(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
