@@ -7,11 +7,14 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
+import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_Teacher;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Data model for teachers table
@@ -34,12 +37,17 @@ public class Teacher {
     @Column(name = "preferences", columnDefinition = "json")
     @Type(JsonType.class)
     public Map<String, String> preferences = new HashMap<>();
-    @ManyToMany
-    @JoinTable(
-            name = "subject_type_teacher",
-            joinColumns = @JoinColumn(name = "teacher_id"),
-            inverseJoinColumns = @JoinColumn(name = "subject_type_id")
-    )
-    @JsonIgnore
-    public List<SubjectType> subjectTypesList;
+
+    @OneToMany(mappedBy = "teacher")
+    public List<SubjectType_Teacher> subjectTypesList;
+
+    public TeacherDTO convertToDTO(){
+        TeacherDTO dto = new TeacherDTO();
+        dto.id = this.id;
+        dto.firstName = this.firstName;
+        dto.lastName = this.lastName;
+        dto.degree = this.degree;
+        dto.subjectTypesList = this.subjectTypesList.stream().map(SubjectType_Teacher::getSubjetTyprId).collect(Collectors.toList());
+        return dto;
+    }
 }

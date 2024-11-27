@@ -47,6 +47,10 @@ public class GroupService {
         return groupRepository.findById(id);
     }
 
+    public List<GroupDTO> getGroupBySemesterID(Integer id){
+        return groupRepository.findBysemester_id(id).stream().map(Group::toDTO).toList();
+    }
+
     /**
      * Creates a group
      * @param group object to be inserted into DB

@@ -100,8 +100,6 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
             },
         };
 
-        console.log(subjectData);
-
         try {
             const action = isAdding ? addSubject : updateSubject;
             const savedSubject = await dispatch(action(subjectData)).unwrap();
@@ -115,7 +113,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
                     ...subjectType,
                     subject: { SubjectId: subjectId },
                 };
-
+                console.log(subjectTypeData);
                 if (subjectType.subjectTypeId) {
                     await dispatch(updateSubjectType(subjectTypeData)).unwrap();
                 } else {
@@ -149,6 +147,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
                     <SubjectTypesForm
                         subjectTypes={subjectTypes}
                         setSubjectTypes={setSubjectTypes}
+                        semester={formData.semester.semesterId as number}
                         loading={loading}
                     />
                 );

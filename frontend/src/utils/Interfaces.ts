@@ -72,11 +72,6 @@ export const typeMapping: { [key in Type]: string} = {
     [Type.PROJECT]: 'Projekt',
 }
 
-export interface Group {
-    id: number;
-    name: string;
-}
-
 export interface BackendTeacher {
     id?: number;
     firstName: string;
@@ -236,6 +231,7 @@ export interface Semester {
     specialisationRepresentation?: string;
     fieldOfStudyName?: string;
     cycle?:Cycle;
+    groupCount?:number;
 }
 
 export interface BackendSemester {
@@ -249,6 +245,7 @@ export interface BackendSemester {
             name?:string;
         }
     };
+    groupCount?:number;
 }
 
 export interface SemesterState {
@@ -289,6 +286,19 @@ export interface SubjectType {
     type: Type;
     maxStudentsPerGroup: number;
     subject: BackendSubject | { SubjectId: number };
+    teachersList:teacherListDTO[];
+    groupsList:Group[];
+    frontId?: string;
+}
+
+export interface teacherListDTO{
+    id: number;
+    teacherId: number;
+    teacherFirstName: string;
+    teacherLastName: string;
+    subjectTypeId: number;
+    numHours: number;
+    frontId?: string;
 }
 
 export interface BackendSubjectType {
@@ -297,6 +307,9 @@ export interface BackendSubjectType {
     type: Type;
     maxStudentsPerGroup: number;
     subject: BackendSubject | { SubjectId: number };
+    teachersList:teacherListDTO[];
+    groupsList:Group[];
+    frontId?: string;
 }
 
 export interface SubjectTypeState {
@@ -330,4 +343,16 @@ export interface Plan {
     planId: number;
     name: string;
     creationDate: string;
+}
+
+export interface Group {
+    id: number;
+    code: string;
+    group_type: Type;
+}
+
+export interface GroupState {
+    rows: Group[];
+    loading: boolean;
+    error: string | null;
 }
