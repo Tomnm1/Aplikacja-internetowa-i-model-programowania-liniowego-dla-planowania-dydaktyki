@@ -23,4 +23,8 @@ public class SubjectTypeTeacherService {
     public List<SubjectTypeTeacher> findByTeacher(Teacher teacher){
         return subjectTypeTeacherRepository.findByTeacher(teacher);
     }
+
+    public List<Integer> findAllAssignedTeachers(){
+        return subjectTypeTeacherRepository.findAllAssignedTeachers();
+    }
 }

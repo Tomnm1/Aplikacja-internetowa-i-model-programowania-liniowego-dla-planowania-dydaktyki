@@ -18,4 +18,8 @@ public class ClassroomSubjectTypeService {
     public List<ClassroomSubjectType> findBySubjectType(SubjectType subjectType){
         return classroomSubjectTypeRepository.findBySubjectType(subjectType);
     }
+
+    public List<Integer> getAllAssignedClassrooms(){
+        return classroomSubjectTypeRepository.getAllAssignedClassrooms();
+    }
 }

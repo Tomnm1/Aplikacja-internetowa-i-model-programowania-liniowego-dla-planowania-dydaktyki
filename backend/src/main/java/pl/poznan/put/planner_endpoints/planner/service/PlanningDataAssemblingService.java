@@ -63,8 +63,8 @@ public class PlanningDataAssemblingService {
         this.week = false;
         PlannerData plannerData = new PlannerData();
         plannerData.setGroups(getAllGroups(exclude));
-        plannerData.setTeachers(getAllTeachers());
-        plannerData.setRooms(getAllClassrooms());
+        plannerData.setTeachers(getAllAssignedTeachers());
+        plannerData.setRooms(getAllAssignedClassrooms());
         plannerData.setTimeSlots(getAllTimeSlots());
         plannerData.setSubjects(getAllSubjects(exclude));
         plannerData.setTeachersLoad(getTeachersLoad(exclude));
@@ -181,6 +181,18 @@ public class PlanningDataAssemblingService {
         return classroomService.getAllClassrooms().stream()
                 .map(classroom -> String.valueOf(classroom.classroomID))
                 .collect(Collectors.toList());
+    }
+
+    private List<String> getAllAssignedClassrooms(){
+        return classroomSubjectTypeService.getAllAssignedClassrooms().stream()
+                .map(String::valueOf)
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getAllAssignedTeachers(){
+        return subjectTypeTeacherService.findAllAssignedTeachers().stream()
+                .map(String::valueOf)
+                .toList();
     }
 
     private List<String> getAllTeachers() {
