@@ -9,6 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.poznan.put.planner_endpoints.Group.Group;
+import pl.poznan.put.planner_endpoints.Group.GroupDTO;
+import pl.poznan.put.planner_endpoints.Group.GroupRepository;
 import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectTypeTeacherDTO;
 import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_Teacher;
 import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_TeacherRepository;
@@ -32,6 +35,9 @@ public class SubjectTypeService {
     private SubjectTypeRepository subjectTypeRepository;
     @Autowired
     private TeacherRepository teacherRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
 
     @Autowired
     private SubjectType_TeacherRepository subjectTypeTeacherRepository;
@@ -80,6 +86,7 @@ public class SubjectTypeService {
             subjectTypeTeacherRepository.save(stt);
         }
         saved.teachersList = teachersList;
+
         return saved.convertToDTO();
     }
 
@@ -108,10 +115,21 @@ public class SubjectTypeService {
                 subjectTypeTeacherRepository.save(stt);
             }
             oldsubjectType.teachersList = teachersList;
+            oldsubjectType.groupsList = subjectTypeParams.groupsList.stream().map(this::toGroup).collect(Collectors.toList());
             return subjectTypeRepository.save(oldsubjectType).convertToDTO();
         } else {
             return null;
         }
+    }
+
+    @Transactional
+    private Group toGroup(GroupDTO dto){
+        Group g = new Group();
+        Optional<Group> og = groupRepository.findById(dto.id);
+        if(og.isPresent()){
+            g = og.get();
+        }
+        return g;
     }
 
     public SubjectType_Teacher toSubjectType_Teacher(SubjectTypeTeacherDTO dto){
@@ -131,6 +149,7 @@ public class SubjectTypeService {
         st.type = dto.type;
         st.maxStudentsPerGroup = dto.maxStudentsPerGroup;
         if(withTeacherList) st.teachersList = dto.teachersList.stream().map(this::toSubjectType_Teacher).collect(Collectors.toList());
+        st.groupsList = dto.groupsList.stream().map(this::toGroup).collect(Collectors.toList());
         return st;
     }
 

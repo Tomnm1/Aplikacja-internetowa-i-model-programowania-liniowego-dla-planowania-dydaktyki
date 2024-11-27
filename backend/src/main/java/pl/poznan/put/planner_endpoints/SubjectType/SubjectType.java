@@ -31,7 +31,12 @@ public class SubjectType {
     public ClassTypeOwn type;
     @Column(name = "max_students")
     public Integer maxStudentsPerGroup;
-    @ManyToMany(mappedBy = "subjectTypesList")
+    @ManyToMany
+    @JoinTable(
+            name = "subject_types_groups",
+            joinColumns = @JoinColumn(name = "subject_type_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id")
+    )
     @JsonIgnore
     public List<Group> groupsList;
 
@@ -47,6 +52,7 @@ public class SubjectType {
         dto.maxStudentsPerGroup = this.maxStudentsPerGroup;
         dto.numOfHours = this.numOfHours;
         dto.teachersList = this.teachersList.stream().map(SubjectType_Teacher::toSubjectTypeTeacherDTO).collect(Collectors.toList());
+        dto.groupsList = this.groupsList.stream().map(Group::toDTO).collect(Collectors.toList());
         return dto;
     }
 }

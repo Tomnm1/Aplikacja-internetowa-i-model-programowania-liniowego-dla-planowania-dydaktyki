@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,16 @@ public class SemesterController {
     public List<Semester> getAllSemesters() {
         return SemesterService.getAllSemesters();
     }
+
+    @Operation(summary = "Return all Semesters DTO")
+    @GetMapping("/DTO")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = Semester.class))
+            )
+    })
+    public List<SemesterDTO> getAllSemestersDTO() {return SemesterService.getAllSemestersDTO();}
 
     @Operation(summary = "Return Semesters by id")
     @GetMapping("/{id}")
@@ -65,7 +76,7 @@ public class SemesterController {
                     schema = @Schema(implementation = Semester.class)
             )
     })
-    public Semester updateSemesterByID(@PathVariable("id") Integer semesterId, @RequestBody Semester SemesterParams){
+    public Semester updateSemesterByID(@PathVariable("id") Integer semesterId, @RequestBody SemesterDTO SemesterParams){
         return SemesterService.updateSemesterByID(semesterId, SemesterParams);
     }
 

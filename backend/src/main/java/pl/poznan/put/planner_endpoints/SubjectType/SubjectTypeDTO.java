@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import pl.poznan.put.planner_endpoints.Group.Group;
+import pl.poznan.put.planner_endpoints.Group.GroupDTO;
+import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Group.SubjectTypeGroupDTO;
 import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectTypeTeacherDTO;
 import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_Teacher;
 import pl.poznan.put.planner_endpoints.Subject.Subject;
@@ -24,5 +26,6 @@ public class SubjectTypeDTO {
     public Integer maxStudentsPerGroup;
 
     public List<SubjectTypeTeacherDTO> teachersList;
+    public List<GroupDTO> groupsList;
 
 }
