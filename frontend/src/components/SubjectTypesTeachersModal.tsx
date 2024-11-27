@@ -44,7 +44,7 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({ o
                 .then((data: BackendTeacher[]) => setTeachers(data.filter(t => !usedTeacher.includes(t.id!))))
                 .catch(err => {
                     enqueueSnackbar(`Wystąpił błąd przy pobieraniu prowadzących: ${err}`, { variant: 'error' });
-                });2
+                });
         }
     }, [enqueueSnackbar, typeData]);
 
