@@ -19,10 +19,8 @@ export const degrees = {
 };
 
 export enum Cycle {
-    FIRST = 'first',
-    SECOND = 'second',
+    FIRST = 'first', SECOND = 'second',
 }
-
 
 export enum Day {
     MONDAY = 'monday',
@@ -35,25 +33,19 @@ export enum Day {
 }
 
 export enum Language {
-    POLSKI = 'polski',
-    ANGIELSKI = 'angielski',
+    POLSKI = 'polski', ANGIELSKI = 'angielski',
 }
 
 export enum Type {
-    LECTURE = 'wykład',
-    EX = 'ćwiczenia',
-    LAB = 'laboratoria',
-    PROJECT = 'projekt',
+    LECTURE = 'wykład', EX = 'ćwiczenia', LAB = 'laboratoria', PROJECT = 'projekt',
 }
 
 export const cycleMapping: { [key in Cycle]: string } = {
-    [Cycle.FIRST]: 'Pierwszy',
-    [Cycle.SECOND]: 'Drugi',
+    [Cycle.FIRST]: 'Pierwszy', [Cycle.SECOND]: 'Drugi',
 };
 
-export const languageMapping: { [key in Language] : string} = {
-    [Language.ANGIELSKI]: 'angielski',
-    [Language.POLSKI]: 'polski',
+export const languageMapping: { [key in Language]: string } = {
+    [Language.ANGIELSKI]: 'angielski', [Language.POLSKI]: 'polski',
 }
 export const dayMapping: { [key in Day]: string } = {
     [Day.MONDAY]: 'Poniedziałek',
@@ -65,11 +57,8 @@ export const dayMapping: { [key in Day]: string } = {
     [Day.SUNDAY]: 'Niedziela',
 };
 
-export const typeMapping: { [key in Type]: string} = {
-    [Type.LECTURE]: 'Wykład',
-    [Type.EX]: 'Ćwiczenia',
-    [Type.LAB]: 'Laboratoria',
-    [Type.PROJECT]: 'Projekt',
+export const typeMapping: { [key in Type]: string } = {
+    [Type.LECTURE]: 'Wykład', [Type.EX]: 'Ćwiczenia', [Type.LAB]: 'Laboratoria', [Type.PROJECT]: 'Projekt',
 }
 
 export interface BackendTeacher {
@@ -94,6 +83,7 @@ export interface TeachersState {
     rows: Teacher[];
     loading: boolean;
     error: string | null;
+    singleTeacher: Teacher | null;
 }
 
 export interface Building {
@@ -211,9 +201,7 @@ export interface SlotsDay {
 export interface BackendSlotsDay {
     SlotsDayId?: number;
     slot: {
-        slotId: number;
-        startTime?: string;
-        endTime?: string;
+        slotId: number; startTime?: string; endTime?: string;
     };
     day: Day;
 }
@@ -230,22 +218,19 @@ export interface Semester {
     specialisationId: number;
     specialisationRepresentation?: string;
     fieldOfStudyName?: string;
-    cycle?:Cycle;
-    groupCount?:number;
+    cycle?: Cycle;
+    groupCount?: number;
 }
 
 export interface BackendSemester {
     semesterId?: number;
     number: string;
     specialisation: {
-        specialisationId: number;
-        name?: string;
-        cycle: Cycle;
-        fieldOfStudy?:{
-            name?:string;
+        specialisationId: number; name?: string; cycle: Cycle; fieldOfStudy?: {
+            name?: string;
         }
     };
-    groupCount?:number;
+    groupCount?: number;
 }
 
 export interface SemesterState {
@@ -261,7 +246,7 @@ export interface Subject {
     exam: boolean;
     mandatory: boolean;
     planned: boolean;
-    semester: BackendSemester | {semesterId : number | string, specialisation?: BackendSpecialisation};
+    semester: BackendSemester | { semesterId: number | string, specialisation?: BackendSpecialisation };
 }
 
 export interface BackendSubject {
@@ -271,7 +256,7 @@ export interface BackendSubject {
     exam: boolean;
     mandatory: boolean;
     planned: boolean;
-    semester: BackendSemester | {semesterId : number};
+    semester: BackendSemester | { semesterId: number };
 }
 
 export interface SubjectState {
@@ -286,12 +271,12 @@ export interface SubjectType {
     type: Type;
     maxStudentsPerGroup: number;
     subject: BackendSubject | { SubjectId: number };
-    teachersList:teacherListDTO[];
-    groupsList:Group[];
+    teachersList: teacherListDTO[];
+    groupsList: Group[];
     frontId?: string;
 }
 
-export interface teacherListDTO{
+export interface teacherListDTO {
     id: number;
     teacherId: number;
     teacherFirstName: string;
@@ -307,8 +292,8 @@ export interface BackendSubjectType {
     type: Type;
     maxStudentsPerGroup: number;
     subject: BackendSubject | { SubjectId: number };
-    teachersList:teacherListDTO[];
-    groupsList:Group[];
+    teachersList: teacherListDTO[];
+    groupsList: Group[];
     frontId?: string;
 }
 
@@ -339,11 +324,14 @@ export interface GeneratedPlan {
     subjectType: SubjectType;
     isEvenWeek: boolean;
 }
+
 export interface Plan {
     planId: number;
     name: string;
     creationDate: string;
 }
+
+export type SlotPreference = 0 | 1 | -1;
 
 export interface Group {
     id: number;

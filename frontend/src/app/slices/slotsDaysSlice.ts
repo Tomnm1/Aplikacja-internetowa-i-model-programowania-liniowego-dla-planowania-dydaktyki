@@ -1,11 +1,9 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { API_ENDPOINTS } from '../urls';
-import { BackendSlotsDay, SlotsDayState, SlotsDay } from '../../utils/Interfaces';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {API_ENDPOINTS} from '../urls';
+import {BackendSlotsDay, SlotsDay, SlotsDayState} from '../../utils/Interfaces';
 
 const initialState: SlotsDayState = {
-    rows: [],
-    loading: false,
-    error: null,
+    rows: [], loading: false, error: null,
 };
 
 export const fetchSlotsDays = createAsyncThunk<SlotsDay[]>('slotsDays/fetchSlotsDays', async () => {
@@ -22,67 +20,51 @@ export const fetchSlotsDays = createAsyncThunk<SlotsDay[]>('slotsDays/fetchSlots
     }));
 });
 
-export const addSlotsDay = createAsyncThunk<SlotsDay, BackendSlotsDay>(
-    'slotsDays/addSlotsDay',
-    async (slotsDayData) => {
-        const response = await fetch(API_ENDPOINTS.SLOTS_DAYS, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(slotsDayData),
-        });
-        if (!response.ok) {
-            throw new Error('Failed to add slotsDay');
-        }
-        const data: BackendSlotsDay = await response.json();
-        return {
-            id: data.SlotsDayId!,
-            slotId: data.slot.slotId,
-            day: data.day,
-            slotRepresentation: `${data.slot.startTime} - ${data.slot.endTime}`,
-        };
+export const addSlotsDay = createAsyncThunk<SlotsDay, BackendSlotsDay>('slotsDays/addSlotsDay', async (slotsDayData) => {
+    const response = await fetch(API_ENDPOINTS.SLOTS_DAYS, {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(slotsDayData),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to add slotsDay');
     }
-);
+    const data: BackendSlotsDay = await response.json();
+    return {
+        id: data.SlotsDayId!,
+        slotId: data.slot.slotId,
+        day: data.day,
+        slotRepresentation: `${data.slot.startTime} - ${data.slot.endTime}`,
+    };
+});
 
-export const updateSlotsDay = createAsyncThunk<SlotsDay, BackendSlotsDay>(
-    'slotsDays/updateSlotsDay',
-    async (slotsDayData) => {
-        if (!slotsDayData.SlotsDayId) {
-            throw new Error('SlotsDayId is required for updating');
-        }
-        const response = await fetch(`${API_ENDPOINTS.SLOTS_DAYS}/${slotsDayData.SlotsDayId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(slotsDayData),
-        });
-        if (!response.ok) {
-            throw new Error('Failed to update slotsDay');
-        }
-        const data: BackendSlotsDay = await response.json();
-        return {
-            id: data.SlotsDayId!,
-            slotId: data.slot.slotId,
-            day: data.day,
-            slotRepresentation: `${data.slot.startTime} - ${data.slot.endTime}`,
-        };
+export const updateSlotsDay = createAsyncThunk<SlotsDay, BackendSlotsDay>('slotsDays/updateSlotsDay', async (slotsDayData) => {
+    if (!slotsDayData.SlotsDayId) {
+        throw new Error('SlotsDayId is required for updating');
     }
-);
+    const response = await fetch(`${API_ENDPOINTS.SLOTS_DAYS}/${slotsDayData.SlotsDayId}`, {
+        method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(slotsDayData),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to update slotsDay');
+    }
+    const data: BackendSlotsDay = await response.json();
+    return {
+        id: data.SlotsDayId!,
+        slotId: data.slot.slotId,
+        day: data.day,
+        slotRepresentation: `${data.slot.startTime} - ${data.slot.endTime}`,
+    };
+});
 
-export const deleteSlotsDay = createAsyncThunk<number, number>(
-    'slotsDays/deleteSlotsDay',
-    async (id) => {
-        const response = await fetch(`${API_ENDPOINTS.SLOTS_DAYS}/${id}`, { method: 'DELETE' });
-        if (!response.ok) {
-            throw new Error('Failed to delete SlotsDay');
-        }
-        return id;
+export const deleteSlotsDay = createAsyncThunk<number, number>('slotsDays/deleteSlotsDay', async (id) => {
+    const response = await fetch(`${API_ENDPOINTS.SLOTS_DAYS}/${id}`, {method: 'DELETE'});
+    if (!response.ok) {
+        throw new Error('Failed to delete SlotsDay');
     }
-);
+    return id;
+});
 
 const slotsDaysSlice = createSlice({
-    name: 'slotsDays',
-    initialState,
-    reducers: {},
-    extraReducers: (builder) => {
+    name: 'slotsDays', initialState, reducers: {}, extraReducers: (builder) => {
         builder
             .addCase(fetchSlotsDays.pending, (state) => {
                 state.loading = true;

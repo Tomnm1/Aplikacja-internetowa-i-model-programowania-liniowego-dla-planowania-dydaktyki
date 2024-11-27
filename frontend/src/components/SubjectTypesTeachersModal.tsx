@@ -1,15 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-    Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, FormControl, InputLabel, Select, MenuItem,
+    Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField,
 } from '@mui/material';
-import {
-    BackendSubjectType,
-    BackendTeacher,
-    teacherListDTO
-} from '../utils/Interfaces';
-import { useSnackbar } from 'notistack';
-import { SelectChangeEvent } from '@mui/material/Select';
+import {BackendSubjectType, BackendTeacher, teacherListDTO} from '../utils/Interfaces';
+import {useSnackbar} from 'notistack';
+import {SelectChangeEvent} from '@mui/material/Select';
 import ActionButton from "../utils/ActionButton.tsx";
 import SaveIcon from "@mui/icons-material/Save";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -23,8 +18,14 @@ interface SubjectTypesTeachersModalProps {
     subjectType: BackendSubjectType | null;
 }
 
-const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({ open, onClose, typeData, onSave,subjectType }) => {
-    const { enqueueSnackbar } = useSnackbar();
+const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({
+                                                                                 open,
+                                                                                 onClose,
+                                                                                 typeData,
+                                                                                 onSave,
+                                                                                 subjectType
+                                                                             }) => {
+    const {enqueueSnackbar} = useSnackbar();
     const [teachers, setTeachers] = useState<BackendTeacher[]>([]);
     const [formData, setFormData] = useState<teacherListDTO>({
         id: typeData?.id || 0,
@@ -43,16 +44,15 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({ o
                 .then(res => res.json())
                 .then((data: BackendTeacher[]) => setTeachers(data.filter(t => !usedTeacher.includes(t.id!))))
                 .catch(err => {
-                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu prowadzących: ${err}`, { variant: 'error' });
+                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu prowadzących: ${err}`, {variant: 'error'});
                 });
         }
     }, [enqueueSnackbar, typeData]);
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement> ) => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setFormData((prev) => ({
-            ...prev,
-            numHours: Number(value),
+            ...prev, numHours: Number(value),
         }));
     };
 
@@ -72,44 +72,37 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({ o
 
     const handleSubmit = () => {
         if (formData.numHours <= 0 || formData.teacherId === 0) {
-            enqueueSnackbar('Proszę wypełnić wszystkie pola', { variant: 'warning' });
+            enqueueSnackbar('Proszę wypełnić wszystkie pola', {variant: 'warning'});
             return;
         }
-        const typeToSave = { ...formData };
+        const typeToSave = {...formData};
         console.log(typeToSave);
         onSave(typeToSave);
     };
 
-    return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    return (<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle>{typeData ? 'Edytuj Prowadzącego' : 'Dodaj Prowadzącego'}</DialogTitle>
             <DialogContent>
-                {!typeData ? (
-                <FormControl fullWidth margin="normal">
-                    <InputLabel id="teacher-label">Prowadzący</InputLabel>
-                    <Select
-                        labelId="teacher-label"
-                        name="teacher"
-                        value={formData.teacherId.toString()}
-                        onChange={handleTeacherChange}
-                        label="Prowadzący"
-                    >
-                        {Object.values(teachers).map((teacher) => (
-                            <MenuItem key={teacher.id} value={teacher.id}>
-                                {`${teacher.firstName} ${teacher.lastName}` }
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-                ) : (
-                    <TextField
+                {!typeData ? (<FormControl fullWidth margin="normal">
+                        <InputLabel id="teacher-label">Prowadzący</InputLabel>
+                        <Select
+                            labelId="teacher-label"
+                            name="teacher"
+                            value={formData.teacherId.toString()}
+                            onChange={handleTeacherChange}
+                            label="Prowadzący"
+                        >
+                            {Object.values(teachers).map((teacher) => (<MenuItem key={teacher.id} value={teacher.id}>
+                                    {`${teacher.firstName} ${teacher.lastName}`}
+                                </MenuItem>))}
+                        </Select>
+                    </FormControl>) : (<TextField
                         margin="normal"
                         label="Prowadzący"
-                        value={`${formData.teacherFirstName} ${formData.teacherLastName}` }
+                        value={`${formData.teacherFirstName} ${formData.teacherLastName}`}
                         fullWidth
                         disabled
-                    />
-                )}
+                    />)}
                 <TextField
                     margin="normal"
                     label="Liczba godzin"
@@ -130,8 +123,7 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({ o
                                   colorScheme={'secondary'}/>
                 </div>
             </DialogActions>
-        </Dialog>
-    );
+        </Dialog>);
 };
 
 export default SubjectTypesTeachersModal;

@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 interface AuthState {
     isAuthenticated: boolean;
@@ -7,18 +7,14 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-    isAuthenticated: false,
-    userId: null,
-    role: null,
+    isAuthenticated: false, userId: null, role: null,
 };
 
 const storedAuth = localStorage.getItem('auth');
 const parsedAuth: AuthState | null = storedAuth ? JSON.parse(storedAuth) : null;
 
 const authSlice = createSlice({
-    name: 'auth',
-    initialState: parsedAuth || initialState,
-    reducers: {
+    name: 'auth', initialState: parsedAuth || initialState, reducers: {
         login: (state, action: PayloadAction<string>) => {
             state.isAuthenticated = true;
             if (action.payload === 'admin') {
@@ -29,8 +25,7 @@ const authSlice = createSlice({
                 state.userId = action.payload;
             }
             localStorage.setItem('auth', JSON.stringify(state));
-        },
-        logout: (state) => {
+        }, logout: (state) => {
             state.isAuthenticated = false;
             state.userId = null;
             state.role = null;
@@ -39,6 +34,6 @@ const authSlice = createSlice({
     },
 });
 
-export const { login, logout } = authSlice.actions;
+export const {login, logout} = authSlice.actions;
 
 export default authSlice.reducer;

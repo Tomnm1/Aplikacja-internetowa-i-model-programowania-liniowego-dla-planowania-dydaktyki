@@ -1,35 +1,34 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, {useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {
-    DataGrid, GridColDef, GridToolbarContainer,
-    GridActionsCellItem, GridRowParams, GridToolbar,
+    DataGrid, GridActionsCellItem, GridColDef, GridRowParams, GridToolbar, GridToolbarContainer,
 } from '@mui/x-data-grid';
-import { Button } from '@mui/material';
+import {Button} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
-import { RootState, AppDispatch } from '../app/store';
+import {AppDispatch, RootState} from '../app/store';
 import {Day, dayMapping, SlotsDay} from '../utils/Interfaces';
-import { plPL } from '@mui/x-data-grid/locales';
-import { deleteSlotsDay, fetchSlotsDays } from "../app/slices/slotsDaysSlice";
+import {plPL} from '@mui/x-data-grid/locales';
+import {deleteSlotsDay, fetchSlotsDays} from "../app/slices/slotsDaysSlice";
 import SlotsDayModal from "./SlotsDayModal";
 import {useSnackbar} from "notistack";
 
 const SlotsDays: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { rows: slotsDays, loading } = useSelector((state: RootState) => state.slotsDays);
+    const {rows: slotsDays, loading} = useSelector((state: RootState) => state.slotsDays);
 
     const [isDialogOpen, setDialogOpen] = React.useState(false);
     const [selectedRowId, setSelectedRowId] = React.useState<number | null>(null);
     const [isModalOpen, setModalOpen] = React.useState(false);
     const [selectedSlotsDay, setSelectedSlotsDay] = React.useState<SlotsDay | null>(null);
     const [isAdding, setIsAdding] = React.useState(false);
-    const { enqueueSnackbar } = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
 
     useEffect(() => {
         dispatch(fetchSlotsDays()).unwrap().catch((error) => {
-            enqueueSnackbar(`Błąd podczas pobierania slotów dnia: ${error.message}`, { variant: 'error' });
+            enqueueSnackbar(`Błąd podczas pobierania slotów dnia: ${error.message}`, {variant: 'error'});
         });
     }, [dispatch, enqueueSnackbar]);
 
@@ -52,10 +51,10 @@ const SlotsDays: React.FC = () => {
             dispatch(deleteSlotsDay(selectedRowId))
                 .unwrap()
                 .then(() => {
-                    enqueueSnackbar('Slot dnia został pomyślnie usunięty', { variant: 'success' });
+                    enqueueSnackbar('Slot dnia został pomyślnie usunięty', {variant: 'success'});
                 })
                 .catch((error) => {
-                    enqueueSnackbar(`Błąd podczas usuwania slotu dnia: ${error.message}`, { variant: 'error' });
+                    enqueueSnackbar(`Błąd podczas usuwania slotu dnia: ${error.message}`, {variant: 'error'});
                 });
         }
         setDialogOpen(false);
@@ -68,53 +67,40 @@ const SlotsDays: React.FC = () => {
         setModalOpen(true);
     };
 
-    const columns: GridColDef[] = [
-        {
-            field: 'day',
-            headerName: 'Dzień',
-            width: 150,
-            valueGetter: (params) => dayMapping[params as Day],
-        },
-        { field: 'slotRepresentation', headerName: 'Slot', width: 300 },
-        {
-            field: 'actions',
-            type: 'actions',
-            headerName: 'Akcje',
-            getActions: (params: GridRowParams) => [
-                <GridActionsCellItem
-                    icon={<VisibilityIcon />}
-                    label="Szczegóły"
-                    onClick={handleViewClick(params.id as number)}
-                    color="inherit"
-                />,
-                <GridActionsCellItem
-                    icon={<DeleteIcon />}
-                    label="Usuń"
-                    onClick={handleDeleteClick(params.id as number)}
-                    color="inherit"
-                />,
-            ],
-        },
-    ];
+    const columns: GridColDef[] = [{
+        field: 'day', headerName: 'Dzień', width: 150, valueGetter: (params) => dayMapping[params as Day],
+    }, {field: 'slotRepresentation', headerName: 'Slot', width: 300}, {
+        field: 'actions',
+        type: 'actions',
+        headerName: 'Akcje',
+        getActions: (params: GridRowParams) => [<GridActionsCellItem
+            icon={<VisibilityIcon/>}
+            label="Szczegóły"
+            onClick={handleViewClick(params.id as number)}
+            color="inherit"
+        />, <GridActionsCellItem
+            icon={<DeleteIcon/>}
+            label="Usuń"
+            onClick={handleDeleteClick(params.id as number)}
+            color="inherit"
+        />,],
+    },];
 
-    const TopToolbar = () => (
-        <GridToolbarContainer>
+    const TopToolbar = () => (<GridToolbarContainer>
             <Button color="primary" startIcon={<AddIcon/>} onClick={handleAddClick}>
                 Dodaj slot dnia
             </Button>
             <div style={{flexGrow: 1}}/>
             <GridToolbar/>
-        </GridToolbarContainer>
-    );
+        </GridToolbarContainer>);
 
-    return (
-        <>
+    return (<>
             <DataGrid
                 rows={slotsDays}
                 columns={columns}
                 loading={loading}
                 localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
-                slots={{ toolbar: TopToolbar }}
+                slots={{toolbar: TopToolbar}}
             />
             <ConfirmationDialog
                 open={isDialogOpen}
@@ -123,16 +109,13 @@ const SlotsDays: React.FC = () => {
                 content="Czy na pewno chcesz usunąć ten slot dnia?"
                 action="Potwierdź"
             />
-            {isModalOpen && (
-                <SlotsDayModal
+            {isModalOpen && (<SlotsDayModal
                     open={isModalOpen}
                     onClose={() => setModalOpen(false)}
                     slotsDay={selectedSlotsDay}
                     isAdding={isAdding}
-                />
-            )}
-        </>
-    );
+                />)}
+        </>);
 };
 
 export default SlotsDays;

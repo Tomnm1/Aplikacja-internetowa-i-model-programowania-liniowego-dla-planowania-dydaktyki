@@ -5,9 +5,9 @@ import Topper from "./Topper.tsx";
 interface Props {
     children: ReactNode;
 }
-const Layout = ({children } : Props) => {
-    return (
-        <div className="h-screen flex flex-col">
+
+const Layout = ({children}: Props) => {
+    return (<div className="h-screen flex flex-col">
             <Topper/>
             <div className="flex-1 flex overflow-hidden">
                 <div className="overflow-auto">
@@ -17,8 +17,7 @@ const Layout = ({children } : Props) => {
                     {children}
                 </div>
             </div>
-        </div>
-    );
+        </div>);
 };
 
 export default Layout;

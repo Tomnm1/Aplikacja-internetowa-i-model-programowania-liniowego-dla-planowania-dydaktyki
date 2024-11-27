@@ -2,11 +2,10 @@ import React, {useEffect, useState} from 'react';
 import {
     Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Fade, Step, StepLabel, Stepper
 } from '@mui/material';
-import {useDispatch, useSelector} from 'react-redux';
-import {AppDispatch, RootState} from '../app/store';
-import {Teacher} from '../utils/Interfaces';
+import {useDispatch} from 'react-redux';
+import {AppDispatch} from '../app/store';
+import {BackendTeacher, SlotPreference, SubjectType, Teacher} from '../utils/Interfaces';
 import {addTeacher, fetchTeachers, updateTeacher} from '../app/slices/teacherSlice';
-import {fetchSlots} from '../app/slices/slotsSlice';
 import {useSnackbar} from 'notistack';
 import ActionButton from "../utils/ActionButton.tsx";
 import SaveIcon from "@mui/icons-material/Save";
@@ -25,52 +24,48 @@ interface TeacherModalProps {
 
 const steps = ['Dane nauczyciela', 'Preferencje godzin'];
 
-type SlotPreference = 'neutral' | 'green' | 'red';
+interface TeacherFormData {
+    id: number;
+    firstName: string;
+    lastName: string;
+    degree: string;
+    subjectTypesList: SubjectType[] | [];
+}
 
 const TeacherModal: React.FC<TeacherModalProps> = ({open, onClose, teacher, isAdding}) => {
     const dispatch = useDispatch<AppDispatch>();
     const {enqueueSnackbar} = useSnackbar();
     const [activeStep, setActiveStep] = useState(0);
 
-    const [formData, setFormData] = useState({
-        id: teacher?.id || '',
-        firstName: teacher?.firstName || '',
-        lastName: teacher?.lastName || '',
-        degree: teacher?.degree || 'BRAK',
-        subjectTypesList: teacher?.subjectTypesList || [],
+    const [formData, setFormData] = useState<TeacherFormData>({
+        id: teacher?.id ?? 0,
+        firstName: teacher?.firstName ?? '',
+        lastName: teacher?.lastName ?? '',
+        degree: teacher?.degree ?? 'BRAK',
+        subjectTypesList: teacher?.subjectTypesList ?? [],
     });
 
-    const [preferences, setPreferences] = useState<Record<string, SlotPreference>>({});
-
+    const [preferences, setPreferences] = useState<Record<number, SlotPreference>>({});
     const [loading, setLoading] = useState<boolean>(false);
-
-    const slots = useSelector((state: RootState) => state.slots.rows);
-    const slotsLoading = useSelector((state: RootState) => state.slots.loading);
-
     useEffect(() => {
         if (open) {
-            if (slots.length === 0 && !slotsLoading) {
-                dispatch(fetchSlots()).unwrap().catch((error: any) => {
-                    enqueueSnackbar(`Błąd podczas pobierania slotów: ${error.message}`, {variant: 'error'});
+            const slotsString = teacher?.preferences.slots;
+            if (slotsString){
+                const slots = JSON.parse(slotsString!);
+                const initialSlots: Record<number, 0 | 1 | -1> = {};
+                Object.keys(slots).forEach((key) => {
+                    initialSlots[Number(key)] = slots[key];
+                })
+                setPreferences({
+                    ...initialSlots,
                 });
-            }
-
-            if (teacher?.preferences) {
-                setPreferences(teacher.preferences as Record<string, SlotPreference>);
-            } else {
-                const initialPreferences: Record<string, SlotPreference> = {};
-                slots.forEach((slot) => {
-                    initialPreferences[slot.slot_id.toString()] = 'neutral';
-                });
-                setPreferences(initialPreferences);
             }
             setActiveStep(0);
         }
-    }, [open, teacher, dispatch, slots, slotsLoading, enqueueSnackbar]);
-
+    }, []);
     const handleNext = () => {
         if (activeStep === 0) {
-            if (!formData.firstName || !formData.lastName) {
+            if (!formData.firstName.trim() || !formData.lastName.trim()) {
                 enqueueSnackbar("Proszę wypełnić wszystkie pola", {variant: 'warning'});
                 return;
             }
@@ -83,20 +78,24 @@ const TeacherModal: React.FC<TeacherModalProps> = ({open, onClose, teacher, isAd
     };
 
     const handleSubmit = async () => {
-        if (!formData.firstName || !formData.lastName) {
+        if (!formData.firstName.trim() || !formData.lastName.trim()) {
             enqueueSnackbar("Proszę wypełnić wszystkie pola", {variant: 'warning'});
             return;
         }
         setLoading(true);
 
-        const teacherData: Teacher = {
+        const serializedPreferences: { [key: string]: string } = {
+            slots: JSON.stringify(preferences),
+        };
+        const teacherData: BackendTeacher = {
             id: isAdding ? 0 : formData.id,
             firstName: formData.firstName,
             lastName: formData.lastName,
             degree: formData.degree,
-            preferences: preferences,
+            preferences: serializedPreferences,
             subjectTypesList: formData.subjectTypesList,
         };
+        console.log(teacherData);
 
         try {
             const action = isAdding ? addTeacher : updateTeacher;
@@ -112,64 +111,66 @@ const TeacherModal: React.FC<TeacherModalProps> = ({open, onClose, teacher, isAd
     };
 
     return (<Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
-            <Fade in={open} timeout={500}>
-                <Box sx={{position: 'relative', minHeight: '400px', padding: 4}}>
-                    <DialogTitle>{isAdding ? 'Dodaj nauczyciela' : `Edytuj nauczyciela ${teacher!.firstName} ${teacher!.lastName}`}</DialogTitle>
-                    <Stepper activeStep={activeStep} alternativeLabel sx={{marginBottom: 2}}>
-                        {steps.map((label) => (<Step key={label}>
-                                <StepLabel>{label}</StepLabel>
-                            </Step>))}
-                    </Stepper>
-                    <DialogContent>
-                        {activeStep === 0 && (<TeacherDetails
-                                formData={formData}
-                                setFormData={setFormData}
-                                loading={loading}
-                            />)}
-                        {activeStep === 1 && (<TeacherPreferences
-                                slots={slots}
-                                preferences={preferences}
-                                setPreferences={setPreferences}
-                                loading={loading}
-                            />)}
-                    </DialogContent>
-                    <DialogActions>
-                        <Box display="flex" justifyContent="space-between" width="100%">
-                            <Box>
-                                {activeStep > 0 && (<Button onClick={handleBack} disabled={loading}>
-                                        <ArrowBackIcon/>
-                                        Powrót
-                                    </Button>)}
-                            </Box>
-                            <Box>
-                                {activeStep < steps.length - 1 && (<ActionButton
-                                        onClick={handleNext}
-                                        disabled={loading}
-                                        tooltipText={'Następny krok'}
-                                        icon={<NavigateNextIcon/>}
-                                        colorScheme={'primary'}
-                                    />)}
-                                {activeStep === steps.length - 1 && (<div className={"flex"}>
-                                        <ActionButton
-                                            onClick={handleSubmit}
-                                            disabled={loading}
-                                            tooltipText={isAdding ? 'Dodaj' : 'Zaktualizuj'}
-                                            icon={<SaveIcon/>}
-                                            colorScheme={'primary'}
-                                        />
-                                        <ActionButton
-                                            onClick={onClose}
-                                            disabled={loading}
-                                            tooltipText={"Anuluj"}
-                                            icon={<ClearIcon/>}
-                                            colorScheme={'secondary'}
-                                        />
-                                    </div>)}
-                            </Box>
+        <Fade in={open} timeout={500}>
+            <Box sx={{position: 'relative', minHeight: '400px', padding: 4}}>
+                <DialogTitle>
+                    {isAdding ? 'Dodaj nauczyciela' : teacher ? `Edytuj nauczyciela ${teacher.firstName} ${teacher.lastName}` : 'Edytuj nauczyciela'}
+                </DialogTitle>
+                <Stepper activeStep={activeStep} alternativeLabel sx={{marginBottom: 2}}>
+                    {steps.map((label) => (<Step key={label}>
+                        <StepLabel>{label}</StepLabel>
+                    </Step>))}
+                </Stepper>
+                <DialogContent>
+                    {activeStep === 0 && (<TeacherDetails
+                        formData={formData}
+                        setFormData={setFormData}
+                        loading={loading}
+                    />)}
+                    {activeStep === 1 && (<TeacherPreferences
+                        preferences={preferences}
+                        setPreferences={setPreferences}
+                        loading={loading}
+                    />)}
+                </DialogContent>
+                <DialogActions>
+                    <Box display="flex" justifyContent="space-between" width="100%">
+                        <Box>
+                            {activeStep > 0 && (<Button onClick={handleBack} disabled={loading}>
+                                <ArrowBackIcon/>
+                                Powrót
+                            </Button>)}
                         </Box>
-                    </DialogActions>
-                </Box>
-            </Fade>
-        </Dialog>);
+                        <Box>
+                            {activeStep < steps.length - 1 && (<ActionButton
+                                onClick={handleNext}
+                                disabled={loading}
+                                tooltipText={'Następny krok'}
+                                icon={<NavigateNextIcon/>}
+                                colorScheme={'primary'}
+                            />)}
+                            {activeStep === steps.length - 1 && (<div className="flex">
+                                <ActionButton
+                                    onClick={handleSubmit}
+                                    disabled={loading}
+                                    tooltipText={isAdding ? 'Dodaj' : 'Zaktualizuj'}
+                                    icon={<SaveIcon/>}
+                                    colorScheme={'primary'}
+                                />
+                                <ActionButton
+                                    onClick={onClose}
+                                    disabled={loading}
+                                    tooltipText={"Anuluj"}
+                                    icon={<ClearIcon/>}
+                                    colorScheme={'secondary'}
+                                />
+                            </div>)}
+                        </Box>
+                    </Box>
+                </DialogActions>
+            </Box>
+        </Fade>
+    </Dialog>);
 };
+
 export default TeacherModal;
