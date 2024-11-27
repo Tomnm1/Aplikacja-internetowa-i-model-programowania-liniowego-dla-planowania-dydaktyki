@@ -14,7 +14,7 @@ interface TypeModalProps {
     open: boolean;
     onClose: () => void;
     typeData: BackendSubjectType | null;
-    onSave: (type: BackendSubjectType) => void;
+    onSave: (typeData: BackendSubjectType, fromGroups: boolean) => void;
 }
 //TODO zabezpieczyć przed wielokrotnym dodaniem tego samego typu przedmiotu -> np 2x wykład etc
 const TypeModal: React.FC<TypeModalProps> = ({ open, onClose, typeData, onSave }) => {
@@ -24,6 +24,9 @@ const TypeModal: React.FC<TypeModalProps> = ({ open, onClose, typeData, onSave }
         type: typeData?.type || Type.LECTURE,
         maxStudentsPerGroup: typeData?.maxStudentsPerGroup || 0,
         subject: typeData?.subject || { SubjectId: 0 },
+        teachersList: typeData?.teachersList || [],
+        groupsList: typeData?.groupsList || [],
+        frontId: typeData?.frontId || `ID-${Date.now()}`,
     });
 
     useEffect(() => {
@@ -35,6 +38,9 @@ const TypeModal: React.FC<TypeModalProps> = ({ open, onClose, typeData, onSave }
                 type: Type.LECTURE,
                 maxStudentsPerGroup: 0,
                 subject: { SubjectId: 0 },
+                teachersList: [],
+                groupsList: [],
+                frontId: `ID-${Date.now()}`,
             });
         }
     }, [typeData]);
@@ -53,7 +59,7 @@ const TypeModal: React.FC<TypeModalProps> = ({ open, onClose, typeData, onSave }
             return;
         }
         const typeToSave = { ...formData };
-        onSave(typeToSave);
+        onSave(typeToSave,false);
     };
 
     return (

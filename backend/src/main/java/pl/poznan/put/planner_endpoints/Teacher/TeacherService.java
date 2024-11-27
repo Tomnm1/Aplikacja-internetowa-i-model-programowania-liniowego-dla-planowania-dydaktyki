@@ -1,13 +1,16 @@
 package pl.poznan.put.planner_endpoints.Teacher;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_Teacher;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Business logic for teachers
@@ -24,9 +27,17 @@ public class TeacherService {
      * Returns all teachers
      * @return list of teachers
      */
-    public List<Teacher> getAllteachers(){
-        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    @Transactional
+    public List<TeacherDTO> getAllteachers(){
+        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream().map(Teacher::convertToDTO).toList();
     }
+
+//    @Transactional
+//    public List<Teacher> getAllteachers(){
+//        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+//    }
+
+
 
     /**
      * For pagination - returns teachers from given page
@@ -63,6 +74,7 @@ public class TeacherService {
      * @param teacherParams new values in JSON format
      * @return saved Teacher or null
      */
+    @Transactional
     public Teacher updateteacherByID(Integer id, Teacher teacherParams){
         Optional<Teacher> teacher = teacherRepository.findById(id);
         if (teacher.isPresent()) {
@@ -71,6 +83,7 @@ public class TeacherService {
             oldteacher.lastName = teacherParams.lastName;
             oldteacher.degree = teacherParams.degree;
             oldteacher.preferences = teacherParams.preferences;
+            oldteacher.subjectTypesList = teacherParams.subjectTypesList;
             return teacherRepository.save(oldteacher);
         } else {
             return null;
