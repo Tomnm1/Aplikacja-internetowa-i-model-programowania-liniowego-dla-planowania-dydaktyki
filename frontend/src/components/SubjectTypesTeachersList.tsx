@@ -21,7 +21,9 @@ const SubjectTypesTeachersList: React.FC<SubjectTypesTeachersListProps> = ({ tea
     const [isAdding, setIsAdding] = useState(false);
     const [openTeachersModal, setOpenTeachersModal] = useState(false);
     const [maxHours, setMaxHours] = useState(typeData ? typeData.numOfHours : 0);
-    const [hours, setHours] = useState(maxHours - teachersList.reduce((sum, t) => {return sum + t.numHours;}, 0));
+    const [hours, setHours] = useState(() => {
+  return maxHours - teachersList.reduce((sum, t) => {return sum + t.numHours;}, 0);
+});
     const [currentType, setCurrentType] = useState<teacherListDTO | null>(null);
 
     const handleAdd = () => {
