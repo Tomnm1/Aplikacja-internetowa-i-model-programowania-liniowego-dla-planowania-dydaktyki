@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     SEMESTERS: `${API_BASE}/semesters`,
     SUBJECT: `${API_BASE}/subjects`,
     SUBJECT_TYPE: `${API_BASE}/subjectTypes`,
+    GROUPS: `${API_BASE}/groups`,
 };
 
 export default API_ENDPOINTS;

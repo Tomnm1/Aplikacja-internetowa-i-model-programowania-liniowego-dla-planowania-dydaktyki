@@ -7,7 +7,7 @@ import {
 import CheckIcon from '@mui/icons-material/Check';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../app/store';
-import {BackendSpecialisation, cycleMapping, Semester} from '../utils/Interfaces';
+import {BackendSpecialisation, cycleMapping, Semester, Type} from '../utils/Interfaces';
 import { green } from "@mui/material/colors";
 import API_ENDPOINTS from '../app/urls';
 import { SelectChangeEvent } from '@mui/material/Select';
@@ -33,6 +33,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
         number: semester?.number || '',
         specialisationId: semester?.specialisationId?.toString() || '',
         specialisationRepresentation: semester?.specialisationRepresentation || '',
+        groupCount: semester?.groupCount || 0,
     });
     const [loading, setLoading] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
@@ -56,6 +57,14 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
         }));
     };
 
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> ) => {
+        const  value  = event.target.value;
+        setFormData((prev) => ({
+            ...prev,
+            groupCount: Number(value),
+        }));
+    };
+
     const handleSpecialisationChange = (event: SelectChangeEvent) => {
         const selectedSpecialisationId = event.target.value as string;
         const selectedSpecialisation = specialisations.find(specialisation => specialisation!.specialisationId!.toString() === selectedSpecialisationId);
@@ -76,6 +85,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
 
         const semesterData = {
             number: formData.number,
+            groupCount: formData.groupCount,
             specialisation: {
                 specialisationId: Number(formData.specialisationId),
             },
@@ -83,6 +93,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
         };
 
         try {
+            console.log(semesterData);
             const action = isAdding ? addSemester : updateSemester;
             await dispatch(action(semesterData)).unwrap();
             await dispatch(fetchSemesters());
@@ -140,6 +151,16 @@ const SemesterModal: React.FC<SemesterModalProps> = ({ open, onClose, semester, 
                                     onChange={handleInputChange}
                                     fullWidth
                                     disabled={loading}
+                                />
+                                <TextField
+                                    margin="normal"
+                                    label="Liczba grub laboratoryjnych"
+                                    type="number"
+                                    name="groupCount"
+                                    value={formData.groupCount}
+                                    onChange={handleChange}
+                                    fullWidth
+                                    required
                                 />
                             </DialogContent>
                             <DialogActions>

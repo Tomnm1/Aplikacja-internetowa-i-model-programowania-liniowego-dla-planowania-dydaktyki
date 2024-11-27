@@ -12,18 +12,22 @@ import { deleteSubjectType } from '../app/slices/subjectTypeSlice';
 import { useSnackbar } from 'notistack';
 import TypeModal from "./TypeModal.tsx";
 import AddIcon from "@mui/icons-material/Add";
+import GroupsIcon from '@mui/icons-material/Groups';
 import SubjectTypesTeachersList from "./SubjectTypesTeachersList.tsx";
+import GroupsModal from './GroupsModal.tsx';
 
 interface SubjectTypesFormProps {
     subjectTypes: BackendSubjectType[];
     setSubjectTypes: React.Dispatch<React.SetStateAction<BackendSubjectType[]>>;
+    semester: number;
     loading: boolean;
 }
 
-const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSubjectTypes, loading }) => {
+const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSubjectTypes,semester, loading }) => {
     const dispatch = useDispatch<AppDispatch>();
     const { enqueueSnackbar } = useSnackbar();
     const [openTypeModal, setOpenTypeModal] = useState(false);
+    const [openGroupsModal, setOpenGroupsModal] = useState(false);
     const [openTeachersList, setOpenTeachersList] = useState(false);
     const [currentType, setCurrentType] = useState<BackendSubjectType | null>(null);
 
@@ -42,6 +46,11 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSu
         currentType === type ? setOpenTeachersList(false) : setOpenTeachersList(true);
     };
 
+    const handleGroups = (type: BackendSubjectType) => {
+        setCurrentType(type);
+        setOpenGroupsModal(true);
+    };
+
     const handleDelete = async (id: number) => {
         try {
             await dispatch(deleteSubjectType(id)).unwrap();
@@ -52,13 +61,18 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSu
         }
     };
 
-    const handleSave = (typeData: BackendSubjectType) => {
+    const handleSave = (typeData: BackendSubjectType, fromGroups:boolean) => {
         if (typeData.subjectTypeId) {
             setSubjectTypes(prev => prev.map(st => st.subjectTypeId === typeData.subjectTypeId ? typeData : st));
             enqueueSnackbar('Typ przedmiotu zaktualizowany!', { variant: 'success' });
         } else {
-            setSubjectTypes(prev => [...prev, { ...typeData}]);
-            enqueueSnackbar('Typ przedmiotu dodany!', { variant: 'success' });
+            if(fromGroups && typeData.frontId){
+                setSubjectTypes(prev => prev.map(st => st.frontId === typeData.frontId ? typeData : st));
+                enqueueSnackbar('Typ przedmiotu zaktualizowany!', { variant: 'success' });
+            }else{
+                setSubjectTypes(prev => [...prev, { ...typeData}]);
+                enqueueSnackbar('Typ przedmiotu dodany!', { variant: 'success' });
+            }
         }
         setOpenTypeModal(false);
     };
@@ -78,8 +92,6 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSu
                     <TableBody>
                         {subjectTypes.map((type) => (
                             <>
-                                {console.log(type.teachersList.reduce((sum, t) => {return sum + t.numHours;}, 0))}
-                                {console.log( type.numOfHours)}
                             <TableRow key={type.type} style={currentType === type ? { backgroundColor:"#dddddd" } : {}}>
                                 <TableCell>{typeMapping[type.type]}</TableCell>
                                 <TableCell>{type.numOfHours}</TableCell>
@@ -92,6 +104,9 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSu
                                         <IconButton onClick={() => handleTeachers(type)} disabled={loading}>
                                             <PersonAddAlt />
                                             {type.teachersList.reduce((sum, t) => {return sum + t.numHours;}, 0) != type.numOfHours && (<ErrorIcon style={{position: 'absolute', top: -5, right: -5, fontSize: 20, color: 'red'}}/>)}
+                                        </IconButton>
+                                        <IconButton onClick={() => handleGroups(type)} disabled={loading}>
+                                            <GroupsIcon />
                                         </IconButton>
                                         {/*TODO dodać zabezpieczenie pytające czy chcesz usunąć rekord <ConfirmationDialog>*/}
                                         {/*TODO Dodać możliwość usuwania rekordków które nie są jeszcze dodane - tj takie których jeszcze nie ma w bazie, bo główny przedmiot nie został dodany*/}
@@ -133,6 +148,15 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({ subjectTypes, setSu
                     open={openTypeModal}
                     onClose={() => setOpenTypeModal(false)}
                     typeData={currentType}
+                    onSave={handleSave}
+                />
+            )}
+            {openGroupsModal && (
+                <GroupsModal
+                    open={openGroupsModal}
+                    onClose={() => setOpenGroupsModal(false)}
+                    typeData={currentType}
+                    semester={semester}
                     onSave={handleSave}
                 />
             )}

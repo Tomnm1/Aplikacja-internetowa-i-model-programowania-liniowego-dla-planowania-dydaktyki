@@ -147,6 +147,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ open, onClose, subject, isA
                     <SubjectTypesForm
                         subjectTypes={subjectTypes}
                         setSubjectTypes={setSubjectTypes}
+                        semester={formData.semester.semesterId as number}
                         loading={loading}
                     />
                 );

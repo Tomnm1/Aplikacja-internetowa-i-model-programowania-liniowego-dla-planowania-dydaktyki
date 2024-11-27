@@ -96,11 +96,6 @@ export interface Hour {
     timeRange: string;
 }
 
-export interface Group {
-    id: number;
-    name: string;
-}
-
 export interface Schedule {
     id: number;
     teacherIds: number[];
@@ -277,6 +272,7 @@ export interface Semester {
     specialisationRepresentation?: string;
     fieldOfStudyName?: string;
     cycle?:Cycle;
+    groupCount?:number;
 }
 
 export interface BackendSemester {
@@ -290,6 +286,7 @@ export interface BackendSemester {
             name?:string;
         }
     };
+    groupCount?:number;
 }
 
 export interface SemesterState {
@@ -331,6 +328,7 @@ export interface SubjectType {
     maxStudentsPerGroup: number;
     subject: BackendSubject | { SubjectId: number };
     teachersList:teacherListDTO[];
+    groupsList:Group[];
     frontId?: string;
 }
 
@@ -351,11 +349,24 @@ export interface BackendSubjectType {
     maxStudentsPerGroup: number;
     subject: BackendSubject | { SubjectId: number };
     teachersList:teacherListDTO[];
+    groupsList:Group[];
     frontId?: string;
 }
 
 export interface SubjectTypeState {
     rows: SubjectType[];
+    loading: boolean;
+    error: string | null;
+}
+
+export interface Group {
+    id: number;
+    code: string;
+    group_type: Type;
+}
+
+export interface GroupState {
+    rows: Group[];
     loading: boolean;
     error: string | null;
 }

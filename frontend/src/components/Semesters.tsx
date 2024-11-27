@@ -91,6 +91,11 @@ const Semesters: React.FC = () => {
             valueGetter: (value) => cycleMapping[value] || value,
         },
         {
+            field: 'groupCount',
+            headerName: 'Liczba grup laboratoryjnych',
+            width: 200,
+        },
+        {
             field: 'actions',
             type: 'actions',
             headerName: 'Akcje',
