@@ -45,7 +45,8 @@ public class TeacherController {
                     schema = @Schema(implementation = Teacher.class)
             )
     })
-    public Optional<Teacher> getTeacherByID(@PathVariable("id") Integer id) {
+    @Transactional
+    public TeacherDTO getTeacherByID(@PathVariable("id") Integer id) {
         return teacherService.getteacherByID(id);
     }
 

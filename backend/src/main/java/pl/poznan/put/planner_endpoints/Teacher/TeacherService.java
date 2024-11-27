@@ -1,6 +1,7 @@
 package pl.poznan.put.planner_endpoints.Teacher;
 
 import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -54,8 +55,10 @@ public class TeacherService {
      * @param id subject id
      * @return Optional - empty or with Subject
      */
-    public Optional<Teacher> getteacherByID(Integer id){
-        return teacherRepository.findById(id);
+    @Transactional
+    public TeacherDTO getteacherByID(Integer id){
+        Teacher teacher = teacherRepository.findById(id).orElseThrow();
+        return teacher.convertToDTO();
     }
 
     /**
