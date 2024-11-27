@@ -13,7 +13,7 @@ const initialState: SemesterState = {
 };
 
 export const fetchSemesters = createAsyncThunk<Semester[]>('semesters/fetchSemesters', async () => {
-    const response = await fetch(API_ENDPOINTS.SEMESTERS);
+    const response = await fetch(`${API_ENDPOINTS.SEMESTERS}/DTO`);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -25,6 +25,7 @@ export const fetchSemesters = createAsyncThunk<Semester[]>('semesters/fetchSemes
         specialisationRepresentation: semester.specialisation.name,
         fieldOfStudyName: semester.specialisation.fieldOfStudy?.name,
         cycle: semester.specialisation.cycle,
+        groupCount: semester.groupCount,
     }));
 });
 
