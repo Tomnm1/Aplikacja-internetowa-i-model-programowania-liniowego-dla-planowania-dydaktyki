@@ -1,37 +1,17 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
+import {Alert, Button, CircularProgress, Snackbar, Step, StepLabel, Stepper, Typography,} from '@mui/material';
 import {
-    Step,
-    StepLabel,
-    Stepper,
-    CircularProgress,
-    Typography,
-    Snackbar,
-    Alert,
-    Button,
-} from '@mui/material';
-import {
-    CheckCircle as CheckCircleIcon,
-    Error as ErrorIcon,
-    Build as BuildIcon,
-    VerifiedUser as VerifiedUserIcon,
+    Build as BuildIcon, CheckCircle as CheckCircleIcon, Error as ErrorIcon, VerifiedUser as VerifiedUserIcon,
 } from '@mui/icons-material';
 import ActionButton from "../utils/ActionButton.tsx";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 
 const steps = ['Sprawdź ograniczenia', 'Budowanie', 'Sukces lub Błąd'];
 
-const dummyProcesses = [
-    'Weryfikacja danych',
-    'Obliczanie',
-    'Zbieranie obliczeń',
-    'Tworzenie planu',
-    'Walidacja wyników',
-];
+const dummyProcesses = ['Weryfikacja danych', 'Obliczanie', 'Zbieranie obliczeń', 'Tworzenie planu', 'Walidacja wyników',];
 
 type SnackbarState = {
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error' | 'info' | 'warning';
+    open: boolean; message: string; severity: 'success' | 'error' | 'info' | 'warning';
 };
 
 const Home: React.FC = () => {
@@ -44,9 +24,7 @@ const Home: React.FC = () => {
     const [result, setResult] = useState<'success' | 'error' | null>(null);
     const [error, setError] = useState<string>('');
     const [snackbar, setSnackbar] = useState<SnackbarState>({
-        open: false,
-        message: '',
-        severity: 'success',
+        open: false, message: '', severity: 'success',
     });
 
     const handleNext = () => {
@@ -71,11 +49,11 @@ const Home: React.FC = () => {
             //tu słać requesta, kiedyś
             await new Promise((resolve) => setTimeout(resolve, 2000));
             setCheckSuccess(true);
-            setSnackbar({ open: true, message: 'Ograniczenia sprawdzone pomyślnie!', severity: 'success' });
+            setSnackbar({open: true, message: 'Ograniczenia sprawdzone pomyślnie!', severity: 'success'});
             handleNext();
         } catch (err) {
             setError('Wystąpił błąd podczas sprawdzania ograniczeń.');
-            setSnackbar({ open: true, message: 'Błąd podczas sprawdzania ograniczeń.', severity: 'error' });
+            setSnackbar({open: true, message: 'Błąd podczas sprawdzania ograniczeń.', severity: 'error'});
         } finally {
             setCheckLoading(false);
         }
@@ -94,12 +72,12 @@ const Home: React.FC = () => {
         if (isSuccess) {
             setBuildSuccess(true);
             setResult('success');
-            setSnackbar({ open: true, message: 'Budowanie zakończone sukcesem!', severity: 'success' });
+            setSnackbar({open: true, message: 'Budowanie zakończone sukcesem!', severity: 'success'});
         } else {
             setBuildSuccess(false);
             setResult('error');
             setError('Budowanie zakończyło się błędem.');
-            setSnackbar({ open: true, message: 'Budowanie zakończyło się błędem.', severity: 'error' });
+            setSnackbar({open: true, message: 'Budowanie zakończyło się błędem.', severity: 'error'});
         }
         setBuildLoading(false);
         handleNext();
@@ -108,80 +86,61 @@ const Home: React.FC = () => {
     const getStepContent = (step: number) => {
         switch (step) {
             case 0:
-                return (
-                    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
+                return (<div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
                         <Typography variant="h6" className="mb-4">
                             Sprawdź Ograniczenia
                         </Typography>
                         <ActionButton onClick={checkRestrictions} disabled={checkLoading}
                                       tooltipText={'Przejdź do następnego kroku'} icon={<NavigateNextIcon/>}
-                                      colorScheme={'primary'} />
-                        {error && (
-                            <Typography color="error" className="mt-4">
+                                      colorScheme={'primary'}/>
+                        {error && (<Typography color="error" className="mt-4">
                                 {error}
-                            </Typography>
-                        )}
-                    </div>
-                );
+                            </Typography>)}
+                    </div>);
             case 1:
-                return (
-                    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
+                return (<div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
                         <Typography variant="h6" className="mb-4">
                             Budowanie
                         </Typography>
-                        {!buildLoading && !buildSuccess ? (
-                            <ActionButton onClick={startBuilding} disabled={buildLoading}
-                                          tooltipText={'Zbuduj'} icon={<NavigateNextIcon/>}
-                                          colorScheme={'primary'} />
-                        ) : (
+                        {!buildLoading && !buildSuccess ? (<ActionButton onClick={startBuilding} disabled={buildLoading}
+                                                                         tooltipText={'Zbuduj'}
+                                                                         icon={<NavigateNextIcon/>}
+                                                                         colorScheme={'primary'}/>) : (
                             <div className="w-full mt-6">
                                 <div className="bg-gray-100 p-4 rounded-lg shadow-inner">
                                     <Stepper activeStep={buildingStep} orientation="vertical">
-                                        {dummyProcesses.map((process) => (
-                                            <Step key={process}>
+                                        {dummyProcesses.map((process) => (<Step key={process}>
                                                 <StepLabel>{process}</StepLabel>
-                                            </Step>
-                                        ))}
+                                            </Step>))}
                                     </Stepper>
                                     <div className="flex justify-center mt-4">
-                                        <CircularProgress />
+                                        <CircularProgress/>
                                     </div>
                                     <Typography variant="body2" className="mt-2 text-center">
                                         Proces budowania...
                                     </Typography>
                                 </div>
-                            </div>
-                        )}
-                        {error && (
-                            <Typography color="error" className="mt-4">
+                            </div>)}
+                        {error && (<Typography color="error" className="mt-4">
                                 {error}
-                            </Typography>
-                        )}
-                    </div>
-                );
+                            </Typography>)}
+                    </div>);
             case 2:
-                return (
-                    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
-                        {result === 'success' ? (
-                            <>
-                                <CheckCircleIcon className="text-green-500" style={{ fontSize: 80 }} />
+                return (<div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
+                        {result === 'success' ? (<>
+                                <CheckCircleIcon className="text-green-500" style={{fontSize: 80}}/>
                                 <Typography variant="h5" className="mt-4">
                                     Operacja zakończona sukcesem!
                                 </Typography>
-                            </>
-                        ) : (
-                            <>
-                                <ErrorIcon className="text-red-500" style={{ fontSize: 80 }} />
+                            </>) : (<>
+                                <ErrorIcon className="text-red-500" style={{fontSize: 80}}/>
                                 <Typography variant="h5" className="mt-4">
                                     Wystąpił błąd podczas operacji.
                                 </Typography>
-                                {error && (
-                                    <Typography color="error" className="mt-2">
+                                {error && (<Typography color="error" className="mt-2">
                                         {error}
-                                    </Typography>
-                                )}
-                            </>
-                        )}
+                                    </Typography>)}
+                            </>)}
                         <Button
                             variant="contained"
                             color="primary"
@@ -191,42 +150,36 @@ const Home: React.FC = () => {
                         >
                             Rozpocznij od nowa
                         </Button>
-                    </div>
-                );
+                    </div>);
             default:
                 return 'Nieznany krok';
         }
     };
 
-    return (
-        <div className="min-h-full flex flex-col items-center justify-center p-4">
+    return (<div className="min-h-full flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-4xl">
                 <div className="bg-gradient-to-tr backdrop-blur from-10% to-90% rounded-lg shadow-lg p-6">
                     <Stepper activeStep={activeStep} alternativeLabel>
-                        {steps.map((label, index) => (
-                            <Step key={label}>
+                        {steps.map((label, index) => (<Step key={label}>
                                 <StepLabel
                                     StepIconComponent={() => {
                                         if (activeStep > index) {
                                             if (index === steps.length - 1) {
                                                 return result === 'success' ? (
-                                                    <CheckCircleIcon className="text-green-500" />
-                                                ) : (
-                                                    <ErrorIcon className="text-red-500" />
-                                                );
+                                                    <CheckCircleIcon className="text-green-500"/>) : (
+                                                    <ErrorIcon className="text-red-500"/>);
                                             }
-                                            return <VerifiedUserIcon className="text-blue-500" />;
+                                            return <VerifiedUserIcon className="text-blue-500"/>;
                                         } else if (activeStep === index) {
-                                            return <BuildIcon className="text-blue-500" />;
+                                            return <BuildIcon className="text-blue-500"/>;
                                         } else {
-                                            return <BuildIcon className="text-gray-300" />;
+                                            return <BuildIcon className="text-gray-300"/>;
                                         }
                                     }}
                                 >
                                     {label}
                                 </StepLabel>
-                            </Step>
-                        ))}
+                            </Step>))}
                     </Stepper>
                     <div className="mt-8">{getStepContent(activeStep)}</div>
                 </div>
@@ -234,19 +187,18 @@ const Home: React.FC = () => {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={6000}
-                onClose={() => setSnackbar({ ...snackbar, open: false })}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                onClose={() => setSnackbar({...snackbar, open: false})}
+                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
             >
                 <Alert
-                    onClose={() => setSnackbar({ ...snackbar, open: false })}
+                    onClose={() => setSnackbar({...snackbar, open: false})}
                     severity={snackbar.severity}
                     className="w-full"
                 >
                     {snackbar.message}
                 </Alert>
             </Snackbar>
-        </div>
-    );
+        </div>);
 };
 
 export default Home;

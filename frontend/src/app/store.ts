@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit';
+import {configureStore} from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice.ts';
 import teacherReducer from './slices/teacherSlice.ts';
 import classroomReducer from './slices/classroomSlice';

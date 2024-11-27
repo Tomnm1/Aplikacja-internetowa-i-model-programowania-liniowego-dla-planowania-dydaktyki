@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+    Box,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
-    TextField,
+    DialogContent,
+    DialogTitle,
+    Fade,
     FormControl,
     InputLabel,
-    Select,
     MenuItem,
     OutlinedInput,
+    Select,
+    TextField,
     Typography,
-    Box,
-    Fade,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../app/store';
-import { Classroom, BackendBuilding, BackendClassroom } from '../utils/Interfaces';
-import { addClassroom, updateClassroom } from '../app/slices/classroomSlice';
-import { API_ENDPOINTS } from '../app/urls';
-import { SelectChangeEvent } from '@mui/material/Select';
-import { GridRowId } from '@mui/x-data-grid';
+import {useDispatch} from 'react-redux';
+import {AppDispatch} from '../app/store';
+import {BackendBuilding, BackendClassroom, Classroom} from '../utils/Interfaces';
+import {addClassroom, updateClassroom} from '../app/slices/classroomSlice';
+import {API_ENDPOINTS} from '../app/urls';
+import {SelectChangeEvent} from '@mui/material/Select';
+import {GridRowId} from '@mui/x-data-grid';
 import {green} from "@mui/material/colors";
 import {useSnackbar} from "notistack";
 import ActionButton from "../utils/ActionButton.tsx";
@@ -35,9 +35,9 @@ interface ClassroomModalProps {
     isAdding: boolean;
 }
 
-const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroom, isAdding }) => {
+const ClassroomModal: React.FC<ClassroomModalProps> = ({open, onClose, classroom, isAdding}) => {
     const dispatch = useDispatch<AppDispatch>();
-    const { enqueueSnackbar } = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
     const [buildings, setBuildings] = useState<BackendBuilding[]>([]);
     const [formData, setFormData] = useState<{
         id: GridRowId;
@@ -60,13 +60,13 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
     const [loading, setLoading] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
 
-    const EQUIPMENT_OPTIONS = [
-        { label: 'projektor', value: 'PROJECTOR' },
-        { label: 'tablica', value: 'WHITEBOARD' },
-        { label: 'komputery', value: 'COMPUTERS' },
-        { label: 'nagłośnienie', value: 'SOUND' },
-        { label: 'sowa', value: 'OWL' },
-    ];
+    const EQUIPMENT_OPTIONS = [{label: 'projektor', value: 'PROJECTOR'}, {
+        label: 'tablica',
+        value: 'WHITEBOARD'
+    }, {label: 'komputery', value: 'COMPUTERS'}, {label: 'nagłośnienie', value: 'SOUND'}, {
+        label: 'sowa',
+        value: 'OWL'
+    },];
 
     useEffect(() => {
         if (isAdding) {
@@ -76,26 +76,23 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                     setBuildings(data);
                     if (data.length > 0) {
                         setFormData((prev) => ({
-                            ...prev,
-                            buildingId: data[0].buildingId.toString(),
-                            buildingCode: data[0].code,
+                            ...prev, buildingId: data[0].buildingId.toString(), buildingCode: data[0].code,
                         }));
                     }
                 })
                 .catch(err => {
-                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu budynków: ${err}`, { variant: 'error' });
+                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu budynków: ${err}`, {variant: 'error'});
                 });
         } else if (classroom) {
             fetch(`${API_ENDPOINTS.BUILDINGS}/${classroom.buildingId}`)
                 .then((res) => res.json())
                 .then((data: BackendBuilding) => {
                     setFormData((prev) => ({
-                        ...prev,
-                        buildingCode: data.code,
+                        ...prev, buildingCode: data.code,
                     }));
                 })
                 .catch(err => {
-                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu budynku nr ${classroom.buildingId}$: ${err}`, { variant: 'error' });
+                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu budynku nr ${classroom.buildingId}$: ${err}`, {variant: 'error'});
                 });
         }
     }, [isAdding, classroom, enqueueSnackbar]);
@@ -113,37 +110,28 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
             });
         } else if (isAdding) {
             setFormData((prev) => ({
-                ...prev,
-                buildingCode: buildings.find(b => b.buildingId.toString() === prev.buildingId)?.code || '',
+                ...prev, buildingCode: buildings.find(b => b.buildingId.toString() === prev.buildingId)?.code || '',
             }));
         } else {
             setFormData({
-                id: '',
-                buildingId: '',
-                buildingCode: '',
-                code: '',
-                floor: 0,
-                capacity: 0,
-                equipment: [],
+                id: '', buildingId: '', buildingCode: '', code: '', floor: 0, capacity: 0, equipment: [],
             });
         }
     }, [classroom, isAdding, buildings]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData((prev) => ({
-            ...prev,
-            [name]: name === 'floor' || name === 'capacity' ? Number(value) : value,
+            ...prev, [name]: name === 'floor' || name === 'capacity' ? Number(value) : value,
         }));
     };
 
     const handleEquipmentChange = (event: SelectChangeEvent<typeof formData.equipment>) => {
         const {
-            target: { value },
+            target: {value},
         } = event;
         setFormData((prev) => ({
-            ...prev,
-            equipment: typeof value === 'string' ? value.split(',') : value,
+            ...prev, equipment: typeof value === 'string' ? value.split(',') : value,
         }));
     };
 
@@ -151,15 +139,13 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
         const selectedBuildingId = event.target.value;
         const selectedBuilding = buildings.find(b => b.buildingId.toString() === selectedBuildingId);
         setFormData((prev) => ({
-            ...prev,
-            buildingId: selectedBuildingId,
-            buildingCode: selectedBuilding ? selectedBuilding.code : '',
+            ...prev, buildingId: selectedBuildingId, buildingCode: selectedBuilding ? selectedBuilding.code : '',
         }));
     };
 
     const handleSubmit = async () => {
         if (!formData.buildingId || !formData.code) {
-            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", {variant: 'warning'});
             return;
         }
 
@@ -177,8 +163,7 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
             capacity: formData.capacity,
             equipment: equipmentMap,
             building: {
-                buildingId: Number(formData.buildingId),
-                code: formData.buildingCode,
+                buildingId: Number(formData.buildingId), code: formData.buildingCode,
             },
         };
 
@@ -209,14 +194,13 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                 setSuccess(false);
                 onClose();
             }
-        } catch (error : any) {
-            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, { variant: 'error' });
+        } catch (error: any) {
+            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, {variant: 'error'});
             setLoading(false);
         }
     };
 
-    return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    return (<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <Fade in={open} timeout={500}>
                 <Box
                     sx={{
@@ -231,12 +215,10 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                         padding: success ? 4 : undefined,
                     }}
                 >
-                    {!success ? (
-                        <>
+                    {!success ? (<>
                             <DialogTitle>{isAdding ? 'Dodaj salę' : 'Szczegóły sali'}</DialogTitle>
                             <DialogContent>
-                                {isAdding ? (
-                                    <FormControl fullWidth margin="normal" disabled={loading}>
+                                {isAdding ? (<FormControl fullWidth margin="normal" disabled={loading}>
                                         <InputLabel id="building-label">Budynek</InputLabel>
                                         <Select
                                             labelId="building-label"
@@ -245,22 +227,18 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                                             label="Budynek"
                                             variant="outlined"
                                         >
-                                            {buildings.map((building) => (
-                                                <MenuItem key={building.buildingId} value={building.buildingId.toString()}>
+                                            {buildings.map((building) => (<MenuItem key={building.buildingId}
+                                                                                    value={building.buildingId.toString()}>
                                                     {building.code || `Budynek ${building.buildingId}`}
-                                                </MenuItem>
-                                            ))}
+                                                </MenuItem>))}
                                         </Select>
-                                    </FormControl>
-                                ) : (
-                                    <TextField
+                                    </FormControl>) : (<TextField
                                         margin="normal"
                                         label="Budynek"
                                         value={formData.buildingCode}
                                         fullWidth
                                         disabled
-                                    />
-                                )}
+                                    />)}
                                 <TextField
                                     margin="normal"
                                     label="Kod"
@@ -299,16 +277,14 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                                         multiple
                                         value={formData.equipment}
                                         onChange={handleEquipmentChange}
-                                        input={<OutlinedInput label="Wyposażenie" />}
+                                        input={<OutlinedInput label="Wyposażenie"/>}
                                     >
-                                        {EQUIPMENT_OPTIONS.map((option) => (
-                                            <MenuItem
+                                        {EQUIPMENT_OPTIONS.map((option) => (<MenuItem
                                                 key={option.value}
                                                 value={option.value}
                                             >
                                                 {option.label}
-                                            </MenuItem>
-                                        ))}
+                                            </MenuItem>))}
                                     </Select>
                                 </FormControl>
                             </DialogContent>
@@ -321,9 +297,7 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                                                   icon={<ClearIcon/>} colorScheme={'secondary'}/>
                                 </div>
                             </DialogActions>
-                        </>
-                    ) : (
-                        <Fade in={success} timeout={1000}>
+                        </>) : (<Fade in={success} timeout={1000}>
                             <Box
                                 sx={{
                                     display: 'flex',
@@ -332,17 +306,15 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({ open, onClose, classroo
                                     alignItems: 'center',
                                 }}
                             >
-                                <CheckIcon sx={{ fontSize: 60, color: green[500], mb: 2 }} />
+                                <CheckIcon sx={{fontSize: 60, color: green[500], mb: 2}}/>
                                 <Typography variant="h6" color="green">
                                     Dodano!
                                 </Typography>
                             </Box>
-                        </Fade>
-                    )}
+                        </Fade>)}
                 </Box>
             </Fade>
-        </Dialog>
-    );
+        </Dialog>);
 };
 
 export default ClassroomModal;

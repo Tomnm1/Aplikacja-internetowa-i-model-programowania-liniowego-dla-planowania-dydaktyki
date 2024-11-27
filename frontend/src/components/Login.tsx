@@ -14,7 +14,13 @@ const Login: React.FC = () => {
         e.preventDefault();
         if (username.trim()) {
             dispatch(login(username.trim()));
-            navigate('/');
+            if(username === "admin") {
+                navigate('/');
+            }
+            if(username === "user") {
+                navigate('/user');
+            }
+
         } else {
             setError('admin lub user');
         }

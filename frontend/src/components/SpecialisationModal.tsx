@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+    Box,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
-    TextField,
+    DialogContent,
+    DialogTitle,
+    Fade,
     FormControl,
     InputLabel,
-    Select,
     MenuItem,
+    Select,
+    TextField,
     Typography,
-    Box,
-    Fade,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../app/store';
-import { Specialisation, BackendSpecialisation, BackendFieldOfStudies, Cycle } from '../utils/Interfaces';
-import { addSpecialisation, updateSpecialisation } from '../app/slices/specialisationSlice';
-import { API_ENDPOINTS } from '../app/urls';
-import { SelectChangeEvent } from '@mui/material/Select';
-import { green } from "@mui/material/colors";
+import {useDispatch} from 'react-redux';
+import {AppDispatch} from '../app/store';
+import {BackendFieldOfStudies, BackendSpecialisation, Cycle, Specialisation} from '../utils/Interfaces';
+import {addSpecialisation, updateSpecialisation} from '../app/slices/specialisationSlice';
+import {API_ENDPOINTS} from '../app/urls';
+import {SelectChangeEvent} from '@mui/material/Select';
+import {green} from "@mui/material/colors";
 import {GridRowId} from "@mui/x-data-grid";
-import { useSnackbar } from 'notistack';
+import {useSnackbar} from 'notistack';
 import ActionButton from "../utils/ActionButton.tsx";
 import SaveIcon from "@mui/icons-material/Save";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -34,16 +34,12 @@ interface SpecialisationModalProps {
     isAdding: boolean;
 }
 
-const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose, specialisation, isAdding }) => {
+const SpecialisationModal: React.FC<SpecialisationModalProps> = ({open, onClose, specialisation, isAdding}) => {
     const dispatch = useDispatch<AppDispatch>();
-    const { enqueueSnackbar } = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
     const [fieldOfStudies, setFieldOfStudies] = useState<BackendFieldOfStudies[]>([]);
     const [formData, setFormData] = useState<{
-        id: GridRowId;
-        name: string;
-        cycle: Cycle;
-        fieldOfStudyId: string;
-        fieldOfStudyName: string;
+        id: GridRowId; name: string; cycle: Cycle; fieldOfStudyId: string; fieldOfStudyName: string;
     }>({
         id: specialisation?.id || '',
         name: specialisation?.name || '',
@@ -62,14 +58,12 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
                 setFieldOfStudies(data);
                 if (isAdding && data.length > 0) {
                     setFormData((prev) => ({
-                        ...prev,
-                        fieldOfStudyId: data[0].fieldOfStudyId.toString(),
-                        fieldOfStudyName: data[0].name,
+                        ...prev, fieldOfStudyId: data[0].fieldOfStudyId.toString(), fieldOfStudyName: data[0].name,
                     }));
                 }
             })
             .catch(err => {
-                enqueueSnackbar(`Wystąpił błąd przy pobieraniu specjalizacji: ${err}`, { variant: 'error' });
+                enqueueSnackbar(`Wystąpił błąd przy pobieraniu specjalizacji: ${err}`, {variant: 'error'});
             });
     }, [enqueueSnackbar, isAdding]);
 
@@ -89,20 +83,15 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
             }));
         } else {
             setFormData({
-                id: '',
-                name: '',
-                cycle: Cycle.FIRST,
-                fieldOfStudyId: '',
-                fieldOfStudyName: "",
+                id: '', name: '', cycle: Cycle.FIRST, fieldOfStudyId: '', fieldOfStudyName: "",
             });
         }
     }, [specialisation, isAdding, fieldOfStudies]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData((prev) => ({
-            ...prev,
-            [name]: name === 'cycle' ? value as Cycle : value,
+            ...prev, [name]: name === 'cycle' ? value as Cycle : value,
         }));
     };
 
@@ -110,23 +99,20 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
         const selectedFieldId = event.target.value;
         const selectedField = fieldOfStudies.find(f => f.fieldOfStudyId.toString() === selectedFieldId);
         setFormData((prev) => ({
-            ...prev,
-            fieldOfStudyId: selectedFieldId,
-            fieldOfStudyName: selectedField ? selectedField.name : "",
+            ...prev, fieldOfStudyId: selectedFieldId, fieldOfStudyName: selectedField ? selectedField.name : "",
         }));
     };
 
     const handleCycleChange = (event: SelectChangeEvent<Cycle>) => {
         const selectedCycle = event.target.value as Cycle;
         setFormData((prev) => ({
-            ...prev,
-            cycle: selectedCycle,
+            ...prev, cycle: selectedCycle,
         }));
     };
 
     const handleSubmit = async () => {
         if (!formData.name || !formData.cycle || !formData.fieldOfStudyId) {
-            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", {variant: 'warning'});
             return;
         }
 
@@ -134,11 +120,8 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
         setSuccess(false);
 
         const specialisationData: BackendSpecialisation = {
-            name: formData.name,
-            cycle: formData.cycle,
-            fieldOfStudy: {
-                fieldOfStudyId: Number(formData.fieldOfStudyId),
-                name: formData.fieldOfStudyName,
+            name: formData.name, cycle: formData.cycle, fieldOfStudy: {
+                fieldOfStudyId: Number(formData.fieldOfStudyId), name: formData.fieldOfStudyName,
             },
         };
 
@@ -169,15 +152,14 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
                 setSuccess(false);
                 onClose();
             }
-            enqueueSnackbar(isAdding ? 'Dodano!' : 'Zaktualizowano!', { variant: 'success' });
-        } catch (error : any) {
-            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, { variant: 'error' });
+            enqueueSnackbar(isAdding ? 'Dodano!' : 'Zaktualizowano!', {variant: 'success'});
+        } catch (error: any) {
+            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, {variant: 'error'});
             setLoading(false);
         }
     };
 
-    return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    return (<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <Fade in={open} timeout={500}>
                 <Box
                     sx={{
@@ -192,8 +174,7 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
                         padding: success ? 4 : undefined,
                     }}
                 >
-                    {!success ? (
-                        <>
+                    {!success ? (<>
                             <DialogTitle>{isAdding ? 'Dodaj Specjalizację' : 'Szczegóły Specjalizacji'}</DialogTitle>
                             <DialogContent>
                                 <TextField
@@ -230,8 +211,7 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
                                         {fieldOfStudies.map((field) => (
                                             <MenuItem key={field.fieldOfStudyId} value={field.fieldOfStudyId}>
                                                 {field.name}
-                                            </MenuItem>
-                                        ))}
+                                            </MenuItem>))}
                                     </Select>
                                 </FormControl>
                             </DialogContent>
@@ -244,9 +224,7 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
                                                   icon={<ClearIcon/>} colorScheme={'secondary'}/>
                                 </div>
                             </DialogActions>
-                        </>
-                    ) : (
-                        <Fade in={success} timeout={1000}>
+                        </>) : (<Fade in={success} timeout={1000}>
                             <Box
                                 sx={{
                                     display: 'flex',
@@ -255,17 +233,15 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({ open, onClose
                                     alignItems: 'center',
                                 }}
                             >
-                                <CheckIcon sx={{ fontSize: 60, color: green[500], mb: 2 }} />
+                                <CheckIcon sx={{fontSize: 60, color: green[500], mb: 2}}/>
                                 <Typography variant="h6" color="green">
                                     Zapisano!
                                 </Typography>
                             </Box>
-                        </Fade>
-                    )}
+                        </Fade>)}
                 </Box>
             </Fade>
-        </Dialog>
-    );
+        </Dialog>);
 };
 
 export default SpecialisationModal;

@@ -1,16 +1,12 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { API_ENDPOINTS } from '../urls';
-import {
- Group, GroupState
-} from '../../utils/Interfaces';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {API_ENDPOINTS} from '../urls';
+import {Group, GroupState} from '../../utils/Interfaces';
 
 const initialState: GroupState = {
-    rows: [],
-    loading: false,
-    error: null,
+    rows: [], loading: false, error: null,
 };
 
-export const fetchGroup = createAsyncThunk<Group[],number>('group/fetchGroups', async (semesterId) => {
+export const fetchGroup = createAsyncThunk<Group[], number>('group/fetchGroups', async (semesterId) => {
     const response = await fetch(`${API_ENDPOINTS.GROUPS}/semester/${semesterId}`);
     if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -22,10 +18,7 @@ export const fetchGroup = createAsyncThunk<Group[],number>('group/fetchGroups', 
 });
 
 const groupSlice = createSlice({
-    name: 'groups',
-    initialState,
-    reducers: {},
-    extraReducers: (builder) => {
+    name: 'groups', initialState, reducers: {}, extraReducers: (builder) => {
         builder
             .addCase(fetchGroup.pending, (state) => {
                 state.loading = true;

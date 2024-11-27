@@ -47,6 +47,7 @@ public class Teacher {
         dto.firstName = this.firstName;
         dto.lastName = this.lastName;
         dto.degree = this.degree;
+        dto.preferences = this.preferences;
         dto.subjectTypesList = this.subjectTypesList.stream().map(SubjectType_Teacher::getSubjetTyprId).collect(Collectors.toList());
         return dto;
     }

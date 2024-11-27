@@ -1,15 +1,9 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { API_ENDPOINTS } from '../urls';
-import {
-    SubjectTypeState,
-    BackendSubjectType,
-    SubjectType
-} from '../../utils/Interfaces';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {API_ENDPOINTS} from '../urls';
+import {BackendSubjectType, SubjectType, SubjectTypeState} from '../../utils/Interfaces';
 
 const initialState: SubjectTypeState = {
-    rows: [],
-    loading: false,
-    error: null,
+    rows: [], loading: false, error: null,
 };
 
 export const fetchSubjectType = createAsyncThunk<SubjectType[]>('subjectType/fetchSubjectsTypes', async () => {
@@ -19,68 +13,49 @@ export const fetchSubjectType = createAsyncThunk<SubjectType[]>('subjectType/fet
     }
     const data: BackendSubjectType[] = await response.json();
     return data.map((subjectType) => ({
-        ...subjectType,
-        subjectTypeId: subjectType.subjectTypeId!,
+        ...subjectType, subjectTypeId: subjectType.subjectTypeId!,
     }));
 });
 
-export const addSubjectType = createAsyncThunk<SubjectType, BackendSubjectType>(
-    'subjectType/addSubjectsTypes',
-    async (subjectTypeData) => {
-        const response = await fetch(API_ENDPOINTS.SUBJECT_TYPE, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(subjectTypeData),
-        });
-        if (!response.ok) {
-            throw new Error('Failed to add subjectType');
-        }
-        const data: BackendSubjectType = await response.json();
-        return {
-            ...data,
-            subjectTypeId: data.subjectTypeId!,
-        };
+export const addSubjectType = createAsyncThunk<SubjectType, BackendSubjectType>('subjectType/addSubjectsTypes', async (subjectTypeData) => {
+    const response = await fetch(API_ENDPOINTS.SUBJECT_TYPE, {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(subjectTypeData),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to add subjectType');
     }
-);
+    const data: BackendSubjectType = await response.json();
+    return {
+        ...data, subjectTypeId: data.subjectTypeId!,
+    };
+});
 
-export const updateSubjectType = createAsyncThunk<SubjectType, BackendSubjectType>(
-    'subjectType/updateSubjectsTypes',
-    async (subjectTypeData) => {
-        if (!subjectTypeData.subjectTypeId) {
-            throw new Error('subjectType_id is required for updating');
-        }
-        const response = await fetch(`${API_ENDPOINTS.SUBJECT_TYPE}/${subjectTypeData.subjectTypeId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(subjectTypeData),
-        });
-        if (!response.ok) {
-            throw new Error('Failed to update SubjectType');
-        }
-        const data: BackendSubjectType = await response.json();
-        return {
-            ...data,
-            subjectTypeId: data.subjectTypeId!,
-        };
+export const updateSubjectType = createAsyncThunk<SubjectType, BackendSubjectType>('subjectType/updateSubjectsTypes', async (subjectTypeData) => {
+    if (!subjectTypeData.subjectTypeId) {
+        throw new Error('subjectType_id is required for updating');
     }
-);
+    const response = await fetch(`${API_ENDPOINTS.SUBJECT_TYPE}/${subjectTypeData.subjectTypeId}`, {
+        method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(subjectTypeData),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to update SubjectType');
+    }
+    const data: BackendSubjectType = await response.json();
+    return {
+        ...data, subjectTypeId: data.subjectTypeId!,
+    };
+});
 
-export const deleteSubjectType = createAsyncThunk<number, number>(
-    'subjectType/deleteSubjectsTypes',
-    async (id) => {
-        const response = await fetch(`${API_ENDPOINTS.SUBJECT_TYPE}/${id}`, { method: 'DELETE' });
-        if (!response.ok) {
-            throw new Error('Failed to delete SubjectType');
-        }
-        return id;
+export const deleteSubjectType = createAsyncThunk<number, number>('subjectType/deleteSubjectsTypes', async (id) => {
+    const response = await fetch(`${API_ENDPOINTS.SUBJECT_TYPE}/${id}`, {method: 'DELETE'});
+    if (!response.ok) {
+        throw new Error('Failed to delete SubjectType');
     }
-);
+    return id;
+});
 
 const subjectTypeSlice = createSlice({
-    name: 'subjectsTypes',
-    initialState,
-    reducers: {},
-    extraReducers: (builder) => {
+    name: 'subjectsTypes', initialState, reducers: {}, extraReducers: (builder) => {
         builder
             .addCase(fetchSubjectType.pending, (state) => {
                 state.loading = true;

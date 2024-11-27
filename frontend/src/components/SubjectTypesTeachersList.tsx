@@ -1,9 +1,6 @@
-import React, { useState} from 'react';
-import {
- Table, TableBody, TableCell,
-    TableContainer, TableHead, TableRow, Paper, IconButton
-} from '@mui/material';
-import {Edit, Delete} from '@mui/icons-material';
+import React, {useState} from 'react';
+import {IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
+import {Delete, Edit} from '@mui/icons-material';
 import {BackendSubjectType, teacherListDTO} from '../utils/Interfaces';
 import {useSnackbar} from 'notistack';
 import AddIcon from "@mui/icons-material/Add";
@@ -12,18 +9,25 @@ import SubjectTypesTeachersModal from "./SubjectTypesTeachersModal.tsx";
 interface SubjectTypesTeachersListProps {
     teachersList: teacherListDTO[];
     typeData: BackendSubjectType | null;
-    setSubjectTypes:  React.Dispatch<React.SetStateAction<BackendSubjectType[]>>;
+    setSubjectTypes: React.Dispatch<React.SetStateAction<BackendSubjectType[]>>;
     loading: boolean;
 }
 
-const SubjectTypesTeachersList: React.FC<SubjectTypesTeachersListProps> = ({ teachersList, typeData, setSubjectTypes, loading}) => {
+const SubjectTypesTeachersList: React.FC<SubjectTypesTeachersListProps> = ({
+                                                                               teachersList,
+                                                                               typeData,
+                                                                               setSubjectTypes,
+                                                                               loading
+                                                                           }) => {
     const {enqueueSnackbar} = useSnackbar();
     const [isAdding, setIsAdding] = useState(false);
     const [openTeachersModal, setOpenTeachersModal] = useState(false);
-    const [maxHours, setMaxHours] = useState(typeData ? typeData.numOfHours : 0);
+    const [maxHours] = useState(typeData ? typeData.numOfHours : 0);
     const [hours, setHours] = useState(() => {
-  return maxHours - teachersList.reduce((sum, t) => {return sum + t.numHours;}, 0);
-});
+        return maxHours - teachersList.reduce((sum, t) => {
+            return sum + t.numHours;
+        }, 0);
+    });
     const [currentType, setCurrentType] = useState<teacherListDTO | null>(null);
 
     const handleAdd = () => {
@@ -41,7 +45,7 @@ const SubjectTypesTeachersList: React.FC<SubjectTypesTeachersListProps> = ({ tea
     const handleDelete = async (typeData: teacherListDTO) => {
         setSubjectTypes(prev => prev.map(st => {
             if (st.subjectTypeId === typeData.subjectTypeId || st.frontId === typeData.frontId) {
-                return {...st, teachersList:st.teachersList.filter(t => t.teacherId !== typeData.teacherId) }
+                return {...st, teachersList: st.teachersList.filter(t => t.teacherId !== typeData.teacherId)}
             } else {
                 return st;
             }
@@ -54,12 +58,15 @@ const SubjectTypesTeachersList: React.FC<SubjectTypesTeachersListProps> = ({ tea
         if (!isAdding) {
             setSubjectTypes(prev => prev.map(st => {
                 if (st.subjectTypeId === typeData.subjectTypeId || st.frontId === typeData.frontId) {
-                    return {...st, teachersList: st.teachersList.map(t => t.teacherId === typeData.teacherId ? typeData : t)};
+                    return {
+                        ...st,
+                        teachersList: st.teachersList.map(t => t.teacherId === typeData.teacherId ? typeData : t)
+                    };
                 } else {
                     return st;
                 }
             }));
-            enqueueSnackbar('Prowadzący zaktualizowany!', { variant: 'success' });
+            enqueueSnackbar('Prowadzący zaktualizowany!', {variant: 'success'});
         } else {
             setSubjectTypes(prev => prev.map(st => {
                 if (st.subjectTypeId === typeData.subjectTypeId || st.frontId === typeData.frontId) {
@@ -68,7 +75,7 @@ const SubjectTypesTeachersList: React.FC<SubjectTypesTeachersListProps> = ({ tea
                     return st;
                 }
             }));
-            enqueueSnackbar('Prowadzący dodany!', { variant: 'success' });
+            enqueueSnackbar('Prowadzący dodany!', {variant: 'success'});
         }
 
         setHours(maxHours - teachersList.reduce((sum, t) => {
@@ -77,71 +84,64 @@ const SubjectTypesTeachersList: React.FC<SubjectTypesTeachersListProps> = ({ tea
         setOpenTeachersModal(false);
     };
 
-    return (
-        <>
-        <TableRow style={{ backgroundColor: '#eeeeee' }}>
-            <TableCell colSpan={4}>
-                {hours !== 0 && <div className={"flex justify-center my-2 text-red-600 font-bold"}>Do rozdysponowania: {hours}h</div>}
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Imię</TableCell>
-                            <TableCell>Nazwisko</TableCell>
-                            <TableCell>Liczba Godzin</TableCell>
-                            <TableCell>Akcje</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {teachersList.map((type) => (
-                            <TableRow key={type.id}>
-                                <TableCell>{type.teacherFirstName}</TableCell>
-                                <TableCell>{type.teacherLastName}</TableCell>
-                                <TableCell>{type.numHours}</TableCell>
-                                <TableCell>
-                                    <div className={"flex"}>
-                                        <IconButton onClick={() => handleEdit(type)} disabled={loading}>
-                                            <Edit/>
-                                        </IconButton>
-                                        <IconButton onClick={() => handleDelete(type)}
-                                                    disabled={loading}>
-                                            <Delete/>
-                                        </IconButton>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                        {teachersList.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={4} align="center">
-                                    Brak przypisanych prowadzących.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <div className={"flex justify-center -mt-5"}>
-                <div className={"bg-white"}>
-                    <IconButton onClick={handleAdd} disabled={loading}>
-                        <AddIcon/>
-                    </IconButton>
-                </div>
-            </div>
-            </TableCell>
-        </TableRow>
+    return (<>
+            <TableRow style={{backgroundColor: '#eeeeee'}}>
+                <TableCell colSpan={4}>
+                    {hours !== 0 && <div className={"flex justify-center my-2 text-red-600 font-bold"}>Do
+                        rozdysponowania: {hours}h</div>}
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Imię</TableCell>
+                                    <TableCell>Nazwisko</TableCell>
+                                    <TableCell>Liczba Godzin</TableCell>
+                                    <TableCell>Akcje</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {teachersList.map((type) => (<TableRow key={type.id}>
+                                        <TableCell>{type.teacherFirstName}</TableCell>
+                                        <TableCell>{type.teacherLastName}</TableCell>
+                                        <TableCell>{type.numHours}</TableCell>
+                                        <TableCell>
+                                            <div className={"flex"}>
+                                                <IconButton onClick={() => handleEdit(type)} disabled={loading}>
+                                                    <Edit/>
+                                                </IconButton>
+                                                <IconButton onClick={() => handleDelete(type)}
+                                                            disabled={loading}>
+                                                    <Delete/>
+                                                </IconButton>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>))}
+                                {teachersList.length === 0 && (<TableRow>
+                                        <TableCell colSpan={4} align="center">
+                                            Brak przypisanych prowadzących.
+                                        </TableCell>
+                                    </TableRow>)}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <div className={"flex justify-center -mt-5"}>
+                        <div className={"bg-white"}>
+                            <IconButton onClick={handleAdd} disabled={loading}>
+                                <AddIcon/>
+                            </IconButton>
+                        </div>
+                    </div>
+                </TableCell>
+            </TableRow>
 
-    {openTeachersModal && (
-        <SubjectTypesTeachersModal
-            open={openTeachersModal}
-            onClose={() => setOpenTeachersModal(false)}
-            typeData={currentType}
-            onSave={handleSave}
-            subjectType={typeData}
-        />
-    )}
-        </>
-    );
+            {openTeachersModal && (<SubjectTypesTeachersModal
+                    open={openTeachersModal}
+                    onClose={() => setOpenTeachersModal(false)}
+                    typeData={currentType}
+                    onSave={handleSave}
+                    subjectType={typeData}
+                />)}
+        </>);
 };
 
 export default SubjectTypesTeachersList;
