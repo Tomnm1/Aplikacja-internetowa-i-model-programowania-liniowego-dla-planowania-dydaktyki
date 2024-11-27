@@ -1,7 +1,9 @@
 const UserPlan = () => {
-    return (<div>
+    return (
+        <div>
             plan
-        </div>);
+        </div>
+    );
 };
 
 export default UserPlan;

@@ -1,29 +1,25 @@
 import React from 'react';
-import {Navigate} from 'react-router-dom';
-import {useAppSelector} from '../hooks/hooks';
+import { useAppSelector } from '../hooks/hooks';
+import { Navigate, Outlet } from 'react-router-dom';
 
 interface ProtectedRouteProps {
-    children: React.ReactNode
-    allowedRoles?: ('admin' | 'user')[];
+    allowedRoles: ('admin' | 'user')[];
 }
 
-const ProtectedRoute = ({children, allowedRoles}: ProtectedRouteProps) => {
-    const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-    const role = useAppSelector((state) => state.auth.role);
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
+    const { isAuthenticated, role, user } = useAppSelector((state) => state.auth);
 
     if (!isAuthenticated) {
-        return <Navigate to="/login"/>;
+        return <Navigate to="/login" replace />;
     }
 
-    if (allowedRoles && !allowedRoles.includes(role!)) {
-        if (role === 'admin') {
-            return <Navigate to="/"/>;
-        } else {
-            return <Navigate to="/usertest"/>;
-        }
+    if (!allowedRoles.includes(role!)) {
+        return <Navigate to="/login" replace />;
     }
-
-    return children;
+    if (role === 'user' && !user) {
+        return <Navigate to="/login" replace />;
+    }
+    return <Outlet />;
 };
 
 export default ProtectedRoute;

@@ -1,38 +1,35 @@
-import React, { useState } from 'react';
-import { useAppDispatch } from '../hooks/hooks';
-import { login } from '../app/slices/authSlice.ts';
-import { useNavigate } from 'react-router-dom';
-import { Container, TextField, Button, Box, Alert } from '@mui/material';
+import React, {useState} from 'react';
+import {useAppDispatch, useAppSelector} from '../hooks/hooks';
+import {loginUser} from '../app/slices/authSlice';
+import {useNavigate} from 'react-router-dom';
+import {Alert, Box, Button, CircularProgress, Container, TextField} from '@mui/material';
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const {loading, error} = useAppSelector((state) => state.auth);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (username.trim()) {
-            dispatch(login(username.trim()));
-            if(username === "admin") {
-                navigate('/');
+            const resultAction = await dispatch(loginUser(username.trim()));
+            if (loginUser.fulfilled.match(resultAction)) {
+                if (resultAction.payload.role === 'admin') {
+                    navigate('/');
+                } else if (resultAction.payload.role === 'user') {
+                    navigate('/user');
+                }
             }
-            if(username === "user") {
-                navigate('/user');
-            }
-
-        } else {
-            setError('admin lub user');
         }
     };
 
-    return (
-        <Container maxWidth="sm">
+    return (<Container maxWidth="sm">
             <Box mt={10} p={4} boxShadow={3} borderRadius={2}>
                 {error && <Alert severity="error">{error}</Alert>}
                 <form onSubmit={handleSubmit}>
                     <TextField
-                        label="admin lub user"
+                        label="Username (admin or userId)"
                         variant="outlined"
                         fullWidth
                         required
@@ -40,13 +37,12 @@ const Login: React.FC = () => {
                         onChange={(e) => setUsername(e.target.value)}
                         margin="normal"
                     />
-                    <Button type="submit" variant="contained" color="primary" fullWidth>
-                        Wbijamy
+                    <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
+                        {loading ? <CircularProgress size={24}/> : 'Zaloguj się'}
                     </Button>
                 </form>
             </Box>
-        </Container>
-    );
+        </Container>);
 };
 
 export default Login;
