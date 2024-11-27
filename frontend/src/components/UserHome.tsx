@@ -1,16 +1,14 @@
-import {Box, Container, Typography} from '@mui/material';
+import React from 'react';
+import { useAppSelector } from '../hooks/hooks';
 
-//todo zmienic typ propsa
-const UserHome = (props: any) => {
-    console.log(props);
-    return (<Container>
-            <Box mt={5}>
-                <Typography variant="h4">Witaj Jacku!</Typography>
-                <Typography variant="body1" mt={2}>
-                    To jest interface testowy.
-                </Typography>
-            </Box>
-        </Container>);
+const UserHome: React.FC = () => {
+    const user = useAppSelector((state) => state.auth.user);
+
+    return (
+        <div>
+            <h1>Witaj, {user?.firstName} {user?.lastName}!</h1>
+        </div>
+    );
 };
 
 export default UserHome;
