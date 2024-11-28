@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Specialisation, BackendSpecialisation } from '../../utils/Interfaces';
-import { API_ENDPOINTS } from '../urls';
+import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {BackendSpecialisation, Specialisation} from '../../utils/Interfaces';
+import {API_ENDPOINTS} from '../urls';
 
 interface SpecialisationsState {
     rows: Specialisation[];
@@ -9,112 +9,91 @@ interface SpecialisationsState {
 }
 
 const initialState: SpecialisationsState = {
-    rows: [],
-    loading: false,
-    error: null,
+    rows: [], loading: false, error: null,
 };
 
-export const fetchSpecialisations = createAsyncThunk<Specialisation[]>(
-    'specialisations/fetchSpecialisations',
-    async () => {
-        const response = await fetch(API_ENDPOINTS.SPECIALISATIONS);
-        if (!response.ok) {
-            throw new Error('Failed to fetch specialisations');
-        }
-        const data: BackendSpecialisation[] = await response.json();
-        const adjustedData: Specialisation[] = data.map((spec) => ({
-            id: spec.specialisationId!,
-            name: spec.name,
-            cycle: spec.cycle,
-            fieldOfStudyId: spec.fieldOfStudy.fieldOfStudyId,
-            fieldOfStudyName: spec.fieldOfStudy.name,
-        }));
-        return adjustedData;
+export const fetchSpecialisations = createAsyncThunk<Specialisation[]>('specialisations/fetchSpecialisations', async () => {
+    const response = await fetch(API_ENDPOINTS.SPECIALISATIONS);
+    if (!response.ok) {
+        throw new Error('Failed to fetch specialisations');
     }
-);
+    const data: BackendSpecialisation[] = await response.json();
+    const adjustedData: Specialisation[] = data.map((spec) => ({
+        id: spec.specialisationId!,
+        name: spec.name,
+        cycle: spec.cycle,
+        fieldOfStudyId: spec.fieldOfStudy.fieldOfStudyId,
+        fieldOfStudyName: spec.fieldOfStudy.name,
+    }));
+    return adjustedData;
+});
 
-export const addSpecialisation = createAsyncThunk<Specialisation, BackendSpecialisation>(
-    'specialisations/addSpecialisation',
-    async (specData) => {
-        const response = await fetch(API_ENDPOINTS.SPECIALISATIONS, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(specData),
-        });
+export const addSpecialisation = createAsyncThunk<Specialisation, BackendSpecialisation>('specialisations/addSpecialisation', async (specData) => {
+    const response = await fetch(API_ENDPOINTS.SPECIALISATIONS, {
+        method: 'POST', headers: {
+            'Content-Type': 'application/json',
+        }, body: JSON.stringify(specData),
+    });
 
-        if (!response.ok) {
-            throw new Error('Failed to add specialisation');
-        }
-
-        const data: BackendSpecialisation = await response.json();
-
-        const adjustedSpec: Specialisation = {
-            id: data.specialisationId!,
-            name: data.name,
-            cycle: data.cycle,
-            fieldOfStudyId: data.fieldOfStudy.fieldOfStudyId,
-            fieldOfStudyName: data.fieldOfStudy.name,
-        };
-
-        return adjustedSpec;
+    if (!response.ok) {
+        throw new Error('Failed to add specialisation');
     }
-);
 
-export const updateSpecialisation = createAsyncThunk<Specialisation, BackendSpecialisation>(
-    'specialisations/updateSpecialisation',
-    async (specData) => {
-        if (specData.specialisationId == null) {
-            throw new Error('specialisationId is required for updating');
-        }
+    const data: BackendSpecialisation = await response.json();
 
-        const response = await fetch(`${API_ENDPOINTS.SPECIALISATIONS}/${specData.specialisationId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(specData),
-        });
+    const adjustedSpec: Specialisation = {
+        id: data.specialisationId!,
+        name: data.name,
+        cycle: data.cycle,
+        fieldOfStudyId: data.fieldOfStudy.fieldOfStudyId,
+        fieldOfStudyName: data.fieldOfStudy.name,
+    };
 
-        if (!response.ok) {
-            throw new Error('Failed to update specialisation');
-        }
+    return adjustedSpec;
+});
 
-        const data: BackendSpecialisation = await response.json();
-
-        const adjustedSpec: Specialisation = {
-            id: data.specialisationId!,
-            name: data.name,
-            cycle: data.cycle,
-            fieldOfStudyId: data.fieldOfStudy.fieldOfStudyId,
-            fieldOfStudyName: data.fieldOfStudy.name,
-        };
-
-        return adjustedSpec;
+export const updateSpecialisation = createAsyncThunk<Specialisation, BackendSpecialisation>('specialisations/updateSpecialisation', async (specData) => {
+    if (specData.specialisationId == null) {
+        throw new Error('specialisationId is required for updating');
     }
-);
 
-export const deleteSpecialisation = createAsyncThunk<number, number>(
-    'specialisations/deleteSpecialisation',
-    async (id) => {
-        const response = await fetch(`${API_ENDPOINTS.SPECIALISATIONS}/${id}`, {
-            method: 'DELETE',
-        });
+    const response = await fetch(`${API_ENDPOINTS.SPECIALISATIONS}/${specData.specialisationId}`, {
+        method: 'PUT', headers: {
+            'Content-Type': 'application/json',
+        }, body: JSON.stringify(specData),
+    });
 
-        if (!response.ok) {
-            throw new Error('Failed to delete specialisation');
-        }
-
-        return id;
+    if (!response.ok) {
+        throw new Error('Failed to update specialisation');
     }
-);
+
+    const data: BackendSpecialisation = await response.json();
+
+    const adjustedSpec: Specialisation = {
+        id: data.specialisationId!,
+        name: data.name,
+        cycle: data.cycle,
+        fieldOfStudyId: data.fieldOfStudy.fieldOfStudyId,
+        fieldOfStudyName: data.fieldOfStudy.name,
+    };
+
+    return adjustedSpec;
+});
+
+export const deleteSpecialisation = createAsyncThunk<number, number>('specialisations/deleteSpecialisation', async (id) => {
+    const response = await fetch(`${API_ENDPOINTS.SPECIALISATIONS}/${id}`, {
+        method: 'DELETE',
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to delete specialisation');
+    }
+
+    return id;
+});
 
 const specialisationsSlice = createSlice({
-    name: 'specialisations',
-    initialState,
-    reducers: {},
-    extraReducers: (builder) => {
+    name: 'specialisations', initialState, reducers: {}, extraReducers: (builder) => {
         builder
             .addCase(fetchSpecialisations.pending, (state) => {
                 state.loading = true;

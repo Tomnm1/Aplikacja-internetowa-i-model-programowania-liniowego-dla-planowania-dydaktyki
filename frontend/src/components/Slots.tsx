@@ -1,14 +1,13 @@
-//todo zamienić pola tekstowe na timepickery ( <TimePicker> @mui/x-date-pickers/ + @mui/x-date-pickers/AdapterDateFnsV3
 import {useDispatch, useSelector} from 'react-redux';
 import {
     DataGrid,
     GridActionsCellItem,
     GridColDef,
+    GridRenderEditCellParams,
     GridRowId,
     GridRowModel,
     GridRowModes,
     GridRowModesModel,
-    GridRowParams,
     GridToolbar,
     GridToolbarContainer,
 } from '@mui/x-data-grid';
@@ -31,8 +30,14 @@ import {
     fetchSlots,
     removeNewSlot,
     setRowModesModel,
-    setSelectedRow, updateSlot
+    setSelectedRow,
+    updateSlot
 } from "../app/slices/slotsSlice.ts";
+import {DesktopTimePicker} from '@mui/x-date-pickers/DesktopTimePicker';
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
+import {LocalizationProvider} from '@mui/x-date-pickers';
+import dayjs, {Dayjs} from 'dayjs';
+import {useSnackbar} from "notistack";
 
 const Slots: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -40,28 +45,29 @@ const Slots: React.FC = () => {
     const rowModesModel = useSelector((state: RootState) => state.slots.rowModesModel);
     const selectedRowId = useSelector((state: RootState) => state.slots.selectedRowId);
     const loading = useSelector((state: RootState) => state.slots.loading);
-    const error = useSelector((state: RootState) => state.slots.error);
     const [isDialogOpen, setDialogOpen] = useState(false);
+    const {enqueueSnackbar} = useSnackbar();
 
     const [rowIdCounter, setRowIdCounter] = useState(-1);
 
     useEffect(() => {
-        dispatch(fetchSlots());
-    }, [dispatch]);
-
+        dispatch(fetchSlots()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania slotów: ${error.message}`, {variant: 'error'});
+        });
+    }, [dispatch, enqueueSnackbar]);
 
     const handleEditClick = (id: GridRowId) => () => {
-        dispatch(setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } }));
+        dispatch(setRowModesModel({...rowModesModel, [id]: {mode: GridRowModes.Edit}}));
     };
 
     const handleSaveClick = (id: GridRowId) => () => {
-        dispatch(setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } }));
+        dispatch(setRowModesModel({...rowModesModel, [id]: {mode: GridRowModes.View}}));
     };
 
     const handleDeleteClick = (id: GridRowId) => () => {
         const rowToDelete = rows.find((row) => row.slot_id === id);
         if (rowToDelete) {
-            dispatch(setSelectedRow({id, start: rowToDelete.start_time,  stop: rowToDelete.end_time}));
+            dispatch(setSelectedRow({id, start: rowToDelete.start_time, stop: rowToDelete.end_time}));
             setDialogOpen(true);
         }
     };
@@ -75,12 +81,9 @@ const Slots: React.FC = () => {
     };
 
     const handleCancelClick = (id: GridRowId) => () => {
-        dispatch(
-            setRowModesModel({
-                ...rowModesModel,
-                [id]: { mode: GridRowModes.View, ignoreModifications: true },
-            })
-        );
+        dispatch(setRowModesModel({
+            ...rowModesModel, [id]: {mode: GridRowModes.View, ignoreModifications: true},
+        }));
 
         const editedRow = rows.find((row) => row.slot_id === id);
         if (editedRow?.isNew) {
@@ -96,20 +99,27 @@ const Slots: React.FC = () => {
             isNew: newRow.isNew || false,
         };
 
+        const startTime = dayjs(updatedRow.start_time, 'HH:mm');
+        const endTime = dayjs(updatedRow.end_time, 'HH:mm');
+
+        if (!startTime.isBefore(endTime)) {
+            enqueueSnackbar(`Czas "Od" musi być wcześniejszy niż czas "Do".`, {variant: 'error'});
+        }
+
         if (updatedRow.isNew) {
             const resultAction = await dispatch(addSlot(updatedRow));
             if (addSlot.fulfilled.match(resultAction)) {
-                const { slot } = resultAction.payload;
+                const {slot} = resultAction.payload;
                 return slot;
             } else {
-                throw new Error('Failed to add slot');
+                enqueueSnackbar(`Wystąpił błąd przy dodawaniu rekordu`, {variant: 'error'});
             }
         } else {
             const resultAction = await dispatch(updateSlot(updatedRow));
             if (updateSlot.fulfilled.match(resultAction)) {
                 return resultAction.payload;
             } else {
-                throw new Error('Failed to update slot');
+                enqueueSnackbar(`Wystąpił błąd przy aktualizacji rekordu`, {variant: 'error'});
             }
         }
     };
@@ -122,106 +132,132 @@ const Slots: React.FC = () => {
         const id = rowIdCounter;
         setRowIdCounter((prev) => prev - 1);
         const newSlot: Slot = {
-            slot_id: id,
-            start_time: "00:00",
-            end_time: "00:00",
-            isNew: true,
+            slot_id: id, start_time: "00:00", end_time: "01:30", isNew: true,
         };
         dispatch(addNewSlot(newSlot));
-        dispatch(
-            setRowModesModel({
-                ...rowModesModel,
-                [id]: { mode: GridRowModes.Edit, fieldToFocus: 'start_time' },
-            })
-        );
+        dispatch(setRowModesModel({
+            ...rowModesModel, [id]: {mode: GridRowModes.Edit, fieldToFocus: 'start_time'},
+        }));
     };
 
     const TopToolbar = () => {
-        return (
-            <GridToolbarContainer>
-                <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
+        return (<GridToolbarContainer>
+                <Button color="primary" startIcon={<AddIcon/>} onClick={handleAddClick}>
                     Dodaj slot
                 </Button>
-                <GridToolbar />
-            </GridToolbarContainer>
-        );
+                <GridToolbar/>
+            </GridToolbarContainer>);
     };
 
-    const columns: GridColDef[] = [
-        { field: 'start_time', headerName: 'Od', width: 150, editable: true },
-        { field: 'end_time', headerName: 'Do', width: 150, editable: true },
-        {
-            field: 'actions',
-            type: 'actions',
-            headerName: 'Akcje',
-            width: 100,
-            getActions: (params: GridRowParams) => {
-                const id = params.id;
-                const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+    const renderTimeEditCell = (params: GridRenderEditCellParams) => {
+        const {id, field, value} = params;
+        //TODO zmienić rozsprzęglenie
+        const handleChange = (newValue: Dayjs | null) => {
+            const timeString = newValue ? newValue.format('HH:mm') : '';
 
-                if (isInEditMode) {
-                    return [
-                        <GridActionsCellItem
-                            key="save"
-                            icon={<SaveIcon />}
-                            label="Zapisz"
-                            sx={{ color: 'primary.main' }}
-                            onClick={handleSaveClick(id)}
-                        />,
-                        <GridActionsCellItem
-                            key="cancel"
-                            icon={<CancelIcon />}
-                            label="Anuluj"
-                            onClick={handleCancelClick(id)}
-                            color="inherit"
-                        />,
-                    ];
+            params.api.setEditCellValue({id, field, value: timeString}, event);
+
+            const otherField = field === 'start_time' ? 'end_time' : 'start_time';
+
+            if (newValue) {
+                let adjustedTime: Dayjs;
+
+                if (field === 'start_time') {
+                    adjustedTime = newValue.add(90, 'minute');
+                } else {
+                    adjustedTime = newValue.subtract(90, 'minute');
                 }
 
-                return [
-                    <GridActionsCellItem
-                        key="edit"
-                        icon={<EditIcon />}
-                        label="Edytuj"
-                        onClick={handleEditClick(id)}
-                        color="inherit"
-                    />,
-                    <GridActionsCellItem
-                        key="delete"
-                        icon={<DeleteIcon />}
-                        label="Usuń"
-                        onClick={handleDeleteClick(id)}
-                        color="inherit"
-                    />,
-                ];
-            },
-        },
-    ];
+                if (adjustedTime.isBefore(dayjs().startOf('day'))) {
+                    adjustedTime = dayjs().startOf('day');
+                } else if (adjustedTime.isAfter(dayjs().endOf('day'))) {
+                    adjustedTime = dayjs().endOf('day');
+                }
 
-    return (
-        <>
-            <DataGrid
-                rows={rows}
-                columns={columns}
-                loading={loading}
-                localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
-                editMode="row"
-                rowModesModel={rowModesModel}
-                onRowModesModelChange={handleRowModesModelChange}
-                processRowUpdate={processRowUpdate}
-                slots={{ toolbar: TopToolbar }}
-                getRowId={(row) => row.slot_id}
-            />
+                const adjustedTimeString = adjustedTime.format('HH:mm');
+
+                params.api.setEditCellValue({id, field: otherField, value: adjustedTimeString}, event);
+            }
+        };
+
+        return (<DesktopTimePicker
+                value={value ? dayjs(value as string, 'HH:mm') : null}
+                onChange={handleChange}
+                ampm={false}
+                views={['hours', 'minutes']}
+                format="HH:mm"
+                slotProps={{
+                    textField: {
+                        variant: 'outlined',
+                    },
+                }}
+            />);
+    };
+
+    const columns: GridColDef[] = [{
+        field: 'start_time', headerName: 'Od', width: 150, editable: true, renderEditCell: renderTimeEditCell,
+    }, {
+        field: 'end_time', headerName: 'Do', width: 150, editable: true, renderEditCell: renderTimeEditCell,
+    }, {
+        field: 'actions', type: 'actions', headerName: 'Akcje', width: 100, getActions: (params) => {
+            const id = params.id;
+            const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+
+            if (isInEditMode) {
+                return [<GridActionsCellItem
+                    key="save"
+                    icon={<SaveIcon/>}
+                    label="Zapisz"
+                    sx={{color: 'primary.main'}}
+                    onClick={handleSaveClick(id)}
+                />, <GridActionsCellItem
+                    key="cancel"
+                    icon={<CancelIcon/>}
+                    label="Anuluj"
+                    onClick={handleCancelClick(id)}
+                    color="inherit"
+                />,];
+            }
+
+            return [<GridActionsCellItem
+                key="edit"
+                icon={<EditIcon/>}
+                label="Edytuj"
+                onClick={handleEditClick(id)}
+                color="inherit"
+            />, <GridActionsCellItem
+                key="delete"
+                icon={<DeleteIcon/>}
+                label="Usuń"
+                onClick={handleDeleteClick(id)}
+                color="inherit"
+            />,];
+        },
+    },];
+
+    return (<>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DataGrid
+                    rows={rows}
+                    columns={columns}
+                    loading={loading}
+                    localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
+                    editMode="row"
+                    rowModesModel={rowModesModel}
+                    onRowModesModelChange={handleRowModesModelChange}
+                    processRowUpdate={processRowUpdate}
+                    slots={{toolbar: TopToolbar}}
+                    getRowId={(row) => row.slot_id}
+                />
+            </LocalizationProvider>
             <ConfirmationDialog
                 open={isDialogOpen}
                 onClose={handleDialogClose}
                 title="Potwierdzenie"
-                content={`Czy na pewno chcesz usunąć budynek slot?`}
+                content={`Czy na pewno chcesz usunąć slot?`}
                 action="Potwierdź"
             />
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
-        </>
-    );
+        </>);
 };
 
 export default Slots;

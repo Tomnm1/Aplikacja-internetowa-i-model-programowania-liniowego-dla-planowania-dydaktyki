@@ -3,7 +3,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import put_logo_text from "../assets/put_logo_text.png"
 import put_logo from "../assets/put_logo.png"
 import {logout} from "../app/slices/authSlice.ts";
-import {useAppDispatch, useAppSelector} from "../hooks/hooks.ts";
+import {useAppDispatch} from "../hooks/hooks.ts";
 import {useNavigate} from "react-router-dom";
 
 const Topper = () => {
@@ -52,8 +52,7 @@ const Topper = () => {
 
             </div>
 
-        </div>
-    );
+        </div>);
 };
 
 export default Topper;

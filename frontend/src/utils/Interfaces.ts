@@ -19,63 +19,50 @@ export const degrees = {
 };
 
 export enum Cycle {
-    FIRST = 'first',
-    SECOND = 'second',
+    FIRST = 'first', SECOND = 'second',
 }
 
-export interface ClassroomRow {
-    id: GridRowId;
-    name: string;
-    capacity: number;
-    floor: string;
-    isNew: boolean;
+export enum Day {
+    MONDAY = 'monday',
+    TUESDAY = 'tuesday',
+    WEDNESDAY = 'wednesday',
+    THURSDAY = 'thursday',
+    FRIDAY = 'friday',
+    SATURDAY = 'saturday',
+    SUNDAY = 'sunday',
 }
 
-export interface ClassroomState {
-    rows: ClassroomRow[];
-    rowModesModel: Record<GridRowId, { mode: string }>;
+export enum Language {
+    POLSKI = 'polski', ANGIELSKI = 'angielski',
 }
 
-
-export interface Room {
-    id: number;
-    name: string;
+export enum Type {
+    LECTURE = 'wykład', EX = 'ćwiczenia', LAB = 'laboratoria', PROJECT = 'projekt',
 }
 
-export interface Hour {
-    id: number;
-    timeRange: string;
+export const cycleMapping: { [key in Cycle]: string } = {
+    [Cycle.FIRST]: 'Pierwszy', [Cycle.SECOND]: 'Drugi',
+};
+
+export const languageMapping: { [key in Language]: string } = {
+    [Language.ANGIELSKI]: 'angielski', [Language.POLSKI]: 'polski',
 }
+export const dayMapping: { [key in Day]: string } = {
+    [Day.MONDAY]: 'Poniedziałek',
+    [Day.TUESDAY]: 'Wtorek',
+    [Day.WEDNESDAY]: 'Środa',
+    [Day.THURSDAY]: 'Czwartek',
+    [Day.FRIDAY]: 'Piątek',
+    [Day.SATURDAY]: 'Sobota',
+    [Day.SUNDAY]: 'Niedziela',
+};
 
-export interface Group {
-    id: number;
-    name: string;
-}
-
-export interface Schedule {
-    id: number;
-    teacherIds: number[];
-    groupIds: number[];
-    roomId: number;
-    hourId: number;
-}
-
-
-export interface CalendarViewProps {
-    teachers: Teacher[];
-    groups: Group[];
-    rooms: Room[];
-    hours: Hour[];
-    schedules: Schedule[];
-}
-
-export interface SubjectType {
-    id: number;
-    name: string;
+export const typeMapping: { [key in Type]: string } = {
+    [Type.LECTURE]: 'Wykład', [Type.EX]: 'Ćwiczenia', [Type.LAB]: 'Laboratoria', [Type.PROJECT]: 'Projekt',
 }
 
 export interface BackendTeacher {
-    id: number;
+    id?: number;
     firstName: string;
     lastName: string;
     degree: string;
@@ -84,22 +71,19 @@ export interface BackendTeacher {
 }
 
 export interface Teacher {
-    id: GridRowId;
+    id: number;
     firstName: string;
     lastName: string;
     degree: string;
     preferences: { [key: string]: string };
-    subjectTypesList: number[];
-    isNew?: boolean;
+    subjectTypesList: SubjectType[];
 }
 
 export interface TeachersState {
     rows: Teacher[];
-    rowModesModel: GridRowModesModel;
-    selectedRowId: GridRowId | null;
-    selectedRowName: string | null;
     loading: boolean;
     error: string | null;
+    singleTeacher: Teacher | null;
 }
 
 export interface Building {
@@ -184,7 +168,6 @@ export interface BackendSpecialisation {
 
 export type LocalTime = string;
 
-
 export interface Slot {
     slot_id: GridRowId;
     start_time: LocalTime;
@@ -204,6 +187,160 @@ export interface SlotsState {
     selectedRowId: GridRowId | null;
     selectedRowStart: LocalTime | null;
     selectedRowStop: LocalTime | null;
+    loading: boolean;
+    error: string | null;
+}
+
+export interface SlotsDay {
+    id: number;
+    slotId: number;
+    day: Day;
+    slotRepresentation?: string;
+}
+
+export interface BackendSlotsDay {
+    SlotsDayId?: number;
+    slot: {
+        slotId: number; startTime?: string; endTime?: string;
+    };
+    day: Day;
+}
+
+export interface SlotsDayState {
+    rows: SlotsDay[];
+    loading: boolean;
+    error: string | null;
+}
+
+export interface Semester {
+    id: number;
+    number: string;
+    specialisationId: number;
+    specialisationRepresentation?: string;
+    fieldOfStudyName?: string;
+    cycle?: Cycle;
+    groupCount?: number;
+}
+
+export interface BackendSemester {
+    semesterId?: number;
+    number: string;
+    specialisation: {
+        specialisationId: number; name?: string; cycle: Cycle; fieldOfStudy?: {
+            name?: string;
+        }
+    };
+    groupCount?: number;
+}
+
+export interface SemesterState {
+    rows: Semester[];
+    loading: boolean;
+    error: string | null;
+}
+
+export interface Subject {
+    SubjectId: number;
+    name: string;
+    language: Language;
+    exam: boolean;
+    mandatory: boolean;
+    planned: boolean;
+    semester: BackendSemester | { semesterId: number | string, specialisation?: BackendSpecialisation };
+}
+
+export interface BackendSubject {
+    SubjectId?: number;
+    name: string;
+    language: Language;
+    exam: boolean;
+    mandatory: boolean;
+    planned: boolean;
+    semester: BackendSemester | { semesterId: number };
+}
+
+export interface SubjectState {
+    rows: Subject[];
+    loading: boolean;
+    error: string | null;
+}
+
+export interface SubjectType {
+    subjectTypeId: number;
+    numOfHours: number;
+    type: Type;
+    maxStudentsPerGroup: number;
+    subject: BackendSubject | { SubjectId: number };
+    teachersList: teacherListDTO[];
+    groupsList: Group[];
+    frontId?: string;
+}
+
+export interface teacherListDTO {
+    id: number;
+    teacherId: number;
+    teacherFirstName: string;
+    teacherLastName: string;
+    subjectTypeId: number;
+    numHours: number;
+    frontId?: string;
+}
+
+export interface BackendSubjectType {
+    subjectTypeId?: number;
+    numOfHours: number;
+    type: Type;
+    maxStudentsPerGroup: number;
+    subject: BackendSubject | { SubjectId: number };
+    teachersList: teacherListDTO[];
+    groupsList: Group[];
+    frontId?: string;
+}
+
+export interface SubjectTypeState {
+    rows: SubjectType[];
+    loading: boolean;
+    error: string | null;
+}
+
+// export interface GeneratedPlan {
+//     id: number;
+//     plan: Plan;
+//     slotsDay: BackendSlotsDay;
+//     group: Group;
+//     teacher: BackendTeacher;
+//     classroom: BackendClassroom;
+//     subjectType: BackendSubjectType;
+//     isEvenWeek: boolean;
+// }
+
+export interface GeneratedPlan {
+    id: number;
+    plan: Plan;
+    slotsDay: SlotsDay;
+    group: Group;
+    teacher: Teacher;
+    classroom: Classroom;
+    subjectType: SubjectType;
+    isEvenWeek: boolean;
+}
+
+export interface Plan {
+    planId: number;
+    name: string;
+    creationDate: string;
+}
+
+export type SlotPreference = 0 | 1 | -1;
+
+export interface Group {
+    id: number;
+    code: string;
+    group_type: Type;
+}
+
+export interface GroupState {
+    rows: Group[];
     loading: boolean;
     error: string | null;
 }

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -28,10 +29,11 @@ public class TeacherController {
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    array = @ArraySchema(schema = @Schema(implementation = Teacher.class))
+                    array = @ArraySchema(schema = @Schema(implementation = TeacherDTO.class))
             )
     })
-    public List<Teacher> getAllTeachers() {
+    @Transactional
+    public List<TeacherDTO> getAllTeachers() {
         return teacherService.getAllteachers();
     }
 
@@ -43,7 +45,8 @@ public class TeacherController {
                     schema = @Schema(implementation = Teacher.class)
             )
     })
-    public Optional<Teacher> getTeacherByID(@PathVariable("id") Integer id) {
+    @Transactional
+    public TeacherDTO getTeacherByID(@PathVariable("id") Integer id) {
         return teacherService.getteacherByID(id);
     }
 

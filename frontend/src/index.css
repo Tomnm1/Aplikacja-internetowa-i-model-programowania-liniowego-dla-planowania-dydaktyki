@@ -1,3 +1,42 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+/* Style for events */
+.fc-event {
+    background-color: #1976d2 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 6px 8px !important;
+    margin: 2px 0 !important;
+    transition: background-color 0.3s ease-in-out !important;
+}
+
+.fc-event:hover {
+    background-color: #1565c0 !important;
+}
+
+.fc-daygrid-day-frame,
+.fc-timegrid-slot {
+    background-color: #ffffff !important;
+}
+
+.fc-day-today {
+    background-color: #e3f2fd !important;
+}
+
+.fc-col-header-cell {
+    background-color: #fafafa !important;
+    color: #616161 !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
+    padding: 8px !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.fc-daygrid-day,
+.fc-timegrid-slot {
+    border: 1px solid #f0f0f0 !important;
+}

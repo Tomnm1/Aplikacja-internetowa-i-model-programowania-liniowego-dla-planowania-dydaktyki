@@ -45,6 +45,18 @@ public class GroupController {
         return groupService.getGroupByID(id);
     }
 
+    @Operation(summary = "Return Group by id")
+    @GetMapping("/semester/{id}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = Group.class)
+            )
+    })
+    public List<GroupDTO> getGroupBySemesterID(@PathVariable("id") Integer id) {
+        return groupService.getGroupBySemesterID(id);
+    }
+
     @Operation(summary = "Create Group from provided JSON")
     @PostMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -54,6 +66,7 @@ public class GroupController {
             )
     })
     public Group createGroup(@RequestBody Group group){
+
         return groupService.createGroup(group);
     }
 

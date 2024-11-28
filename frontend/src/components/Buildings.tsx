@@ -33,6 +33,7 @@ import {
 } from '../app/slices/buildingSlice';
 import {Building} from '../utils/Interfaces.ts';
 import {plPL} from "@mui/x-data-grid/locales";
+import {useSnackbar} from "notistack";
 
 const Buildings: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -41,47 +42,53 @@ const Buildings: React.FC = () => {
     const selectedRowCode = useSelector((state: RootState) => state.buildings.selectedRowCode);
     const selectedRowId = useSelector((state: RootState) => state.buildings.selectedRowId);
     const loading = useSelector((state: RootState) => state.buildings.loading);
-    const error = useSelector((state: RootState) => state.buildings.error);
     const [isDialogOpen, setDialogOpen] = React.useState(false);
+    const {enqueueSnackbar} = useSnackbar();
 
     const [rowIdCounter, setRowIdCounter] = React.useState(-1);
 
     useEffect(() => {
-        dispatch(fetchBuildings());
-    }, [dispatch]);
+        dispatch(fetchBuildings()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania budynków: ${error.message}`, {variant: 'error'});
+        });
+    }, [dispatch, enqueueSnackbar]);
 
 
     const handleEditClick = (id: GridRowId) => () => {
-        dispatch(setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } }));
+        dispatch(setRowModesModel({...rowModesModel, [id]: {mode: GridRowModes.Edit}}));
     };
 
     const handleSaveClick = (id: GridRowId) => () => {
-        dispatch(setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } }));
+        dispatch(setRowModesModel({...rowModesModel, [id]: {mode: GridRowModes.View}}));
     };
 
     const handleDeleteClick = (id: GridRowId) => () => {
         const rowToDelete = rows.find((row) => row.id === id);
         if (rowToDelete) {
-            dispatch(setSelectedRow({ id, code: rowToDelete.code }));
+            dispatch(setSelectedRow({id, code: rowToDelete.code}));
             setDialogOpen(true);
         }
     };
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteBuilding(selectedRowId));
+            dispatch(deleteBuilding(selectedRowId))
+                .unwrap()
+                .then(() => {
+                    enqueueSnackbar('Budynek został pomyślnie usunięty', {variant: 'success'});
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas usuwania budynku: ${error.message}`, {variant: 'error'});
+                });
         }
         setDialogOpen(false);
         dispatch(clearSelectedRow());
     };
 
     const handleCancelClick = (id: GridRowId) => () => {
-        dispatch(
-            setRowModesModel({
-                ...rowModesModel,
-                [id]: { mode: GridRowModes.View, ignoreModifications: true },
-            })
-        );
+        dispatch(setRowModesModel({
+            ...rowModesModel, [id]: {mode: GridRowModes.View, ignoreModifications: true},
+        }));
 
         const editedRow = rows.find((row) => row.id === id);
         if (editedRow?.isNew) {
@@ -91,25 +98,23 @@ const Buildings: React.FC = () => {
 
     const processRowUpdate = async (newRow: GridRowModel) => {
         const updatedRow: Building = {
-            id: newRow.id,
-            code: newRow.code || '',
-            isNew: newRow.isNew || false,
+            id: newRow.id, code: newRow.code || '', isNew: newRow.isNew || false,
         };
 
         if (updatedRow.isNew) {
             const resultAction = await dispatch(addBuilding(updatedRow));
             if (addBuilding.fulfilled.match(resultAction)) {
-                const { building } = resultAction.payload;
+                const {building} = resultAction.payload;
                 return building;
             } else {
-                throw new Error('Failed to add building');
+                enqueueSnackbar(`Wystąpił błąd przy dodawaniu budynku`, {variant: 'error'});
             }
         } else {
             const resultAction = await dispatch(updateBuilding(updatedRow));
             if (updateBuilding.fulfilled.match(resultAction)) {
                 return resultAction.payload;
             } else {
-                throw new Error('Failed to update building');
+                enqueueSnackbar(`Wystąpił błąd przy aktualizacji budynku`, {variant: 'error'});
             }
         }
     };
@@ -118,86 +123,65 @@ const Buildings: React.FC = () => {
         dispatch(setRowModesModel(newRowModesModel));
     };
 
-    const columns: GridColDef[] = [
-        { field: 'code', headerName: 'Kod', width: 150, editable: true },
-        {
-            field: 'actions',
-            type: 'actions',
-            headerName: 'Akcje',
-            width: 100,
-            getActions: (params: GridRowParams) => {
-                const id = params.id;
-                const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+    const columns: GridColDef[] = [{field: 'code', headerName: 'Kod', width: 150, editable: true}, {
+        field: 'actions', type: 'actions', headerName: 'Akcje', width: 100, getActions: (params: GridRowParams) => {
+            const id = params.id;
+            const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
-                if (isInEditMode) {
-                    return [
-                        <GridActionsCellItem
-                            key="save"
-                            icon={<SaveIcon />}
-                            label="Zapisz"
-                            sx={{ color: 'primary.main' }}
-                            onClick={handleSaveClick(id)}
-                        />,
-                        <GridActionsCellItem
-                            key="cancel"
-                            icon={<CancelIcon />}
-                            label="Anuluj"
-                            onClick={handleCancelClick(id)}
-                            color="inherit"
-                        />,
-                    ];
-                }
+            if (isInEditMode) {
+                return [<GridActionsCellItem
+                    key="save"
+                    icon={<SaveIcon/>}
+                    label="Zapisz"
+                    sx={{color: 'primary.main'}}
+                    onClick={handleSaveClick(id)}
+                />, <GridActionsCellItem
+                    key="cancel"
+                    icon={<CancelIcon/>}
+                    label="Anuluj"
+                    onClick={handleCancelClick(id)}
+                    color="inherit"
+                />,];
+            }
 
-                return [
-                    <GridActionsCellItem
-                        key="edit"
-                        icon={<EditIcon />}
-                        label="Edytuj"
-                        onClick={handleEditClick(id)}
-                        color="inherit"
-                    />,
-                    <GridActionsCellItem
-                        key="delete"
-                        icon={<DeleteIcon />}
-                        label="Usuń"
-                        onClick={handleDeleteClick(id)}
-                        color="inherit"
-                    />,
-                ];
-            },
+            return [<GridActionsCellItem
+                key="edit"
+                icon={<EditIcon/>}
+                label="Edytuj"
+                onClick={handleEditClick(id)}
+                color="inherit"
+            />, <GridActionsCellItem
+                key="delete"
+                icon={<DeleteIcon/>}
+                label="Usuń"
+                onClick={handleDeleteClick(id)}
+                color="inherit"
+            />,];
         },
-    ];
+    },];
 
     const handleAddClick = () => {
         const id = rowIdCounter;
         setRowIdCounter((prev) => prev - 1);
         const newBuilding: Building = {
-            id,
-            code: '',
-            isNew: true,
+            id, code: '', isNew: true,
         };
         dispatch(addNewBuilding(newBuilding));
-        dispatch(
-            setRowModesModel({
-                ...rowModesModel,
-                [id]: { mode: GridRowModes.Edit, fieldToFocus: 'code' },
-            })
-        );
+        dispatch(setRowModesModel({
+            ...rowModesModel, [id]: {mode: GridRowModes.Edit, fieldToFocus: 'code'},
+        }));
     };
 
     const TopToolbar = () => {
-        return (
-            <GridToolbarContainer>
-                <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
+        return (<GridToolbarContainer>
+                <Button color="primary" startIcon={<AddIcon/>} onClick={handleAddClick}>
                     Dodaj budynek
                 </Button>
-                <GridToolbar />
-            </GridToolbarContainer>
-        );
+                <GridToolbar/>
+            </GridToolbarContainer>);
     };
 
-    return (
-        <>
+    return (<>
             <DataGrid
                 rows={rows}
                 columns={columns}
@@ -207,7 +191,7 @@ const Buildings: React.FC = () => {
                 rowModesModel={rowModesModel}
                 onRowModesModelChange={handleRowModesModelChange}
                 processRowUpdate={processRowUpdate}
-                slots={{ toolbar: TopToolbar }}
+                slots={{toolbar: TopToolbar}}
             />
             <ConfirmationDialog
                 open={isDialogOpen}
@@ -216,9 +200,7 @@ const Buildings: React.FC = () => {
                 content={`Czy na pewno chcesz usunąć budynek ${selectedRowCode}?`}
                 action="Potwierdź"
             />
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
-        </>
-    );
+        </>);
 };
 
 export default Buildings;

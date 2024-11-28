@@ -21,18 +21,11 @@ import CancelIcon from '@mui/icons-material/Close';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import {AppDispatch, RootState} from '../app/store';
 import {
-    setRowModesModel,
-    setSelectedRow,
-    clearSelectedRow,
-    addNewFOS,
-    removeNewFOS,
-    fetchFOS,
-    addFOS,
-    updateFOS,
-    deleteFOS,
+    addFOS, addNewFOS, clearSelectedRow, deleteFOS, fetchFOS, removeNewFOS, setRowModesModel, setSelectedRow, updateFOS,
 } from '../app/slices/fieldOfStudySlice.ts';
 import {FieldOfStudy} from '../utils/Interfaces.ts';
 import {plPL} from "@mui/x-data-grid/locales";
+import {useSnackbar} from "notistack";
 
 const FieldOfStudies: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -41,47 +34,53 @@ const FieldOfStudies: React.FC = () => {
     const selectedRowName = useSelector((state: RootState) => state.fields.selectedRowName);
     const selectedRowId = useSelector((state: RootState) => state.fields.selectedRowId);
     const loading = useSelector((state: RootState) => state.fields.loading);
-    const error = useSelector((state: RootState) => state.fields.error);
     const [isDialogOpen, setDialogOpen] = React.useState(false);
+    const {enqueueSnackbar} = useSnackbar();
 
     const [rowIdCounter, setRowIdCounter] = React.useState(-1);
 
     useEffect(() => {
-        dispatch(fetchFOS());
-    }, [dispatch]);
+        dispatch(fetchFOS()).unwrap().catch((error) => {
+            enqueueSnackbar(`Błąd podczas pobierania kierunków studiów: ${error.message}`, {variant: 'error'});
+        });
+    }, [dispatch, enqueueSnackbar]);
 
 
     const handleEditClick = (id: GridRowId) => () => {
-        dispatch(setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } }));
+        dispatch(setRowModesModel({...rowModesModel, [id]: {mode: GridRowModes.Edit}}));
     };
 
     const handleSaveClick = (id: GridRowId) => () => {
-        dispatch(setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } }));
+        dispatch(setRowModesModel({...rowModesModel, [id]: {mode: GridRowModes.View}}));
     };
 
     const handleDeleteClick = (id: GridRowId) => () => {
         const rowToDelete = rows.find((row) => row.id === id);
         if (rowToDelete) {
-            dispatch(setSelectedRow({ id, name: rowToDelete.name }));
+            dispatch(setSelectedRow({id, name: rowToDelete.name}));
             setDialogOpen(true);
         }
     };
 
     const handleDialogClose = (confirmed: boolean) => {
         if (confirmed && selectedRowId != null) {
-            dispatch(deleteFOS(selectedRowId));
+            dispatch(deleteFOS(selectedRowId))
+                .unwrap()
+                .then(() => {
+                    enqueueSnackbar('Kierunek został pomyślnie usunięty', {variant: 'success'});
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas usuwania kierunku: ${error.message}`, {variant: 'error'});
+                });
         }
         setDialogOpen(false);
         dispatch(clearSelectedRow());
     };
 
     const handleCancelClick = (id: GridRowId) => () => {
-        dispatch(
-            setRowModesModel({
-                ...rowModesModel,
-                [id]: { mode: GridRowModes.View, ignoreModifications: true },
-            })
-        );
+        dispatch(setRowModesModel({
+            ...rowModesModel, [id]: {mode: GridRowModes.View, ignoreModifications: true},
+        }));
 
         const editedRow = rows.find((row) => row.id === id);
         if (editedRow?.isNew) {
@@ -91,25 +90,23 @@ const FieldOfStudies: React.FC = () => {
 
     const processRowUpdate = async (newRow: GridRowModel) => {
         const updatedRow: FieldOfStudy = {
-            id: newRow.id,
-            name: newRow.name || '',
-            isNew: newRow.isNew || false,
+            id: newRow.id, name: newRow.name || '', isNew: newRow.isNew || false,
         };
 
         if (updatedRow.isNew) {
             const resultAction = await dispatch(addFOS(updatedRow));
             if (addFOS.fulfilled.match(resultAction)) {
-                const { fos } = resultAction.payload;
+                const {fos} = resultAction.payload;
                 return fos;
             } else {
-                throw new Error('Failed to add field of study');
+                enqueueSnackbar(`Wystąpił błąd przy dodawaniu kierunku`, {variant: 'error'});
             }
         } else {
             const resultAction = await dispatch(updateFOS(updatedRow));
             if (updateFOS.fulfilled.match(resultAction)) {
                 return resultAction.payload;
             } else {
-                throw new Error('Failed to update field of study');
+                enqueueSnackbar(`Wystąpił błąd przy aktualizacji kierunku`, {variant: 'error'});
             }
         }
     };
@@ -118,86 +115,65 @@ const FieldOfStudies: React.FC = () => {
         dispatch(setRowModesModel(newRowModesModel));
     };
 
-    const columns: GridColDef[] = [
-        { field: 'name', headerName: 'Kod', width: 150, editable: true },
-        {
-            field: 'actions',
-            type: 'actions',
-            headerName: 'Akcje',
-            width: 100,
-            getActions: (params: GridRowParams) => {
-                const id = params.id;
-                const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+    const columns: GridColDef[] = [{field: 'name', headerName: 'Kod', width: 150, editable: true}, {
+        field: 'actions', type: 'actions', headerName: 'Akcje', width: 100, getActions: (params: GridRowParams) => {
+            const id = params.id;
+            const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
-                if (isInEditMode) {
-                    return [
-                        <GridActionsCellItem
-                            key="save"
-                            icon={<SaveIcon />}
-                            label="Zapisz"
-                            sx={{ color: 'primary.main' }}
-                            onClick={handleSaveClick(id)}
-                        />,
-                        <GridActionsCellItem
-                            key="cancel"
-                            icon={<CancelIcon />}
-                            label="Anuluj"
-                            onClick={handleCancelClick(id)}
-                            color="inherit"
-                        />,
-                    ];
-                }
+            if (isInEditMode) {
+                return [<GridActionsCellItem
+                    key="save"
+                    icon={<SaveIcon/>}
+                    label="Zapisz"
+                    sx={{color: 'primary.main'}}
+                    onClick={handleSaveClick(id)}
+                />, <GridActionsCellItem
+                    key="cancel"
+                    icon={<CancelIcon/>}
+                    label="Anuluj"
+                    onClick={handleCancelClick(id)}
+                    color="inherit"
+                />,];
+            }
 
-                return [
-                    <GridActionsCellItem
-                        key="edit"
-                        icon={<EditIcon />}
-                        label="Edytuj"
-                        onClick={handleEditClick(id)}
-                        color="inherit"
-                    />,
-                    <GridActionsCellItem
-                        key="delete"
-                        icon={<DeleteIcon />}
-                        label="Usuń"
-                        onClick={handleDeleteClick(id)}
-                        color="inherit"
-                    />,
-                ];
-            },
+            return [<GridActionsCellItem
+                key="edit"
+                icon={<EditIcon/>}
+                label="Edytuj"
+                onClick={handleEditClick(id)}
+                color="inherit"
+            />, <GridActionsCellItem
+                key="delete"
+                icon={<DeleteIcon/>}
+                label="Usuń"
+                onClick={handleDeleteClick(id)}
+                color="inherit"
+            />,];
         },
-    ];
+    },];
 
     const handleAddClick = () => {
         const id = rowIdCounter;
         setRowIdCounter((prev) => prev - 1);
         const newFOS: FieldOfStudy = {
-            id,
-            name: '',
-            isNew: true,
+            id, name: '', isNew: true,
         };
         dispatch(addNewFOS(newFOS));
-        dispatch(
-            setRowModesModel({
-                ...rowModesModel,
-                [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
-            })
-        );
+        dispatch(setRowModesModel({
+            ...rowModesModel, [id]: {mode: GridRowModes.Edit, fieldToFocus: 'name'},
+        }));
     };
 
     const TopToolbar = () => {
-        return (
-            <GridToolbarContainer>
-                <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
+        return (<GridToolbarContainer>
+                <Button color="primary" startIcon={<AddIcon/>} onClick={handleAddClick}>
                     Dodaj kierunek studiów
                 </Button>
-                <GridToolbar />
-            </GridToolbarContainer>
-        );
+                <GridToolbar/>
+            </GridToolbarContainer>);
     };
 
-    return (
-        <>
+    return (<>
             <DataGrid
                 rows={rows}
                 columns={columns}
@@ -207,7 +183,7 @@ const FieldOfStudies: React.FC = () => {
                 rowModesModel={rowModesModel}
                 onRowModesModelChange={handleRowModesModelChange}
                 processRowUpdate={processRowUpdate}
-                slots={{ toolbar: TopToolbar }}
+                slots={{toolbar: TopToolbar}}
             />
             <ConfirmationDialog
                 open={isDialogOpen}
@@ -216,9 +192,7 @@ const FieldOfStudies: React.FC = () => {
                 content={`Czy na pewno chcesz usunąć kierunek studiów? ${selectedRowName}?`}
                 action="Potwierdź"
             />
-            {error && <div style={{ color: 'red' }}>Błąd: {error}</div>}
-        </>
-    );
+        </>);
 };
 
 export default FieldOfStudies;
