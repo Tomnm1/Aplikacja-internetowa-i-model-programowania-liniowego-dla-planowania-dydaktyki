@@ -27,6 +27,7 @@ public class ClassroomAssignmentService {
         this.subjectTypeService = subjectTypeService;
         this.classroomService = classroomService;
     }
+
     public void assignClassroomsBasedOnCapacity(){
         List<SubjectType> subjectTypeList = subjectTypeService.getAllsubjectType();
         for(SubjectType subjectType: subjectTypeList){

@@ -48,8 +48,13 @@ public class SubjectTypeService {
      * Returns all subjectTypes
      * @return list of SubjectType
      */
+
+    public List<SubjectType> getAllsubjectType(){
+        return subjectTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "subjectTypeId"));
+    }
+
     @Transactional
-    public List<SubjectTypeDTO> getAllsubjectType(){
+    public List<SubjectTypeDTO> getAllsubjectTypeDTO(){
         return subjectTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "subjectTypeId")).stream().map(SubjectType::convertToDTO).toList();
     }
 
@@ -76,13 +81,19 @@ public class SubjectTypeService {
         return subjectTypeRepository.findSubjectTypeBySubjectAndType(subject, type);
     }
 
+
+
+    public SubjectType createsubjectType(SubjectType subjectType){
+        return subjectTypeRepository.save(subjectType);
+    }
+
     /**
      * Creates a SubjectType
-     * @param SubjectTypeDTO object to be inserted into DB
+     * @param subjectTypeDTO object to be inserted into DB
      * @return saved SubjectType
      */
     @Transactional
-    public SubjectTypeDTO createsubjectType(SubjectTypeDTO subjectTypeDTO){
+    public SubjectTypeDTO createsubjectTypeDTO(SubjectTypeDTO subjectTypeDTO){
         SubjectType st = toSubjectType(subjectTypeDTO,false);
         SubjectType saved = subjectTypeRepository.save(st);
         List<SubjectType_Teacher> teachersList = subjectTypeDTO.teachersList.stream().map(this::toSubjectType_Teacher).toList();
@@ -101,8 +112,23 @@ public class SubjectTypeService {
      * @param subjectTypeParams new values in JSON format
      * @return saved SubjectType or null
      */
+
+    public SubjectType updatesubjectTypeByID(Integer id, SubjectType subjectTypeParams){
+        Optional<SubjectType> subjectType = subjectTypeRepository.findById(id);
+        if (subjectType.isPresent()) {
+            SubjectType oldsubjectType = subjectType.get();
+            oldsubjectType.subject = subjectTypeParams.subject;
+            oldsubjectType.type = subjectTypeParams.type;
+            oldsubjectType.numOfHours = subjectTypeParams.numOfHours;
+            oldsubjectType.maxStudentsPerGroup = subjectTypeParams.maxStudentsPerGroup;
+            return subjectTypeRepository.save(oldsubjectType);
+        } else {
+            return null;
+        }
+    }
+
     @Transactional
-    public SubjectTypeDTO updatesubjectTypeByID(Integer id, SubjectTypeDTO subjectTypeParams){
+    public SubjectTypeDTO updatesubjectTypeDTOByID(Integer id, SubjectTypeDTO subjectTypeParams){
         Optional<SubjectType> subjectType = subjectTypeRepository.findById(id);
         if (subjectType.isPresent()) {
             SubjectType oldsubjectType = subjectType.get();
@@ -128,7 +154,7 @@ public class SubjectTypeService {
     }
 
     @Transactional
-    private Group toGroup(GroupDTO dto){
+    public Group toGroup(GroupDTO dto){
         Group g = new Group();
         Optional<Group> og = groupRepository.findById(dto.id);
         if(og.isPresent()){

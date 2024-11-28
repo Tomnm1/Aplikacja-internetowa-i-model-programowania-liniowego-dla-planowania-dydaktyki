@@ -47,7 +47,7 @@ public class TeacherController {
     })
     @Transactional
     public TeacherDTO getTeacherByID(@PathVariable("id") Integer id) {
-        return teacherService.getteacherByID(id);
+        return teacherService.getteacherDTOByID(id);
     }
 
     @Operation(summary = "Create teachers from provided JSON")

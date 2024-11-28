@@ -31,7 +31,7 @@ public class SubjectTypeController {
             )
     })
     public List<SubjectTypeDTO> getAllSubjectType() {
-        return subjectTypeService.getAllsubjectType();
+        return subjectTypeService.getAllsubjectTypeDTO();
     }
 
     @Operation(summary = "Return SubjectType by id")
@@ -55,7 +55,7 @@ public class SubjectTypeController {
             )
     })
     public SubjectTypeDTO createSubjectType(@RequestBody SubjectTypeDTO subjectTypeDTO){
-        return subjectTypeService.createsubjectType(subjectTypeDTO);
+        return subjectTypeService.createsubjectTypeDTO(subjectTypeDTO);
     }
 
     @Operation(summary = "Update specified SubjectType from provided JSON")
@@ -67,7 +67,7 @@ public class SubjectTypeController {
             )
     })
     public SubjectTypeDTO updateSubjectTypeByID(@PathVariable("id") Integer id, @RequestBody SubjectTypeDTO subjectTypeParams){
-        return subjectTypeService.updatesubjectTypeByID(id, subjectTypeParams);
+        return subjectTypeService.updatesubjectTypeDTOByID(id, subjectTypeParams);
     }
 
     @Operation(summary = "Delete all subjectTypes")

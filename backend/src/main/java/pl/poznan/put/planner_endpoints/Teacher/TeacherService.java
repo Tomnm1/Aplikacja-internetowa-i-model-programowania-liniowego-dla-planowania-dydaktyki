@@ -55,8 +55,12 @@ public class TeacherService {
      * @param id subject id
      * @return Optional - empty or with Subject
      */
+
+    public Optional<Teacher> getteacherByID(Integer id){
+        return teacherRepository.findById(id);
+    }
     @Transactional
-    public TeacherDTO getteacherByID(Integer id){
+    public TeacherDTO getteacherDTOByID(Integer id){
         Teacher teacher = teacherRepository.findById(id).orElseThrow();
         return teacher.convertToDTO();
     }

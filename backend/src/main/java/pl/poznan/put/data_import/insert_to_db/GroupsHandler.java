@@ -7,6 +7,7 @@ import pl.poznan.put.data_import.model.subjects.TeacherWithInnerId;
 import pl.poznan.put.planner_endpoints.Group.Group;
 import pl.poznan.put.planner_endpoints.Group.GroupService;
 import pl.poznan.put.planner_endpoints.Semester.Semester;
+import pl.poznan.put.planner_endpoints.SubjectType.ClassTypeOwn;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectTypeService;
 import pl.poznan.put.planner_endpoints.SubjectTypeGroup.SubjectTypeGroup;
@@ -57,6 +58,7 @@ public class GroupsHandler {
             Group group = new Group();
             group.code = LAB_LETTER + i;
             group.semester = semester;
+            group.group_type = ClassTypeOwn.laboratoria;
             Group returnedGroup = groupService.createGroupIfNotExists(group);
             groupList.add(returnedGroup);
         }

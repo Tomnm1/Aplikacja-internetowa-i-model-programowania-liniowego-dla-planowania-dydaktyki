@@ -56,7 +56,7 @@ public class Teacher {
     public List<SubjectType> subjectTypesList;
 
     @OneToMany(mappedBy = "teacher")
-    public List<SubjectType_Teacher> subjectTypesList;
+    public List<SubjectType_Teacher> subjectTypesTeacherList;
 
     public TeacherDTO convertToDTO(){
         TeacherDTO dto = new TeacherDTO();
@@ -65,7 +65,7 @@ public class Teacher {
         dto.lastName = this.lastName;
         dto.degree = this.degree;
         dto.preferences = this.preferences;
-        dto.subjectTypesList = this.subjectTypesList.stream().map(SubjectType_Teacher::getSubjetTyprId).collect(Collectors.toList());
+        dto.subjectTypesList = this.subjectTypesTeacherList.stream().map(SubjectType_Teacher::getSubjetTyprId).collect(Collectors.toList());
         return dto;
     }
 }
