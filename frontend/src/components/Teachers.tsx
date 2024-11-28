@@ -1,35 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {
-    DataGrid, GridColDef, GridToolbarContainer,
-    GridActionsCellItem, GridRowParams, GridToolbar,
+    DataGrid, GridActionsCellItem, GridColDef, GridRowParams, GridToolbar, GridToolbarContainer,
 } from '@mui/x-data-grid';
-import { Button } from '@mui/material';
+import {Button} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
-import { RootState, AppDispatch } from '../app/store';
-import { plPL } from '@mui/x-data-grid/locales';
-import { fetchTeachers, deleteTeacher } from '../app/slices/teacherSlice';
+import {AppDispatch, RootState} from '../app/store';
+import {plPL} from '@mui/x-data-grid/locales';
+import {deleteTeacher, fetchTeachers} from '../app/slices/teacherSlice';
 import TeacherModal from './TeacherModal';
-import { degrees, Teacher } from '../utils/Interfaces';
-import { useSnackbar } from "notistack";
+import {degrees, Teacher} from '../utils/Interfaces';
+import {useSnackbar} from "notistack";
 
 const Teachers: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { rows: teachers, loading } = useSelector((state: RootState) => state.teachers);
+    const {rows: teachers, loading} = useSelector((state: RootState) => state.teachers);
 
     const [isDialogOpen, setDialogOpen] = useState(false);
     const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
     const [isModalOpen, setModalOpen] = useState(false);
     const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
     const [isAdding, setIsAdding] = useState(false);
-    const { enqueueSnackbar } = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
 
     useEffect(() => {
         dispatch(fetchTeachers()).unwrap().catch((error) => {
-            enqueueSnackbar(`Błąd podczas pobierania przedmiotów: ${error.message}`, { variant: 'error' });
+            enqueueSnackbar(`Błąd podczas pobierania przedmiotów: ${error.message}`, {variant: 'error'});
         });
     }, [dispatch, enqueueSnackbar]);
 
@@ -52,10 +51,10 @@ const Teachers: React.FC = () => {
             dispatch(deleteTeacher(selectedRowId))
                 .unwrap()
                 .then(() => {
-                    enqueueSnackbar('Pracownik został pomyślnie usunięty', { variant: 'success' });
+                    enqueueSnackbar('Pracownik został pomyślnie usunięty', {variant: 'success'});
                 })
                 .catch((error) => {
-                    enqueueSnackbar(`Błąd podczas usuwania pracownika: ${error.message}`, { variant: 'error' });
+                    enqueueSnackbar(`Błąd podczas usuwania pracownika: ${error.message}`, {variant: 'error'});
                 });
         }
         setDialogOpen(false);
@@ -68,16 +67,16 @@ const Teachers: React.FC = () => {
         setModalOpen(true);
     };
 
-    const columns: GridColDef[] = [
-        { field: 'firstName', headerName: 'Imię', width: 150 },
-        { field: 'lastName', headerName: 'Nazwisko', width: 150 },
-        {
-            field: 'degree',
-            headerName: 'Stopień',
-            width: 150,
-            valueFormatter: (params) => degrees[params as keyof typeof degrees] || '',
-        },
-        // {
+    const columns: GridColDef[] = [{field: 'firstName', headerName: 'Imię', width: 150}, {
+        field: 'lastName',
+        headerName: 'Nazwisko',
+        width: 150
+    }, {
+        field: 'degree',
+        headerName: 'Stopień',
+        width: 150,
+        valueFormatter: (params) => degrees[params as keyof typeof degrees] || '',
+    }, // {
         //     field: 'subjectTypesList',
         //     headerName: 'Typy Przedmiotów',
         //     width: 250,
@@ -91,40 +90,33 @@ const Teachers: React.FC = () => {
             type: 'actions',
             headerName: 'Akcje',
             width: 100,
-            getActions: (params: GridRowParams) => [
-                <GridActionsCellItem
-                    icon={<VisibilityIcon />}
-                    label="Szczegóły"
-                    onClick={handleViewClick(params.id as number)}
-                    color="inherit"
-                />,
-                <GridActionsCellItem
-                    icon={<DeleteIcon />}
-                    label="Usuń"
-                    onClick={handleDeleteClick(params.id as number)}
-                    color="inherit"
-                />,
-            ],
-        },
-    ];
+            getActions: (params: GridRowParams) => [<GridActionsCellItem
+                icon={<VisibilityIcon/>}
+                label="Szczegóły"
+                onClick={handleViewClick(params.id as number)}
+                color="inherit"
+            />, <GridActionsCellItem
+                icon={<DeleteIcon/>}
+                label="Usuń"
+                onClick={handleDeleteClick(params.id as number)}
+                color="inherit"
+            />,],
+        },];
 
-    const TopToolbar = () => (
-        <GridToolbarContainer>
-            <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
+    const TopToolbar = () => (<GridToolbarContainer>
+            <Button color="primary" startIcon={<AddIcon/>} onClick={handleAddClick}>
                 Dodaj nauczyciela
             </Button>
-            <GridToolbar />
-        </GridToolbarContainer>
-    );
+            <GridToolbar/>
+        </GridToolbarContainer>);
 
-    return (
-        <>
+    return (<>
             <DataGrid
                 rows={teachers}
                 columns={columns}
                 loading={loading}
                 localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
-                slots={{ toolbar: TopToolbar }}
+                slots={{toolbar: TopToolbar}}
             />
             <ConfirmationDialog
                 open={isDialogOpen}
@@ -133,16 +125,13 @@ const Teachers: React.FC = () => {
                 content="Czy na pewno chcesz usunąć tego nauczyciela?"
                 action="Potwierdź"
             />
-            {isModalOpen && (
-                <TeacherModal
+            {isModalOpen && (<TeacherModal
                     open={isModalOpen}
                     onClose={() => setModalOpen(false)}
                     teacher={selectedTeacher}
                     isAdding={isAdding}
-                />
-            )}
-        </>
-    );
+                />)}
+        </>);
 };
 
 export default Teachers;

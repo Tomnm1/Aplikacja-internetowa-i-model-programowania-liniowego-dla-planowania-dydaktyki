@@ -1,20 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-    Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, FormControl, InputLabel, Select, MenuItem,
-    Typography, Box, Fade,
+    Box,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Fade,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    TextField,
+    Typography,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../app/store';
-import {SlotsDay, BackendSlot, Day, dayMapping} from '../utils/Interfaces';
-import SaveButton from '../utils/SaveButton';
-import { green } from "@mui/material/colors";
-import CancelButton from "../utils/CancelButton";
+import {useDispatch} from 'react-redux';
+import {AppDispatch} from '../app/store';
+import {BackendSlot, Day, dayMapping, SlotsDay} from '../utils/Interfaces';
+import {green} from "@mui/material/colors";
 import {addSlotsDay, fetchSlotsDays, updateSlotsDay} from "../app/slices/slotsDaysSlice";
 import API_ENDPOINTS from '../app/urls';
-import { SelectChangeEvent } from '@mui/material/Select';
-import { useSnackbar } from 'notistack';
+import {SelectChangeEvent} from '@mui/material/Select';
+import {useSnackbar} from 'notistack';
+import ActionButton from "../utils/ActionButton.tsx";
+import SaveIcon from "@mui/icons-material/Save";
+import ClearIcon from "@mui/icons-material/Clear";
 
 interface SlotsDayModalProps {
     open: boolean;
@@ -23,9 +33,9 @@ interface SlotsDayModalProps {
     isAdding: boolean;
 }
 
-const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, isAdding }) => {
+const SlotsDayModal: React.FC<SlotsDayModalProps> = ({open, onClose, slotsDay, isAdding}) => {
     const dispatch = useDispatch<AppDispatch>();
-    const { enqueueSnackbar } = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
     const [slots, setSlots] = useState<BackendSlot[]>([]);
     const [formData, setFormData] = useState({
         id: slotsDay?.id || '',
@@ -42,13 +52,13 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
                 .then(res => res.json())
                 .then((data: BackendSlot[]) => setSlots(data))
                 .catch(err => {
-                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu slotów: ${err}`, { variant: 'error' });
+                    enqueueSnackbar(`Wystąpił błąd przy pobieraniu slotów: ${err}`, {variant: 'error'});
                 });
         }
     }, [enqueueSnackbar, isAdding]);
 
     const handleDayChange = (event: SelectChangeEvent) => {
-        setFormData({ ...formData, day: event.target.value as Day });
+        setFormData({...formData, day: event.target.value as Day});
     };
 
     const handleSlotChange = (event: SelectChangeEvent) => {
@@ -63,18 +73,16 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
 
     const handleSubmit = async () => {
         if (!formData.slotId) {
-            enqueueSnackbar("Proszę wypełnić wszystkie pola", { variant: 'warning' });
+            enqueueSnackbar("Proszę wypełnić wszystkie pola", {variant: 'warning'});
             return;
         }
 
         setLoading(true);
 
         const slotsDayData = {
-            day: formData.day,
-            slot: {
+            day: formData.day, slot: {
                 slotId: Number(formData.slotId),
-            },
-            ...(isAdding ? {} : { SlotsDayId: Number(formData.id) }),
+            }, ...(isAdding ? {} : {SlotsDayId: Number(formData.id)}),
         };
 
         try {
@@ -87,23 +95,20 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
                 setSuccess(false);
                 onClose();
             }, 1000);
-        } catch (error : any) {
+        } catch (error: any) {
             console.log(error)
-            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, { variant: 'error' });
+            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, {variant: 'error'});
             setLoading(false);
         }
     };
 
-    return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    return (<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <Fade in={open} timeout={500}>
-                <Box sx={{ position: 'relative', minHeight: '200px', padding: 4 }}>
-                    {!success ? (
-                        <>
+                <Box sx={{position: 'relative', minHeight: '200px', padding: 4}}>
+                    {!success ? (<>
                             <DialogTitle>{isAdding ? 'Dodaj slot dnia' : 'Szczegóły slotu dnia'}</DialogTitle>
                             <DialogContent>
-                                {isAdding ? (
-                                    <FormControl fullWidth margin="normal" disabled={loading}>
+                                {isAdding ? (<FormControl fullWidth margin="normal" disabled={loading}>
                                         <InputLabel id="slot-label">Slot</InputLabel>
                                         <Select
                                             labelId="slot-label"
@@ -115,19 +120,15 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
                                             {slots.map((slot) => (
                                                 <MenuItem key={slot.slotId} value={slot.slotId.toString()}>
                                                     {`${slot.startTime} - ${slot.endTime}`}
-                                                </MenuItem>
-                                            ))}
+                                                </MenuItem>))}
                                         </Select>
-                                    </FormControl>
-                                ) : (
-                                    <TextField
+                                    </FormControl>) : (<TextField
                                         margin="normal"
                                         label="Slot"
                                         value={formData.slotRepresentation}
                                         fullWidth
                                         disabled
-                                    />
-                                )}
+                                    />)}
                                 <FormControl fullWidth margin="normal" disabled={loading}>
                                     <InputLabel id="day-label">Dzień</InputLabel>
                                     <Select
@@ -137,33 +138,32 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({ open, onClose, slotsDay, 
                                         label="Dzień"
                                         variant="outlined"
                                     >
-                                        {Object.values(Day).map((day) => (
-                                            <MenuItem key={day} value={day}>
+                                        {Object.values(Day).map((day) => (<MenuItem key={day} value={day}>
                                                 {dayMapping[day]}
-                                            </MenuItem>
-                                        ))}
+                                            </MenuItem>))}
                                     </Select>
                                 </FormControl>
                             </DialogContent>
                             <DialogActions>
-                                <SaveButton onClick={handleSubmit} loading={loading} success={success} />
-                                <CancelButton onClick={onClose} disabled={loading} />
+                                <div className={"flex"}>
+                                    <ActionButton onClick={handleSubmit} disabled={loading}
+                                                  tooltipText={isAdding ? 'Dodaj' : 'Zaktualizuj'} icon={<SaveIcon/>}
+                                                  colorScheme={'primary'}/>
+                                    <ActionButton onClick={onClose} disabled={loading} tooltipText={"Anuluj"}
+                                                  icon={<ClearIcon/>} colorScheme={'secondary'}/>
+                                </div>
                             </DialogActions>
-                        </>
-                    ) : (
-                        <Fade in={success} timeout={1000}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <CheckIcon sx={{ fontSize: 60, color: green[500], mb: 2 }} />
+                        </>) : (<Fade in={success} timeout={1000}>
+                            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                <CheckIcon sx={{fontSize: 60, color: green[500], mb: 2}}/>
                                 <Typography variant="h6" color="green">
                                     Dodano!
                                 </Typography>
                             </Box>
-                        </Fade>
-                    )}
+                        </Fade>)}
                 </Box>
             </Fade>
-        </Dialog>
-    );
+        </Dialog>);
 };
 
 export default SlotsDayModal;
