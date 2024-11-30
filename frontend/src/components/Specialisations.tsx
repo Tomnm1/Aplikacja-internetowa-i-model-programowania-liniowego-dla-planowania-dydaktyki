@@ -1,25 +1,18 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, {useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {
-    DataGrid,
-    GridColDef,
-    GridToolbarContainer,
-    GridActionsCellItem,
-    GridRowParams, GridToolbar,
+    DataGrid, GridActionsCellItem, GridColDef, GridRowParams, GridToolbar, GridToolbarContainer,
 } from '@mui/x-data-grid';
-import { Button } from '@mui/material';
+import {Button} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import SpecialisationModal from './SpecialisationModal';
-import { RootState, AppDispatch } from '../app/store';
-import {
-    fetchSpecialisations,
-    deleteSpecialisation,
-} from '../app/slices/specialisationSlice';
-import { cycleMapping, Specialisation} from '../utils/Interfaces';
-import { plPL } from '@mui/x-data-grid/locales';
+import {AppDispatch, RootState} from '../app/store';
+import {deleteSpecialisation, fetchSpecialisations,} from '../app/slices/specialisationSlice';
+import {cycleMapping, Specialisation} from '../utils/Interfaces';
+import {plPL} from '@mui/x-data-grid/locales';
 import {useSnackbar} from "notistack";
 
 const Specialisations: React.FC = () => {
@@ -32,11 +25,11 @@ const Specialisations: React.FC = () => {
     const [isModalOpen, setModalOpen] = React.useState(false);
     const [selectedSpecialisation, setSelectedSpecialisation] = React.useState<Specialisation | null>(null);
     const [isAdding, setIsAdding] = React.useState(false);
-    const { enqueueSnackbar } = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
 
     useEffect(() => {
         dispatch(fetchSpecialisations()).unwrap().catch((error) => {
-            enqueueSnackbar(`Błąd podczas pobierania specjalizacji: ${error.message}`, { variant: 'error' });
+            enqueueSnackbar(`Błąd podczas pobierania specjalizacji: ${error.message}`, {variant: 'error'});
         });
     }, [dispatch, enqueueSnackbar]);
 
@@ -59,10 +52,10 @@ const Specialisations: React.FC = () => {
             dispatch(deleteSpecialisation(selectedRowId))
                 .unwrap()
                 .then(() => {
-                    enqueueSnackbar('Specjalizacja została pomyślnie usunięta', { variant: 'success' });
+                    enqueueSnackbar('Specjalizacja została pomyślnie usunięta', {variant: 'success'});
                 })
                 .catch((error) => {
-                    enqueueSnackbar(`Błąd podczas usuwania specjalizacji: ${error.message}`, { variant: 'error' });
+                    enqueueSnackbar(`Błąd podczas usuwania specjalizacji: ${error.message}`, {variant: 'error'});
                 });
         }
         setDialogOpen(false);
@@ -75,53 +68,40 @@ const Specialisations: React.FC = () => {
         setModalOpen(true);
     };
 
-    const columns: GridColDef[] = [
-        { field: 'name', headerName: 'Nazwa', width: 200 },
-        {
-            field: 'cycle',
-            headerName: 'Cykl',
-            width: 150,
-            valueGetter: (value) => cycleMapping[value] || value,
-        },        { field: 'fieldOfStudyName', headerName: 'Kierunek', width: 150 },
-        {
-            field: 'actions',
-            type: 'actions',
-            headerName: 'Akcje',
-            getActions: (params: GridRowParams) => [
-                <GridActionsCellItem
-                    icon={<VisibilityIcon />}
-                    label="Szczegóły"
-                    onClick={handleViewClick(params.id as number)}
-                    color="inherit"
-                />,
-                <GridActionsCellItem
-                    icon={<DeleteIcon />}
-                    label="Usuń"
-                    onClick={handleDeleteClick(params.id as number)}
-                    color="inherit"
-                />,
-            ],
-        },
-    ];
+    const columns: GridColDef[] = [{field: 'name', headerName: 'Nazwa', width: 200}, {
+        field: 'cycle', headerName: 'Cykl', width: 150, valueGetter: (value) => cycleMapping[value] || value,
+    }, {field: 'fieldOfStudyName', headerName: 'Kierunek', width: 150}, {
+        field: 'actions',
+        type: 'actions',
+        headerName: 'Akcje',
+        getActions: (params: GridRowParams) => [<GridActionsCellItem
+            icon={<VisibilityIcon/>}
+            label="Szczegóły"
+            onClick={handleViewClick(params.id as number)}
+            color="inherit"
+        />, <GridActionsCellItem
+            icon={<DeleteIcon/>}
+            label="Usuń"
+            onClick={handleDeleteClick(params.id as number)}
+            color="inherit"
+        />,],
+    },];
 
-    const TopToolbar = () => (
-        <GridToolbarContainer>
-            <Button color="primary" startIcon={<AddIcon />} onClick={handleAddClick}>
+    const TopToolbar = () => (<GridToolbarContainer>
+            <Button color="primary" startIcon={<AddIcon/>} onClick={handleAddClick}>
                 Dodaj Specjalizację
             </Button>
-            <div style={{ flexGrow: 1 }} />
-            <GridToolbar />
-        </GridToolbarContainer>
-    );
+            <div style={{flexGrow: 1}}/>
+            <GridToolbar/>
+        </GridToolbarContainer>);
 
-    return (
-        <>
+    return (<>
             <DataGrid
                 rows={specialisations}
                 columns={columns}
                 loading={loading}
                 localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
-                slots={{ toolbar: TopToolbar }}
+                slots={{toolbar: TopToolbar}}
             />
             <ConfirmationDialog
                 open={isDialogOpen}
@@ -130,16 +110,13 @@ const Specialisations: React.FC = () => {
                 content="Czy na pewno chcesz usunąć tę specjalizację?"
                 action="Potwierdź"
             />
-            {isModalOpen && (
-                <SpecialisationModal
+            {isModalOpen && (<SpecialisationModal
                     open={isModalOpen}
                     onClose={() => setModalOpen(false)}
                     specialisation={selectedSpecialisation}
                     isAdding={isAdding}
-                />
-            )}
-        </>
-    );
+                />)}
+        </>);
 };
 
 export default Specialisations;

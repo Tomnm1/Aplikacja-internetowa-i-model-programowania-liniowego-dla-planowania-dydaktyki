@@ -52,8 +52,7 @@ const Topper = () => {
 
             </div>
 
-        </div>
-    );
+        </div>);
 };
 
 export default Topper;

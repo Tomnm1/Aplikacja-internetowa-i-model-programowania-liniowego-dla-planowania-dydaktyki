@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_Teacher;
 import pl.poznan.put.planner_endpoints.Semester.Semester;
 import pl.poznan.put.planner_endpoints.Specialisation.Specialisation;
-import pl.poznan.put.planner_endpoints.Subgroup.Subgroup;
 import pl.poznan.put.planner_endpoints.SubjectType.ClassTypeOwn;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 
@@ -30,12 +30,23 @@ public class Group {
     @JoinColumn(name = "semester_id")
     @ManyToOne
     public Semester semester;
-    @ManyToMany
-    @JoinTable(
-            name = "subject_types_groups",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "subject_type_id")
-    )
+
+    @ManyToMany(mappedBy = "groupsList")
+    @JsonIgnore
     public List<SubjectType> subjectTypesList;
+
+    public GroupDTO toDTO(){
+        GroupDTO dto = new GroupDTO();
+        dto.id = id;
+        dto.code = code;
+        dto.group_type = group_type;
+        return dto;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        Group g = (Group) obj;
+        return (g.id == this.id);
+    }
 
 }
