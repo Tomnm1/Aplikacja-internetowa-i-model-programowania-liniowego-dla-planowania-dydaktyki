@@ -13,7 +13,7 @@ import pl.poznan.put.planner_endpoints.GeneratedPlan.GeneratedPlanService;
 import pl.poznan.put.planner_endpoints.Group.Group;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
 import pl.poznan.put.planner_endpoints.Semester.Semester;
-import pl.poznan.put.planner_endpoints.Slot.SlotService;
+import pl.poznan.put.planner_endpoints.SlotsDay.Day;
 import pl.poznan.put.planner_endpoints.SlotsDay.SlotsDay;
 import pl.poznan.put.planner_endpoints.SlotsDay.SlotsDayService;
 import pl.poznan.put.planner_endpoints.Subject.Subject;
@@ -24,20 +24,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static pl.poznan.put.constans.Constans.FieldsOfStudyTypes.*;
+
 @Service
 public class PlanToExcelExportService {
     private final GeneratedPlanService generatedPlanService;
-    private final SlotService slotService;
     private final SlotsDayService slotsDayService;
 
     @Autowired
     PlanToExcelExportService(
             GeneratedPlanService generatedPlanService,
-            SlotService slotService,
             SlotsDayService slotsDayService
     ){
         this.generatedPlanService = generatedPlanService;
-        this.slotService = slotService;
         this.slotsDayService = slotsDayService;
     }
 
@@ -51,6 +50,7 @@ public class PlanToExcelExportService {
         Map<Subject, XSSFCellStyle> subjectColors = new HashMap<>();
 
         List<GeneratedPlan> planObjects = generatedPlanService.getGeneratedPlansByPlanId(plan);
+        String fieldOfStudyTyp = planObjects.get(0).group.semester.specialisation.fieldOfStudy.typ;
 
         for(GeneratedPlan planObject: planObjects){
             semesterListMap.computeIfAbsent(planObject.group.semester, k -> new ArrayList<>()).add(planObject);
@@ -74,7 +74,7 @@ public class PlanToExcelExportService {
 //            }
         }
 
-        Map<SlotsDay, Integer> slots = processSlots();
+        Map<SlotsDay, Integer> slots = processSlots(fieldOfStudyTyp);
 
         for (Semester semester: semesterListMap.keySet()){
             Sheet sheet = workbook.createSheet(semester.specialisation.fieldOfStudy.name + " " +
@@ -90,10 +90,22 @@ public class PlanToExcelExportService {
         }
     }
 
-    private Map<SlotsDay, Integer> processSlots(){
+    private Map<SlotsDay, Integer> processSlots(String typ){
         int firstSlotRowIndex = 2;
         Map<SlotsDay, Integer> slots = new HashMap<>();
-        slotService.getAllSlotsOrdered();
+        List<Day> days = new ArrayList<>();
+        if(Objects.equals(typ, FULL_TIME)){
+            days = fullTimeDays;
+        } else if(Objects.equals(typ, PART_TIME)){
+            days = partTimeDays;
+        }
+        for(Day day: days){
+            List<SlotsDay> slotsDays = slotsDayService.getAllSlotsDayForDay(day);
+            for(SlotsDay slotsDay: slotsDays){
+                slots.put(slotsDay, firstSlotRowIndex);
+                firstSlotRowIndex += 2;
+            }
+        }
         return slots;
     }
 

@@ -67,4 +67,8 @@ public class SlotsDayService {
     public void deleteAllSlotsDays(){
         SlotsDayRepository.deleteAll();
     }
+
+    public List<SlotsDay> getAllSlotsDayForDay(Day day){
+        return SlotsDayRepository.findAllByDayOrderBySlotStartTime(day);
+    }
 }

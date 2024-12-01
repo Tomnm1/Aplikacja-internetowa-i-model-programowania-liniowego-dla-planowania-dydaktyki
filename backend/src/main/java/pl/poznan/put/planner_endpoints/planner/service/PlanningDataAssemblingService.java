@@ -21,6 +21,7 @@ import pl.poznan.put.planner_endpoints.SubjectTypeTeacher.SubjectTypeTeacher;
 import pl.poznan.put.planner_endpoints.SubjectTypeTeacher.SubjectTypeTeacherService;
 import pl.poznan.put.planner_endpoints.Teacher.Teacher;
 import pl.poznan.put.planner_endpoints.Teacher.TeacherService;
+import pl.poznan.put.planner_endpoints.planner.params.PlanningParams;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,15 +61,17 @@ public class PlanningDataAssemblingService {
         this.subjectTypeTeacherService = subjectTypeTeacherService;
     }
 
-    public PlannerData startAssembling(String exclude, String type){
+    public PlannerData startAssembling(PlanningParams planningParams){
         this.week = false;
+        String fieldOfStudyType = planningParams.getFieldOfStudyType();
+        String semesterType = planningParams.getSemesterType();
         PlannerData plannerData = new PlannerData();
-        plannerData.setGroups(getAllGroups(exclude, type));
+        plannerData.setGroups(getAllGroups(fieldOfStudyType, semesterType));
         plannerData.setTeachers(getAllAssignedTeachers());
         plannerData.setRooms(getAllAssignedClassrooms());
         plannerData.setTimeSlots(getAllTimeSlots());
-        plannerData.setSubjects(getAllSubjects(exclude, type));
-        plannerData.setTeachersLoad(getTeachersLoad(exclude));
+        plannerData.setSubjects(getAllSubjects(fieldOfStudyType, semesterType));
+        plannerData.setTeachersLoad(getTeachersLoad());
         plannerData.setClassroomToSubjectTypes(getClassroomToSubjectTypes());
         plannerData.setGroupToSubjectTypes(getGroupToSubjectTypes());
         plannerData.setSubjectTypeToTeachers(getSubjectTypeToTeachers());
@@ -128,7 +131,7 @@ public class PlanningDataAssemblingService {
         return classroomToSubjectTypes;
     }
 
-    private List<TeacherLoad> getTeachersLoad(String exclude){
+    private List<TeacherLoad> getTeachersLoad(){
         List<Teacher> teachers = teacherService.getAllteachers();
         List<TeacherLoad> result = new ArrayList<>();
         for(Teacher teacher: teachers){
@@ -156,12 +159,12 @@ public class PlanningDataAssemblingService {
         return result;
     }
 
-    private List<PlannerClassType> getAllSubjects(String exclude, String type){
+    private List<PlannerClassType> getAllSubjects(String fieldOfStudyType, String semesterType){
         List<PlannerClassType> result = new ArrayList<>();
         List<SubjectType> subjectTypeList = subjectTypeService.getAllsubjectType();
         for(SubjectType subjectType: subjectTypeList){
-            if(!subjectType.subject.semester.specialisation.fieldOfStudy.name.endsWith(exclude)
-            && checkSemester(type, subjectType.subject.semester.number)){
+            if(Objects.equals(subjectType.subject.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType)
+            && Objects.equals(subjectType.subject.semester.typ, semesterType)){
                 PlannerClassType plannerClassType =
                     new PlannerClassType(
                         subjectType.subjectTypeId.toString(),
@@ -260,27 +263,15 @@ public class PlanningDataAssemblingService {
                 .collect(Collectors.toList());
     }
 
-    private List<String> getAllGroups(String exclude, String type) {
+    private List<String> getAllGroups(String fieldOfStudyType, String semesterType) {
         List<Group> groups = groupService.getAllGroup();
         List<String> groupIds = new ArrayList<>();
         for (Group group : groups) {
-            if (!group.semester.specialisation.fieldOfStudy.name.endsWith(exclude) &&
-                    checkSemester(type, group.semester.number)) {
+            if (Objects.equals(group.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType) &&
+                    Objects.equals(group.semester.typ, semesterType)) {
                 groupIds.add(group.id.toString());
             }
         }
         return groupIds;
-    }
-
-    private boolean checkSemester(String type, String number){
-        List<String> summerSemesters = Arrays.asList("2.0", "4.0", "6.0", "8.0", "1 (letni)", "3 (letni)");
-        List<String> winterSemesters = Arrays.asList("1.0", "3.0", "5.0", "7.0", "2 (zimowy)");
-        if(Objects.equals(type, "zimowy")){
-            return winterSemesters.contains(number);
-        }
-        if(Objects.equals(type, "letni")){
-            return summerSemesters.contains(number);
-        }
-        return false;
     }
 }

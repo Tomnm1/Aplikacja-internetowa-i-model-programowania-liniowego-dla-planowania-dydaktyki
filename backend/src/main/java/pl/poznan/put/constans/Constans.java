@@ -1,5 +1,10 @@
 package pl.poznan.put.constans;
 
+import pl.poznan.put.planner_endpoints.SlotsDay.Day;
+
+import java.util.Arrays;
+import java.util.List;
+
 public final class Constans {
     private Constans(){}
 
@@ -7,6 +12,21 @@ public final class Constans {
         public static final String WEEKLY = "weekly";
         public static final String EVEN_WEEKS = "even_weeks";
         public static final String ODD_WEEKS = "odd_weeks";
+    }
+
+    public static final class FieldsOfStudyTypes{
+        public static final String FULL_TIME = "stacjonarne";
+        public static final String PART_TIME = "niestacjonarne";
+        public static final List<Day> fullTimeDays = Arrays.asList(Day.monday, Day.tuesday, Day.wednesday, Day.thursday,
+                Day.friday);
+        public static final List<Day> partTimeDays = Arrays.asList(Day.saturday, Day.sunday);
+    }
+
+    public static final class SemesterTypes{
+        public static final String SUMMER = "letni";
+        public static final String WINTER = "zimowy";
+        public static final List<String> summerSemesters = Arrays.asList("2.0", "4.0", "6.0", "8.0", "1 (letni)", "3 (letni)");
+        public static final List<String> winterSemesters = Arrays.asList("1.0", "3.0", "5.0", "7.0", "2 (zimowy)");
     }
 
     public static final class ExcelToDb{

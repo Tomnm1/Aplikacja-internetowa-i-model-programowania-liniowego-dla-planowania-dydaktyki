@@ -104,7 +104,7 @@ public class ExcelToDbService {
 
     private void insertData(){
         boolean groupsFlag = false;
-        this.fieldOfStudy = assignIfNotNull(fieldOfStudyHandler.insertFieldOfStudy(fieldOfStudyName), this.fieldOfStudy);
+        this.fieldOfStudy = assignIfNotNull(fieldOfStudyHandler.insertFieldOfStudy(fieldOfStudyName, type), this.fieldOfStudy);
         this.specialisation = assignIfNotNull(specialisationHandler.insertSpecialisation(specialisationName, cycle, fieldOfStudy), this.specialisation);
         Semester newSemester = semesterHandler.insertSemester(semesterNumber, specialisation);
         Semester tempSemester = this.semester;

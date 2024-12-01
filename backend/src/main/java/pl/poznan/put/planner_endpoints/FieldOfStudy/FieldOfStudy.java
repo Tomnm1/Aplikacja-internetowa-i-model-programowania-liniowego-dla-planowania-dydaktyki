@@ -14,4 +14,6 @@ public class FieldOfStudy {
     public Integer fieldOfStudyId;
     @Column(name = "name")
     public String name;
+    @Column(name = "typ")
+    public String typ;
 }

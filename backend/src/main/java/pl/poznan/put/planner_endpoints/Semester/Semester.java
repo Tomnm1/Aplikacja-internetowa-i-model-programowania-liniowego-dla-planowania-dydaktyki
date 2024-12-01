@@ -19,4 +19,6 @@ public class Semester {
     @JoinColumn(name = "specialisation_id")
     @ManyToOne
     public Specialisation specialisation;
+    @Column(name = "typ")
+    public String typ;
 }

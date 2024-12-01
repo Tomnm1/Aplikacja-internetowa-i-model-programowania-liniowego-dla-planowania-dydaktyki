@@ -14,6 +14,7 @@ import pl.poznan.put.or_planner.insert.InsertPlanToDbService;
 import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
+import pl.poznan.put.planner_endpoints.planner.params.PlanningParams;
 import pl.poznan.put.planner_endpoints.planner.service.ClassroomAssignmentService;
 import pl.poznan.put.planner_endpoints.planner.service.PlanningDataAssemblingService;
 
@@ -82,9 +83,10 @@ public class PlannerController {
     }
 
     @PostMapping("/startPlanningBasedOnDb")
-    public ResponseEntity<Void> startPlanningBasedOnDb(){
+    public ResponseEntity<Void> startPlanningBasedOnDb(@RequestBody PlanningParams planningParams){
         logger.log(Level.INFO,"DataAssembling started");
-        PlannerData plannerData = planningDataAssemblingService.startAssembling("N", "zimowy"); // S/N oraz zimowy/letni
+//        PlannerData plannerData = planningDataAssemblingService.startAssembling("N", "zimowy"); // S/N oraz zimowy/letni
+        PlannerData plannerData = planningDataAssemblingService.startAssembling(planningParams); // S/N oraz zimowy/letni
         logger.log(Level.INFO,"DataAssembling finished");
         try {
             List<String> groups = plannerData.getGroups();
