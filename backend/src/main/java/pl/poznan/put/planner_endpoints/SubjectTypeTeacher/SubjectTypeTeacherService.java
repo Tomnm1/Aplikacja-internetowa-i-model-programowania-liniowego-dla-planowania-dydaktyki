@@ -27,4 +27,12 @@ public class SubjectTypeTeacherService {
     public List<Integer> findAllAssignedTeachers(){
         return subjectTypeTeacherRepository.findAllAssignedTeachers();
     }
+
+    public boolean teacherCanTeach(int teacherId, int subjectTypeId){
+        return subjectTypeTeacherRepository.existsByTeacherIdAndSubjectTypeSubjectTypeId(teacherId, subjectTypeId);
+    }
+
+    public List<SubjectTypeTeacher> getAllSubjectTypeTeacher(){
+        return subjectTypeTeacherRepository.findAll();
+    }
 }

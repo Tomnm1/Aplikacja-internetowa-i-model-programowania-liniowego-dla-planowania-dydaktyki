@@ -13,7 +13,9 @@ import pl.poznan.put.planner_endpoints.GeneratedPlan.GeneratedPlanService;
 import pl.poznan.put.planner_endpoints.Group.Group;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
 import pl.poznan.put.planner_endpoints.Semester.Semester;
+import pl.poznan.put.planner_endpoints.Slot.SlotService;
 import pl.poznan.put.planner_endpoints.SlotsDay.SlotsDay;
+import pl.poznan.put.planner_endpoints.SlotsDay.SlotsDayService;
 import pl.poznan.put.planner_endpoints.Subject.Subject;
 
 import java.io.FileOutputStream;
@@ -25,24 +27,28 @@ import java.util.*;
 @Service
 public class PlanToExcelExportService {
     private final GeneratedPlanService generatedPlanService;
+    private final SlotService slotService;
+    private final SlotsDayService slotsDayService;
 
     @Autowired
     PlanToExcelExportService(
-            GeneratedPlanService generatedPlanService
+            GeneratedPlanService generatedPlanService,
+            SlotService slotService,
+            SlotsDayService slotsDayService
     ){
         this.generatedPlanService = generatedPlanService;
+        this.slotService = slotService;
+        this.slotsDayService = slotsDayService;
     }
 
     @Transactional
     public void exportPlanToExcel(Plan plan) throws IOException {
         Random random = new Random();
 
-        int firstSlotRowIndex = 2;
         Workbook workbook = new XSSFWorkbook();
 
         Map<Semester, List<GeneratedPlan>> semesterListMap = new HashMap<>();
         Map<Subject, XSSFCellStyle> subjectColors = new HashMap<>();
-        Map<SlotsDay, Integer> slots = new HashMap<>();
 
         List<GeneratedPlan> planObjects = generatedPlanService.getGeneratedPlansByPlanId(plan);
 
@@ -62,11 +68,13 @@ public class PlanToExcelExportService {
                 subjectColors.put(subject, cellStyle);
             }
 
-            if(!slots.containsKey(planObject.slotsDay)){
-                slots.put(planObject.slotsDay, firstSlotRowIndex);
-                firstSlotRowIndex += 2;
-            }
+//            if(!slots.containsKey(planObject.slotsDay)){
+//                slots.put(planObject.slotsDay, firstSlotRowIndex);
+//                firstSlotRowIndex += 2;
+//            }
         }
+
+        Map<SlotsDay, Integer> slots = processSlots();
 
         for (Semester semester: semesterListMap.keySet()){
             Sheet sheet = workbook.createSheet(semester.specialisation.fieldOfStudy.name + " " +
@@ -80,6 +88,13 @@ public class PlanToExcelExportService {
         } finally {
             workbook.close();
         }
+    }
+
+    private Map<SlotsDay, Integer> processSlots(){
+        int firstSlotRowIndex = 2;
+        Map<SlotsDay, Integer> slots = new HashMap<>();
+        slotService.getAllSlotsOrdered();
+        return slots;
     }
 
     private void processSheet(Sheet sheet, List<GeneratedPlan> planObjects, Map<SlotsDay, Integer> slots,

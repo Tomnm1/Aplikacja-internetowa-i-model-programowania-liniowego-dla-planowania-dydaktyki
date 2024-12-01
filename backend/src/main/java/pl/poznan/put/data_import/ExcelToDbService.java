@@ -108,7 +108,8 @@ public class ExcelToDbService {
         this.specialisation = assignIfNotNull(specialisationHandler.insertSpecialisation(specialisationName, cycle, fieldOfStudy), this.specialisation);
         Semester newSemester = semesterHandler.insertSemester(semesterNumber, specialisation);
         Semester tempSemester = this.semester;
-        if ((this.semester != null
+//        this.row.getRowNum() == this.sheet.getLastRowNum() ||
+        if (this.row.getRowNum() == this.sheet.getLastRowNum() ||(this.semester != null
                 && !Objects.equals(newSemester.specialisation.specialisationId, this.semester.specialisation.specialisationId))
                 || (this.semester != null && Objects.equals(newSemester.specialisation.specialisationId, this.semester.specialisation.specialisationId)
                 && !Objects.equals(newSemester.number, this.semester.number))){
@@ -122,7 +123,8 @@ public class ExcelToDbService {
 
         if(groupsFlag){
             List <SubjectWithGroupData> tempSubject = groupTypesData.get(subjectName);
-            groupTypesData.remove(subjectName);
+            if(this.row.getRowNum() != this.sheet.getLastRowNum())
+                groupTypesData.remove(subjectName);
             this.groupsHandler.processAndInsertGroups(this.groupsCounter, tempSemester, this.groupTypesData);
             groupsCounter.clear();
             groupTypesData.clear();
@@ -133,7 +135,7 @@ public class ExcelToDbService {
     private void processAllRows(Sheet sheet, int startingRow){
         this.sheet = sheet;
         resetGroupsCounter();
-        for (int i = startingRow; i < sheet.getLastRowNum(); i++){
+        for (int i = startingRow; i <= sheet.getLastRowNum(); i++){
             row = sheet.getRow(i);
             for (Map.Entry<String, Consumer<Cell>> entry : columnActions.entrySet()) {
                 columnName = entry.getKey();

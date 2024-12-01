@@ -29,14 +29,14 @@ public class TeacherService {
      * @return list of teachers
      */
     @Transactional
-    public List<TeacherDTO> getAllteachers(){
+    public List<TeacherDTO> getAllteachersDTO(){
         return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream().map(Teacher::convertToDTO).toList();
     }
 
-//    @Transactional
-//    public List<Teacher> getAllteachers(){
-//        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
-//    }
+    @Transactional
+    public List<Teacher> getAllteachers(){
+        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    }
 
 
 

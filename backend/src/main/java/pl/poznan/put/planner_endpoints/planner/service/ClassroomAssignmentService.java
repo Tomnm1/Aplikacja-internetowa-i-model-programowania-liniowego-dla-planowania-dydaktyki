@@ -27,10 +27,7 @@ public class ClassroomAssignmentService {
         this.subjectTypeService = subjectTypeService;
         this.classroomService = classroomService;
     }
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/35-adjust-api-and-hibernate-backend-to-new-db-schema
     public void assignClassroomsBasedOnCapacity(){
         List<SubjectType> subjectTypeList = subjectTypeService.getAllsubjectType();
         for(SubjectType subjectType: subjectTypeList){

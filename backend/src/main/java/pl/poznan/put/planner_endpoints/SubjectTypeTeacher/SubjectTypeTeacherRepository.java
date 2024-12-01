@@ -14,4 +14,6 @@ public interface SubjectTypeTeacherRepository extends JpaRepository<SubjectTypeT
 
     @Query(value = "SELECT DISTINCT teacher_id FROM subject_type_teacher", nativeQuery = true)
     List<Integer> findAllAssignedTeachers();
+
+    boolean existsByTeacherIdAndSubjectTypeSubjectTypeId(Integer teacher_id, Integer subjectType_subjectTypeId);
 }

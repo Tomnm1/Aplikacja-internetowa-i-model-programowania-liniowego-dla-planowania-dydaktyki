@@ -22,4 +22,12 @@ public class ClassroomSubjectTypeService {
     public List<Integer> getAllAssignedClassrooms(){
         return classroomSubjectTypeRepository.getAllAssignedClassrooms();
     }
+
+    public boolean classroomIsAssignedToSubject(int classroomId, int subjectTypeId){
+        return classroomSubjectTypeRepository.existsByClassroomClassroomIDAndSubjectTypeSubjectTypeId(classroomId, subjectTypeId);
+    }
+
+    public List<ClassroomSubjectType> getAllClassroomSubjectType(){
+        return classroomSubjectTypeRepository.findAll();
+    }
 }

@@ -11,4 +11,6 @@ public interface ClassroomSubjectTypeRepository extends JpaRepository<ClassroomS
 
     @Query(value = "SELECT DISTINCT classroom_id FROM classrooms_subject_types", nativeQuery = true)
     List<Integer> getAllAssignedClassrooms();
+
+    boolean existsByClassroomClassroomIDAndSubjectTypeSubjectTypeId(Integer classroom_classroomID, Integer subjectType_subjectTypeId);
 }
