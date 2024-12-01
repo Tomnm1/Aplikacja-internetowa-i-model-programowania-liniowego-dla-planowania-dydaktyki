@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
 import {Delete, Edit, PersonAddAlt} from '@mui/icons-material';
 import ErrorIcon from '@mui/icons-material/Error';
-import {BackendSubjectType, typeMapping} from '../utils/Interfaces';
+import {BackendSubjectType, Type, typeMapping} from '../utils/Interfaces';
 import {useDispatch} from 'react-redux';
 import {AppDispatch} from '../app/store';
 import {deleteSubjectType} from '../app/slices/subjectTypeSlice';
@@ -74,6 +74,12 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
         setOpenTypeModal(false);
     };
 
+    const calcHours = (type: Type, numHours: number, numGroups: number) => {
+        if(type === Type.LECTURE) return numHours;
+        if(type === Type.EX) return numHours * (numGroups/2);
+        return numHours * numGroups;
+    }
+
     return (<Box>
             <TableContainer component={Paper} sx={{mt: 2}}>
                 <Table>
@@ -101,7 +107,7 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
                                                 <PersonAddAlt/>
                                                 {type.teachersList.reduce((sum, t) => {
                                                     return sum + t.numHours;
-                                                }, 0) != type.numOfHours && (<ErrorIcon style={{
+                                                }, 0) != calcHours(type.type, type.numOfHours, type.groupsList.length)  && (<ErrorIcon style={{
                                                     position: 'absolute',
                                                     top: -5,
                                                     right: -5,
@@ -111,6 +117,13 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
                                             </IconButton>
                                             <IconButton onClick={() => handleGroups(type)} disabled={loading}>
                                                 <GroupsIcon/>
+                                                { type.groupsList.length === 0 && (<ErrorIcon style={{
+                                                    position: 'absolute',
+                                                    top: -5,
+                                                    right: -5,
+                                                    fontSize: 20,
+                                                    color: 'red'
+                                                }}/>)}
                                             </IconButton>
                                             {/*TODO dodać zabezpieczenie pytające czy chcesz usunąć rekord <ConfirmationDialog>*/}
                                             {/*TODO Dodać możliwość usuwania rekordków które nie są jeszcze dodane - tj takie których jeszcze nie ma w bazie, bo główny przedmiot nie został dodany*/}
@@ -124,6 +137,7 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
                                 {currentType === type && openTeachersList && (<SubjectTypesTeachersList
                                     teachersList={currentType?.teachersList ? currentType.teachersList : []}
                                     typeData={currentType}
+                                    maxHours={calcHours(type.type, type.numOfHours, type.groupsList.length)}
                                     setSubjectTypes={setSubjectTypes}
                                     loading={loading}
                                 />)}

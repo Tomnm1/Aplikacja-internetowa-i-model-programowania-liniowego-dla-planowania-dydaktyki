@@ -9,6 +9,7 @@ import SubjectTypesTeachersModal from "./SubjectTypesTeachersModal.tsx";
 interface SubjectTypesTeachersListProps {
     teachersList: teacherListDTO[];
     typeData: BackendSubjectType | null;
+    maxHours: number;
     setSubjectTypes: React.Dispatch<React.SetStateAction<BackendSubjectType[]>>;
     loading: boolean;
 }
@@ -16,13 +17,13 @@ interface SubjectTypesTeachersListProps {
 const SubjectTypesTeachersList: React.FC<SubjectTypesTeachersListProps> = ({
                                                                                teachersList,
                                                                                typeData,
+                                                                               maxHours,
                                                                                setSubjectTypes,
                                                                                loading
                                                                            }) => {
     const {enqueueSnackbar} = useSnackbar();
     const [isAdding, setIsAdding] = useState(false);
     const [openTeachersModal, setOpenTeachersModal] = useState(false);
-    const [maxHours] = useState(typeData ? typeData.numOfHours : 0);
     const [hours, setHours] = useState(() => {
         return maxHours - teachersList.reduce((sum, t) => {
             return sum + t.numHours;
