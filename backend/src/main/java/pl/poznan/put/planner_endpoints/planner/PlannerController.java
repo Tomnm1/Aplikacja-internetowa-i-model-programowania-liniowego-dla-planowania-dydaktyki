@@ -1,5 +1,6 @@
 package pl.poznan.put.planner_endpoints.planner;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +15,13 @@ import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
 import pl.poznan.put.planner_endpoints.planner.service.ClassroomAssignmentService;
+import pl.poznan.put.planner_endpoints.planner.service.PlanningDataAssemblingService;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/planner")
@@ -23,16 +29,23 @@ public class PlannerController {
     private final InsertPlanToDbService insertPlanToDbService;
     private final PlanToExcelExportService planToExcelExportService;
     private final ClassroomAssignmentService classroomAssignmentService;
+    private final PlanningDataAssemblingService planningDataAssemblingService;
+    private final Planner planner;
+    private static final Logger logger = Logger.getLogger(PlannerController.class.getName());
 
     @Autowired
     PlannerController(
             InsertPlanToDbService insertPlanToDbService,
             PlanToExcelExportService planToExcelExportService,
-            ClassroomAssignmentService classroomAssignmentService
+            ClassroomAssignmentService classroomAssignmentService,
+            PlanningDataAssemblingService planningDataAssemblingService,
+            Planner planner
     ){
         this.insertPlanToDbService = insertPlanToDbService;
         this.planToExcelExportService = planToExcelExportService;
         this.classroomAssignmentService = classroomAssignmentService;
+        this.planningDataAssemblingService = planningDataAssemblingService;
+        this.planner = planner;
     }
 
     @PostMapping("/start")
@@ -44,10 +57,57 @@ public class PlannerController {
             List<String> timeSlots = plannerData.getTimeSlots();
             List<PlannerClassType> subjects = plannerData.getSubjects();
             List<TeacherLoad> teachersLoad = plannerData.getTeachersLoad();
+            Map<String, Set<String>> subjectTypeToTeachers = plannerData.getSubjectTypeToTeachers();
+            Map<String, Set<String>> groupToSubjectTypes = plannerData.getGroupToSubjectTypes();
+            Map<String, Set<String>> classroomToSubjectTypes = plannerData.getClassroomToSubjectTypes();
+            Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
 
-            Planner planner = new Planner(groups, teachers, rooms, timeSlots, subjects, teachersLoad);
+            planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, subjectTypeToTeachers,
+                    groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
 
             List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
+
+            Plan plan = insertPlanToDbService.insertSlots(optimizedSchedule);
+
+            planToExcelExportService.exportPlanToExcel(plan);
+
+//            printScheduleAsTable(optimizedSchedule, groups, timeSlots);
+            System.out.println("done");
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/startPlanningBasedOnDb")
+    public ResponseEntity<Void> startPlanningBasedOnDb(){
+        logger.log(Level.INFO,"DataAssembling started");
+        PlannerData plannerData = planningDataAssemblingService.startAssembling("N", "zimowy"); // S/N oraz zimowy/letni
+        logger.log(Level.INFO,"DataAssembling finished");
+        try {
+            List<String> groups = plannerData.getGroups();
+            List<String> teachers = plannerData.getTeachers();
+            List<String> rooms = plannerData.getRooms();
+            List<String> timeSlots = plannerData.getTimeSlots();
+            List<PlannerClassType> subjects = plannerData.getSubjects();
+            List<TeacherLoad> teachersLoad = plannerData.getTeachersLoad();
+            Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(plannerData);
+
+            Map<String, Set<String>> subjectTypeToTeachers = plannerData.getSubjectTypeToTeachers();
+            Map<String, Set<String>> groupToSubjectTypes = plannerData.getGroupToSubjectTypes();
+            Map<String, Set<String>> classroomToSubjectTypes = plannerData.getClassroomToSubjectTypes();
+
+            planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, subjectTypeToTeachers,
+                    groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
+
+            List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
+
+            planner.cleanup();
 
             Plan plan = insertPlanToDbService.insertSlots(optimizedSchedule);
 

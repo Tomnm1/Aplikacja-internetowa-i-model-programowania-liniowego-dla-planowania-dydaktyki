@@ -5,6 +5,8 @@ import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PlannerData {
     private List<String> groups;
@@ -13,6 +15,21 @@ public class PlannerData {
     private List<String> timeSlots;
     private List<PlannerClassType> subjects;
     private List<TeacherLoad> teachersLoad;
+    private Map<String, Set<String>> subjectTypeToTeachers;
+    private Map<String, Set<String>> groupToSubjectTypes;
+    private Map<String, Set<String>> classroomToSubjectTypes;
+    private Map<String, Set<String>> teachersToSubjectTypes;
+
+    public PlannerData() {
+    }
+
+    public Map<String, Set<String>> getTeachersToSubjectTypes() {
+        return teachersToSubjectTypes;
+    }
+
+    public void setTeachersToSubjectTypes(Map<String, Set<String>> teachersToSubjectTypes) {
+        this.teachersToSubjectTypes = teachersToSubjectTypes;
+    }
 
     public List<TeacherLoad> getTeachersLoad() {
         return teachersLoad;
@@ -60,5 +77,29 @@ public class PlannerData {
 
     public void setSubjects(List<PlannerClassType> subjects) {
         this.subjects = subjects;
+    }
+
+    public void setClassroomToSubjectTypes(Map<String, Set<String>> classroomToSubjectTypes) {
+        this.classroomToSubjectTypes = classroomToSubjectTypes;
+    }
+
+    public Map<String, Set<String>> getClassroomToSubjectTypes() {
+        return classroomToSubjectTypes;
+    }
+
+    public Map<String, Set<String>> getSubjectTypeToTeachers() {
+        return subjectTypeToTeachers;
+    }
+
+    public Map<String, Set<String>> getGroupToSubjectTypes() {
+        return groupToSubjectTypes;
+    }
+
+    public void setSubjectTypeToTeachers(Map<String, Set<String>> subjectTypeToTeachers) {
+        this.subjectTypeToTeachers = subjectTypeToTeachers;
+    }
+
+    public void setGroupToSubjectTypes(Map<String, Set<String>> groupToSubjectTypes) {
+        this.groupToSubjectTypes = groupToSubjectTypes;
     }
 }

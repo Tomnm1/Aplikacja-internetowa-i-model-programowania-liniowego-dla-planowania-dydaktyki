@@ -34,7 +34,7 @@ public class TeacherController {
     })
     @Transactional
     public List<TeacherDTO> getAllTeachers() {
-        return teacherService.getAllteachers();
+        return teacherService.getAllteachersDTO();
     }
 
     @Operation(summary = "Return teachers by id")

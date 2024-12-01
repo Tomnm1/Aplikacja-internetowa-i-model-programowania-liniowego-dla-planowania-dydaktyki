@@ -21,6 +21,8 @@ public class SlotService {
      */
     public List<Slot> getAllSlots() {return SlotRepository.findAll(Sort.by(Sort.Direction.ASC, "slotId"));}
 
+    public List<Slot> getAllSlotsOrdered(){return SlotRepository.findAll(Sort.by(Sort.Direction.ASC, "start_time"));}
+
     /**
      * Finds room by ID
      * @param slotId ID of Slot
