@@ -134,12 +134,14 @@ export interface ClassroomsState {
 export interface FieldOfStudy {
     id: GridRowId;
     name: string;
+    typ: string;
     isNew?: boolean;
 }
 
 export interface BackendFieldOfStudies {
     fieldOfStudyId: number;
     name: string;
+    typ: string;
 }
 
 export interface FieldOfStudiesState {
@@ -219,15 +221,19 @@ export interface Semester {
     specialisationRepresentation?: string;
     fieldOfStudyName?: string;
     cycle?: Cycle;
+    fieldOfStudyTyp?: string;
     groupCount?: number;
+    typ: string;
 }
 
 export interface BackendSemester {
     semesterId?: number;
     number: string;
+    typ: string;
     specialisation: {
         specialisationId: number; name?: string; cycle: Cycle; fieldOfStudy?: {
             name?: string;
+            typ?: string;
         }
     };
     groupCount?: number;

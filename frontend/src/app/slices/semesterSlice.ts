@@ -18,13 +18,15 @@ export const fetchSemesters = createAsyncThunk<Semester[]>('semesters/fetchSemes
         specialisationId: semester.specialisation.specialisationId!,
         specialisationRepresentation: semester.specialisation.name,
         fieldOfStudyName: semester.specialisation.fieldOfStudy?.name,
+        fieldOfStudyTyp: semester.specialisation.fieldOfStudy?.typ,
         cycle: semester.specialisation.cycle,
         groupCount: semester.groupCount,
+        typ: semester.typ,
     }));
 });
 
 export const addSemester = createAsyncThunk<Semester, BackendSemester>('semesters/addSemester', async (semesterData) => {
-    const response = await fetch(API_ENDPOINTS.SEMESTERS, {
+    const response = await fetch(`${API_ENDPOINTS.SEMESTERS}/DTO`, {
         method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(semesterData),
     });
     if (!response.ok) {
@@ -37,7 +39,9 @@ export const addSemester = createAsyncThunk<Semester, BackendSemester>('semester
         specialisationId: data.specialisation.specialisationId!,
         specialisationRepresentation: data.specialisation.name,
         fieldOfStudyName: data.specialisation.fieldOfStudy?.name,
+        fieldOfStudyTyp: data.specialisation.fieldOfStudy?.typ,
         cycle: data.specialisation.cycle,
+        typ: data.typ,
     };
 });
 
@@ -58,7 +62,9 @@ export const updateSemester = createAsyncThunk<Semester, BackendSemester>('semes
         specialisationId: data.specialisation.specialisationId!,
         specialisationRepresentation: data.specialisation.name,
         fieldOfStudyName: data.specialisation.fieldOfStudy?.name,
+        fieldOfStudyTyp: data.specialisation.fieldOfStudy?.typ,
         cycle: data.specialisation.cycle,
+        typ: data.typ,
     };
 });
 

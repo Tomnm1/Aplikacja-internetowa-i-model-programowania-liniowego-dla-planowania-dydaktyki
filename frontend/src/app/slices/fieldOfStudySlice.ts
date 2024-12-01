@@ -14,7 +14,7 @@ export const fetchFOS = createAsyncThunk<FieldOfStudy[]>('fos/fetchFOS', async (
     }
     const data: BackendFieldOfStudies[] = await response.json();
     const adjustedData: FieldOfStudy[] = data.map((fos) => ({
-        id: fos.fieldOfStudyId, name: fos.name,
+        id: fos.fieldOfStudyId, name: fos.name, typ: fos.typ,
     }));
     return adjustedData;
 });
@@ -25,6 +25,7 @@ export const addFOS = createAsyncThunk<{
 }, FieldOfStudy>('fos/addFOS', async (fos: FieldOfStudy) => {
     const fosData = {
         name: fos.name,
+        typ: fos.typ,
     };
     const response = await fetch(API_ENDPOINTS.FIELD_OF_STUDIES, {
         method: 'POST', headers: {
@@ -36,7 +37,7 @@ export const addFOS = createAsyncThunk<{
     }
     const data: BackendFieldOfStudies = await response.json();
     const adjustedFOS: FieldOfStudy = {
-        id: data.fieldOfStudyId, name: data.name,
+        id: data.fieldOfStudyId, name: data.name, typ: data.typ,
     };
     return {tempId: fos.id, fos: adjustedFOS};
 });
@@ -44,6 +45,7 @@ export const addFOS = createAsyncThunk<{
 export const updateFOS = createAsyncThunk<FieldOfStudy, FieldOfStudy>('fos/updateFOS', async (fos: FieldOfStudy) => {
     const fosData = {
         name: fos.name,
+        typ: fos.typ,
     };
     const response = await fetch(`${API_ENDPOINTS.FIELD_OF_STUDIES}/${fos.id}`, {
         method: 'PUT', headers: {
@@ -55,7 +57,7 @@ export const updateFOS = createAsyncThunk<FieldOfStudy, FieldOfStudy>('fos/updat
     }
     const data: BackendFieldOfStudies = await response.json();
     const adjustedBuilding: FieldOfStudy = {
-        id: data.fieldOfStudyId, name: data.name,
+        id: data.fieldOfStudyId, name: data.name, typ: data.typ,
     };
     return adjustedBuilding;
 });

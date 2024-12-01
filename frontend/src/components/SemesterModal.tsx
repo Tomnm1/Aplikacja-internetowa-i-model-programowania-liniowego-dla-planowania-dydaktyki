@@ -43,6 +43,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({open, onClose, semester, i
         specialisationId: semester?.specialisationId?.toString() || '',
         specialisationRepresentation: semester?.specialisationRepresentation || '',
         groupCount: semester?.groupCount || 0,
+        typ: semester?.typ || '',
     });
     const [loading, setLoading] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
@@ -82,6 +83,13 @@ const SemesterModal: React.FC<SemesterModalProps> = ({open, onClose, semester, i
         });
     };
 
+    const handleTypChange = (event: SelectChangeEvent) => {
+      setFormData({
+          ...formData,
+          typ:event.target.value,
+      })
+    };
+
     const handleSubmit = async () => {
         if (!formData.specialisationId) {
             enqueueSnackbar("Proszę wypełnić wszystkie pola", {variant: 'warning'});
@@ -91,7 +99,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({open, onClose, semester, i
         setLoading(true);
 
         const semesterData = {
-            number: formData.number, groupCount: formData.groupCount, specialisation: {
+            number: formData.number, typ: formData.typ, groupCount: formData.groupCount, specialisation: {
                 specialisationId: Number(formData.specialisationId),
             }, ...(isAdding ? {} : {semesterId: Number(formData.id)}),
         };
@@ -150,6 +158,19 @@ const SemesterModal: React.FC<SemesterModalProps> = ({open, onClose, semester, i
                                     fullWidth
                                     disabled={loading}
                                 />
+                                <FormControl fullWidth margin="normal" disabled={loading}>
+                                    <InputLabel id="semester-typ-label">Typ</InputLabel>
+                                    <Select
+                                        labelId="semester-typ-label"
+                                        value={formData.typ}
+                                        onChange={handleTypChange}
+                                        label="Typ"
+                                        variant="outlined"
+                                    >
+                                        <MenuItem key="letni" value="letni">LETNI</MenuItem>
+                                        <MenuItem key="zimowy" value="zimowy">ZIMOWY</MenuItem>
+                                    </Select>
+                                </FormControl>
                                 <TextField
                                     margin="normal"
                                     label="Liczba grub laboratoryjnych"

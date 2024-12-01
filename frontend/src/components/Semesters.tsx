@@ -72,7 +72,11 @@ const Semesters: React.FC = () => {
     }, {
         field: 'specialisationRepresentation', headerName: 'Specjalizacja', width: 100,
     }, {
+        field: 'typ', headerName: 'Typ', width: 100,
+    }, {
         field: 'fieldOfStudyName', headerName: 'Kierunek', width: 150,
+    }, {
+        field: 'fieldOfStudyTyp', headerName: 'Typ', width: 150,
     }, {
         field: 'cycle', headerName: 'Cykl', width: 100, valueGetter: (value) => cycleMapping[value] || value,
     }, {

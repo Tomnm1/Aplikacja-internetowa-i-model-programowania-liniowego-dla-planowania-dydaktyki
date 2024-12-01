@@ -90,7 +90,7 @@ const FieldOfStudies: React.FC = () => {
 
     const processRowUpdate = async (newRow: GridRowModel) => {
         const updatedRow: FieldOfStudy = {
-            id: newRow.id, name: newRow.name || '', isNew: newRow.isNew || false,
+            id: newRow.id, name: newRow.name || '', isNew: newRow.isNew || false, typ: newRow.typ,
         };
 
         if (updatedRow.isNew) {
@@ -115,7 +115,9 @@ const FieldOfStudies: React.FC = () => {
         dispatch(setRowModesModel(newRowModesModel));
     };
 
-    const columns: GridColDef[] = [{field: 'name', headerName: 'Kod', width: 150, editable: true}, {
+    const columns: GridColDef[] = [{field: 'name', headerName: 'Kod', width: 150, editable: true},
+        {field: 'typ', headerName: 'Typ', width: 150, editable: true, type: 'singleSelect',
+            valueOptions: ['stacjonarne', 'niestacjonarne']}, {
         field: 'actions', type: 'actions', headerName: 'Akcje', width: 100, getActions: (params: GridRowParams) => {
             const id = params.id;
             const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -156,7 +158,7 @@ const FieldOfStudies: React.FC = () => {
         const id = rowIdCounter;
         setRowIdCounter((prev) => prev - 1);
         const newFOS: FieldOfStudy = {
-            id, name: '', isNew: true,
+            id, name: '', isNew: true, typ: 'stacjonarne'
         };
         dispatch(addNewFOS(newFOS));
         dispatch(setRowModesModel({
