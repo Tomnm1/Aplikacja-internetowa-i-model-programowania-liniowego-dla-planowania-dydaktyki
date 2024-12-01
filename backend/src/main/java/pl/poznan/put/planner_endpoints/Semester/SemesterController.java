@@ -68,6 +68,18 @@ public class SemesterController {
         return SemesterService.createSemester(Semester);
     }
 
+    @Operation(summary = "Create Semesters from provided JSON")
+    @PostMapping("/DTO")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = SemesterDTO.class)
+            )
+    })
+    public Semester createSemesterDTO(@RequestBody SemesterDTO Semester){
+        return SemesterService.createSemesterDTO(Semester);
+    }
+
     @Operation(summary = "Update specified Semesters from provided JSON")
     @PutMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
