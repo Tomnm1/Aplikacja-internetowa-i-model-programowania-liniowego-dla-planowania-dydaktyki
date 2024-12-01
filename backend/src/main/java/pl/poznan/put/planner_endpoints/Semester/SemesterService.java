@@ -55,9 +55,10 @@ public class SemesterService {
         for (Object[] result : results) {
             Integer semesterId = (Integer) result[0];
             String number = (String) result[1];
+            String type = (String) result[4];
             Specialisation specialisation =  specialisationRepository.findById((Integer) result[2]).get();
             Long groupCount = (Long) result[3];
-            SemesterDTO dto = new SemesterDTO(semesterId, number,specialisation, groupCount);
+            SemesterDTO dto = new SemesterDTO(semesterId, number,type ,specialisation, groupCount);
             semesterDTOs.add(dto);
         }
 
@@ -78,6 +79,11 @@ public class SemesterService {
      */
     public Semester createSemester(Semester semester) {return semesterRepository.save(semester);}
 
+    @Transactional
+    public Semester createSemesterDTO(SemesterDTO semester) {
+        Semester savedSemester = semesterRepository.save(semester.toSemester());
+        semesterRepository.defineGroup(semester.groupCount.intValue(),savedSemester.semesterId);
+        return savedSemester;}
     /**
      * Updates a semester by given ID and params
      * @param semesterId id of semester to update
@@ -92,6 +98,7 @@ public class SemesterService {
             Semester oldSemester = semester.get();
             oldSemester.number = semesterParams.number;
             oldSemester.specialisation = semesterParams.specialisation;
+            oldSemester.typ = semesterParams.typ;
             semesterRepository.defineGroup(semesterParams.groupCount.intValue(),semesterId);
             return semesterRepository.save(oldSemester);
         } else {

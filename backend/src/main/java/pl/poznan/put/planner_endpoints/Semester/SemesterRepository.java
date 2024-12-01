@@ -14,7 +14,7 @@ import java.util.List;
 public interface SemesterRepository extends JpaRepository<Semester, Integer> {
     Semester findByNumberAndSpecialisation(String number, Specialisation specialisation);
     boolean existsByNumberAndSpecialisation(String number, Specialisation specialisation);
-    @Query(value = "SELECT s.semester_id,s.number,s.specialisation_id,count(g.group_id) \n" +
+    @Query(value = "SELECT s.semester_id,s.number,s.specialisation_id,count(g.group_id),s.typ \n" +
         "FROM semesters as s \n" +
         "LEFT JOIN groups g ON g.semester_id = s.semester_id AND g.group_type = 'laboratoria'\n" +
         "group by s.semester_id;", nativeQuery = true)

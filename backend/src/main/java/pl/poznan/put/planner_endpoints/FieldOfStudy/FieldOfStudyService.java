@@ -46,6 +46,7 @@ public class FieldOfStudyService {
         if (fieldOfStudy.isPresent()){
             FieldOfStudy oldFieldOfStudy = fieldOfStudy.get();
             oldFieldOfStudy.name = fieldOfStudyParams.name;
+            oldFieldOfStudy.typ = fieldOfStudyParams.typ;
             return fieldOfStudyRepository.save(oldFieldOfStudy);
         } else {
             return null;
