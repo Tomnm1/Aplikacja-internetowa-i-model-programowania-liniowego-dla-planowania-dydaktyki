@@ -135,8 +135,9 @@ public class ExcelToDbService {
     private void processAllRows(Sheet sheet, int startingRow){
         this.sheet = sheet;
         resetGroupsCounter();
-        for (int i = startingRow; i <= sheet.getLastRowNum(); i++){
+        for (int i = startingRow; i <= obtainLastRowNum(startingRow); i++){
             row = sheet.getRow(i);
+            System.out.println("wiersz nr: " + i);
             for (Map.Entry<String, Consumer<Cell>> entry : columnActions.entrySet()) {
                 columnName = entry.getKey();
                 Consumer<Cell> action = entry.getValue();
@@ -149,6 +150,27 @@ public class ExcelToDbService {
             insertData();
             subjectTypes.clear();
         }
+    }
+
+    private int obtainLastRowNum(int startingRow){
+        int subjectIndexColumn = columnIndices.get(SUBJECT);
+        for(int i = startingRow; i < sheet.getLastRowNum(); i++){
+            Row currentRow = sheet.getRow(i);
+            Row nextRow = sheet.getRow(i + 1);
+
+            Cell cell1 = (currentRow != null) ? currentRow.getCell(subjectIndexColumn) : null;
+            Cell cell2 = (nextRow != null) ? nextRow.getCell(subjectIndexColumn) : null;
+
+            boolean cell1IsEmpty = (cell1 == null || cell1.getCellType() == CellType.BLANK ||
+                    (cell1.getCellType() == CellType.STRING && cell1.getStringCellValue().trim().isEmpty()));
+            boolean cell2IsEmpty = (cell2 == null || cell2.getCellType() == CellType.BLANK ||
+                    (cell2.getCellType() == CellType.STRING && cell2.getStringCellValue().trim().isEmpty()));
+
+            if (cell1IsEmpty && cell2IsEmpty) {
+                return i;
+            }
+        }
+        return sheet.getLastRowNum();
     }
 
     private void prepareColumnActions(){
@@ -473,5 +495,27 @@ public class ExcelToDbService {
             }
             columnIndices.put(cellValue, cellIndex);
         }
+    }
+
+    public void clear(){
+        this.cycle = null;
+        this.semesterNumber = null;
+        this.type = null;
+        this.exam = false;
+        this.numStudents = null;
+        this.subjectName = null;
+
+        this.fieldOfStudy = null;
+        this.fieldOfStudyName = null;
+        this.specialisation = null;
+        this.specialisationName = null;
+        this.semester = null;
+        this.subject = null;
+        this.sheet = null;
+        this.groupTypesData.clear();
+        this.groupsCounter.clear();
+        this.columnActions.clear();
+        this.columnIndices.clear();
+        this.subjectTypes.clear();
     }
 }

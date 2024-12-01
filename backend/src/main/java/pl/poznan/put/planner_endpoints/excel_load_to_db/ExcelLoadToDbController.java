@@ -38,6 +38,7 @@ public class ExcelLoadToDbController {
             Workbook workbook = new XSSFWorkbook(inputStream)){
             Sheet sheet = workbook.getSheetAt(0);
             excelToDbService.startSheetProcessing(sheet);
+            excelToDbService.clear();
             return ResponseEntity.ok("File loaded");
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Excel import error: " + e);
