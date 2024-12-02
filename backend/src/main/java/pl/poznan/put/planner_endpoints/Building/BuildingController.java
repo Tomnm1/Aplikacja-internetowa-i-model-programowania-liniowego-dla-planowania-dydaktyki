@@ -41,8 +41,8 @@ public class BuildingController {
                     schema = @Schema(implementation = Building.class)
             )
     })
-    public Optional<Building> getBuildingByID(@PathVariable("id") String id) {
-        return BuildingService.getBuildingByID(id);
+    public Optional<Building> getBuildingByID(@PathVariable("id") Integer buildingId) {
+        return BuildingService.getBuildingByID(buildingId);
     }
 
     @Operation(summary = "Create Buildings from provided JSON")
@@ -53,7 +53,6 @@ public class BuildingController {
                     schema = @Schema(implementation = Building.class)
             )
     })
-    // TODO add check to fail if entity already exists
     public Building createBuilding(@RequestBody Building Building){
         return BuildingService.createBuilding(Building);
     }
@@ -66,8 +65,8 @@ public class BuildingController {
                     schema = @Schema(implementation = Building.class)
             )
     })
-    public Building updateBuildingByID(@PathVariable("id") String id, @RequestBody Building BuildingParams){
-        return BuildingService.updateBuildingByID(id, BuildingParams);
+    public Building updateBuildingByID(@PathVariable("id") Integer buildingId, @RequestBody Building BuildingParams){
+        return BuildingService.updateBuildingByID(buildingId, BuildingParams);
     }
 
     @Operation(summary = "Delete all Buildings")
@@ -84,8 +83,8 @@ public class BuildingController {
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(schema = @Schema(hidden = true))
     })
-    public void deleteBuilding(@PathVariable("id") String id) {
-        BuildingService.deleteBuildingByID(id);
+    public void deleteBuilding(@PathVariable("id") Integer buildingId) {
+        BuildingService.deleteBuildingByID(buildingId);
     }
 }
 

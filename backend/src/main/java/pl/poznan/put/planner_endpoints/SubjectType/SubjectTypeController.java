@@ -16,7 +16,7 @@ import java.util.Optional;
 /**
  * Controller for SubjectType resource
  */
-@RestController // TODO use http response builders to create success and fail responses
+@RestController
 @RequestMapping("/subjectTypes")
 public class SubjectTypeController {
     @Autowired
@@ -27,11 +27,11 @@ public class SubjectTypeController {
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    array = @ArraySchema(schema = @Schema(implementation = SubjectType.class))
+                    array = @ArraySchema(schema = @Schema(implementation = SubjectTypeDTO.class))
             )
     })
-    public List<SubjectType> getAllSubjectType() {
-        return subjectTypeService.getAllsubjectType();
+    public List<SubjectTypeDTO> getAllSubjectType() {
+        return subjectTypeService.getAllsubjectTypeDTO();
     }
 
     @Operation(summary = "Return SubjectType by id")
@@ -54,9 +54,8 @@ public class SubjectTypeController {
                     schema = @Schema(implementation = SubjectType.class)
             )
     })
-    // TODO add check to fail if entity already exists
-    public SubjectType createSubjectType(@RequestBody SubjectType subjectType){
-        return subjectTypeService.createsubjectType(subjectType);
+    public SubjectTypeDTO createSubjectType(@RequestBody SubjectTypeDTO subjectTypeDTO){
+        return subjectTypeService.createsubjectTypeDTO(subjectTypeDTO);
     }
 
     @Operation(summary = "Update specified SubjectType from provided JSON")
@@ -67,8 +66,8 @@ public class SubjectTypeController {
                     schema = @Schema(implementation = SubjectType.class)
             )
     })
-    public SubjectType updateSubjectTypeByID(@PathVariable("id") Integer id, @RequestBody SubjectType subjectTypeParams){
-        return subjectTypeService.updatesubjectTypeByID(id, subjectTypeParams);
+    public SubjectTypeDTO updateSubjectTypeByID(@PathVariable("id") Integer id, @RequestBody SubjectTypeDTO subjectTypeParams){
+        return subjectTypeService.updatesubjectTypeDTOByID(id, subjectTypeParams);
     }
 
     @Operation(summary = "Delete all subjectTypes")

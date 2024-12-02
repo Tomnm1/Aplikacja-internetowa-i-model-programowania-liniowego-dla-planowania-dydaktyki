@@ -15,7 +15,7 @@ import java.util.Optional;
 /**
  * Controller for Group resource
  */
-@RestController // TODO use http response builders to create success and fail responses
+@RestController
 @RequestMapping("/groups")
 public class GroupController {
     @Autowired
@@ -45,6 +45,18 @@ public class GroupController {
         return groupService.getGroupByID(id);
     }
 
+    @Operation(summary = "Return Group by id")
+    @GetMapping("/semester/{id}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = Group.class)
+            )
+    })
+    public List<GroupDTO> getGroupBySemesterID(@PathVariable("id") Integer id) {
+        return groupService.getGroupBySemesterID(id);
+    }
+
     @Operation(summary = "Create Group from provided JSON")
     @PostMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -53,8 +65,8 @@ public class GroupController {
                     schema = @Schema(implementation = Group.class)
             )
     })
-    // TODO add check to fail if entity already exists
     public Group createGroup(@RequestBody Group group){
+
         return groupService.createGroup(group);
     }
 

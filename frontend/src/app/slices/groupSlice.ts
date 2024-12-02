@@ -1,42 +1,37 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import endpoints from '../../utils/endpoints.ts';
-import axios from 'axios';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {API_ENDPOINTS} from '../urls';
+import {Group, GroupState} from '../../utils/Interfaces';
 
+const initialState: GroupState = {
+    rows: [], loading: false, error: null,
+};
 
-export const fetchGroups = createAsyncThunk('groups/fetchGroups', async () => {
-    const response = await axios.get(endpoints.group.getAll);
-    return response.data;
-});
-
-export const createGroup = createAsyncThunk('groups/createGroup', async (newGroup) => {
-    const response = await axios.post(endpoints.group.create, newGroup);
-    return response.data;
+export const fetchGroup = createAsyncThunk<Group[], number>('group/fetchGroups', async (semesterId) => {
+    const response = await fetch(`${API_ENDPOINTS.GROUPS}/semester/${semesterId}`);
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    const data: Group[] = await response.json();
+    return data.map((group) => ({
+        ...group,
+    }));
 });
 
 const groupSlice = createSlice({
-    name: 'groups',
-    initialState: {
-        list: [],
-        status: 'idle',
-        error: null,
-    },
-    reducers: {},
-    extraReducers: (builder) => {
+    name: 'groups', initialState, reducers: {}, extraReducers: (builder) => {
         builder
-            .addCase(fetchGroups.pending, (state) => {
-                state.status = 'loading';
+            .addCase(fetchGroup.pending, (state) => {
+                state.loading = true;
+                state.error = null;
             })
-            .addCase(fetchGroups.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.list = action.payload;
+            .addCase(fetchGroup.fulfilled, (state, action) => {
+                state.loading = false;
+                state.rows = action.payload;
             })
-            .addCase(fetchGroups.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.error.message;
+            .addCase(fetchGroup.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Failed to fetch groups';
             })
-            .addCase(createGroup.fulfilled, (state, action) => {
-                state.list.push(action.payload);
-            });
     },
 });
 

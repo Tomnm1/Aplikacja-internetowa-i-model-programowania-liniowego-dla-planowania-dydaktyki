@@ -25,7 +25,7 @@ public class SubjectService {
      * @return list of Subject
      */
     public List<Subject> getAllSubject(){
-        return subjectRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+        return subjectRepository.findAll();
     }
 
     /**
@@ -69,9 +69,9 @@ public class SubjectService {
             oldSubject.name = subjectParams.name;
             oldSubject.language = subjectParams.language;
             oldSubject.exam = subjectParams.exam;
-            oldSubject.elective = subjectParams.elective;
+            oldSubject.mandatory = subjectParams.mandatory;
             oldSubject.planned = subjectParams.planned;
-            oldSubject.course = subjectParams.course;
+            oldSubject.semester = subjectParams.semester;
             return subjectRepository.save(oldSubject);
         } else {
             return null;
@@ -91,5 +91,15 @@ public class SubjectService {
      */
     public void deleteAllSubjects(){
         subjectRepository.deleteAll();
+    }
+
+    public Subject createSubjectIfNotExists(Subject subject){
+        Subject existingSubject = subjectRepository.findByNameAndSemester(subject.name, subject.semester);
+        if(existingSubject != null){
+            return existingSubject;
+        } else {
+            createSubject(subject);
+            return subject;
+        }
     }
 }

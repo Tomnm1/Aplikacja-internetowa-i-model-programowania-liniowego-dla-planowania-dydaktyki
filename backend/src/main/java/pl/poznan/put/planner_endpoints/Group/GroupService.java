@@ -47,6 +47,10 @@ public class GroupService {
         return groupRepository.findById(id);
     }
 
+    public List<GroupDTO> getGroupBySemesterID(Integer id){
+        return groupRepository.findBysemester_id(id).stream().map(Group::toDTO).toList();
+    }
+
     /**
      * Creates a group
      * @param group object to be inserted into DB
@@ -66,9 +70,7 @@ public class GroupService {
         Optional<Group> group = groupRepository.findById(id);
         if (group.isPresent()) {
             Group oldGroup = group.get();
-            oldGroup.number = groupParams.number;
-            oldGroup.numOfStudents = groupParams.numOfStudents;
-            oldGroup.course = groupParams.course;
+            oldGroup.code = groupParams.code;
             return groupRepository.save(oldGroup);
         } else {
             return null;
@@ -88,5 +90,15 @@ public class GroupService {
      */
     public void deleteAllGroups(){
         groupRepository.deleteAll();
+    }
+
+    public Group createGroupIfNotExists(Group group){
+        Group existingGroup = groupRepository.findByCodeAndSemester(group.code, group.semester);
+        if(existingGroup != null){
+            return existingGroup;
+        } else {
+            createGroup(group);
+            return group;
+        }
     }
 }
