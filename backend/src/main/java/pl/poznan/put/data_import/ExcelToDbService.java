@@ -137,7 +137,6 @@ public class ExcelToDbService {
         resetGroupsCounter();
         for (int i = startingRow; i <= obtainLastRowNum(startingRow); i++){
             row = sheet.getRow(i);
-            System.out.println("wiersz nr: " + i);
             for (Map.Entry<String, Consumer<Cell>> entry : columnActions.entrySet()) {
                 columnName = entry.getKey();
                 Consumer<Cell> action = entry.getValue();

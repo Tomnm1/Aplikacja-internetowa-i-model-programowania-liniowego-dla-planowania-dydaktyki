@@ -215,11 +215,17 @@ public class ConstraintsManager {
     private void blockGroupsConstraint(Map<String, MPVariable> xEvenMap, Map<String, MPVariable> xOddMap,
                                        List<Integer> blockedGroupsIndices, int assignedGroupIndex, int subject,
                                        String frequency){
+        String subjectTypeId = subjects.get(subject).getId();
         for (int t = 0; t < numTimeSlots; ++t) {
             for (int roomIndex = 0; roomIndex < numRooms; ++roomIndex) {
+                if(!classroomToSubjectTypes.get(rooms.get(roomIndex)).contains(subjectTypeId))
+                    continue;
                 for (int teacherIndex = 0; teacherIndex < numTeachers; ++teacherIndex) {
-
+                    if(!teachersToSubjectTypes.get(teachers.get(teacherIndex)).contains(subjectTypeId))
+                        continue;
                     for (int blockedGroupIndex : blockedGroupsIndices) {
+                        if(!groupToSubjectTypes.get(groups.get(blockedGroupIndex)).contains(subjectTypeId))
+                            continue;
                         String varNameEven = "xEven_" + assignedGroupIndex + "_" + roomIndex + "_" + t + "_" + subject + "_" + teacherIndex;
                         String varNameOdd = "xOdd_" + assignedGroupIndex + "_" + roomIndex + "_" + t + "_" + subject + "_" + teacherIndex;
 

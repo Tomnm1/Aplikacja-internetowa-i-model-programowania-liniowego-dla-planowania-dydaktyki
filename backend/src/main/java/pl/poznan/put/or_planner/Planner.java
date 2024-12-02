@@ -160,7 +160,8 @@ public class Planner {
         constraintsManager.oneGroupOneClassConstraint(xEvenMap, xOddMap);
 
         logger.log(Level.INFO, " ograniczenie 5");
-        constraintsManager.teachersLoadConstraint(xEvenMap, xOddMap);
+        //TODO: To ograniczenie działa dobrze, ale dane w zbieraniu danych z obciążeń jest jakiś problem tj. brakuje w pewnych miejscach danych - dodać walidator
+//        constraintsManager.teachersLoadConstraint(xEvenMap, xOddMap);
 
         logger.log(Level.INFO, " solver start");
         MPSolver.ResultStatus status = solver.solve();
@@ -173,6 +174,7 @@ public class Planner {
             return null;
         }
 
+        logger.log(Level.INFO, "Solution analysing started");
         List<PlannedSlot> scheduleTable = new ArrayList<>();
         for (int p = 0; p < numSubjects; ++p) {
             PlannerClassType plannerClassType = subjects.get(p);
@@ -225,6 +227,7 @@ public class Planner {
                 }
             }
         }
+        logger.log(Level.INFO, "Solution analyzing finished");
         xOddMap.clear();
         xEvenMap.clear();
         constraintsManager.cleanup();
