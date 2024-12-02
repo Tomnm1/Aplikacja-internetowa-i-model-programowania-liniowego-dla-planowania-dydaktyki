@@ -18,14 +18,11 @@ export const fetchSubjectType = createAsyncThunk<SubjectType[]>('subjectType/fet
 });
 
 export const fetchSubjectTypeBySubjectId = createAsyncThunk<SubjectType[], number>('subjectType/fetchSubjectsTypesBySubjectId', async (id) => {
-    console.log(`${API_ENDPOINTS.SUBJECT_TYPE}/subject/${id}`)
     const response = await fetch(`${API_ENDPOINTS.SUBJECT_TYPE}/subject/${id}`);
-    console.log(response)
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
     const data: BackendSubjectType[] = await response.json();
-    console.log(data)
     return data.map((subjectType) => ({
         ...subjectType, subjectTypeId: subjectType.subjectTypeId!,
     }));
