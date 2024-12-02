@@ -22,7 +22,6 @@ const SubjectTypesClassroomsModal: React.FC<SubjectTypesClassroomsModalProps> = 
     const { enqueueSnackbar } = useSnackbar();
     const [buildings,setBuildings] = useState<BuildingDTO[]>([]);
     const [value, setValue] = useState(0);
-    console.log(typeData);
     const [formData, setFormData] = useState<BackendClassroom[]>(typeData?.classroomList || []);
 
     useEffect(() => {
@@ -41,7 +40,6 @@ const SubjectTypesClassroomsModal: React.FC<SubjectTypesClassroomsModalProps> = 
             }
             return [...prev, classroom];
         });
-        console.log(formData);
     };
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -59,7 +57,6 @@ const SubjectTypesClassroomsModal: React.FC<SubjectTypesClassroomsModalProps> = 
 
     const handleSubmit = () => {
         const typeToSave = { ...typeData!,classroomList:formData };
-        console.log(typeToSave);
         onSave(typeToSave,true);
         onClose();
     };
