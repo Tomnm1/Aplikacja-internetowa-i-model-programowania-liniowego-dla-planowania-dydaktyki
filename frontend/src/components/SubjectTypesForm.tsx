@@ -30,8 +30,6 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
     const [openClassroomsModal, setOpenClassroomsModal] = useState(false);
     const [openTeachersList, setOpenTeachersList] = useState(false);
     const [currentType, setCurrentType] = useState<BackendSubjectType | null>(null);
-    console.log("Form");
-    console.log(subjectTypes);
 
     const handleAdd = () => {
         setCurrentType(null);
