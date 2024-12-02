@@ -143,14 +143,19 @@ public class PlanningDataAssemblingService {
                         .stream()
                         .map(subjectTypeGroup -> subjectTypeGroup.group.id.toString())
                         .toList();
-                String maxGroups = String.valueOf((subjectTypeTeacher.numHours / subjectTypeTeacher.subjectType.numOfHours));
+                int teacherNumHoursSubject = subjectTypeTeacher.numHours;
+                int subjectTypeHoursForGroup = subjectTypeTeacher.subjectType.numOfHours;
+                if(teacherNumHoursSubject < subjectTypeHoursForGroup)
+                    teacherNumHoursSubject = subjectTypeHoursForGroup;
+                int maxGroups = (int) Math.ceil((double) teacherNumHoursSubject / subjectTypeHoursForGroup);
 
-                teacherLoadSubjectList.add(
-                    new TeacherLoadSubject(
-                        subjectTypeTeacher.subjectType.subjectTypeId.toString(),
-                        groups,
-                        maxGroups)
-                    );
+                if(maxGroups > 0)
+                    teacherLoadSubjectList.add(
+                        new TeacherLoadSubject(
+                            subjectTypeTeacher.subjectType.subjectTypeId.toString(),
+                            groups,
+                            String.valueOf(maxGroups))
+                        );
 
             }
             if(!teacherLoadSubjectList.isEmpty())

@@ -67,18 +67,13 @@ public class PlanToExcelExportService {
                 cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
                 subjectColors.put(subject, cellStyle);
             }
-
-//            if(!slots.containsKey(planObject.slotsDay)){
-//                slots.put(planObject.slotsDay, firstSlotRowIndex);
-//                firstSlotRowIndex += 2;
-//            }
         }
 
         Map<SlotsDay, Integer> slots = processSlots(fieldOfStudyTyp);
 
         for (Semester semester: semesterListMap.keySet()){
             Sheet sheet = workbook.createSheet(semester.specialisation.fieldOfStudy.name + " " +
-                    semester.specialisation.name + " " + semester.number);
+                    semester.specialisation.cycle + " " + semester.specialisation.name + " " + semester.number);
             processSheet(sheet, semesterListMap.get(semester), slots, subjectColors);
         }
 
