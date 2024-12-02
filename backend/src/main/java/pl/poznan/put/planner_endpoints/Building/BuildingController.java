@@ -33,6 +33,18 @@ public class BuildingController {
         return BuildingService.getAllBuildings();
     }
 
+    @Operation(summary = "Return all Buildings with theirs Classrooms")
+    @GetMapping("/classrooms")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = Building.class))
+            )
+    })
+    public List<BuildingDTO> getAllBuildingsDTO() {
+        return BuildingService.getAllBuildingsDTO();
+    }
+
     @Operation(summary = "Return Buildings by id")
     @GetMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
