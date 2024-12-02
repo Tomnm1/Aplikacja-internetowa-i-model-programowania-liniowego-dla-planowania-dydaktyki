@@ -1,27 +1,25 @@
 package pl.poznan.put.planner_endpoints.SubjectType;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.poznan.put.planner_endpoints.Classroom.Classroom;
+import pl.poznan.put.planner_endpoints.ClassroomsSubjectTypes.ClassroomSubjectType;
+import pl.poznan.put.planner_endpoints.ClassroomsSubjectTypes.ClassroomSubjectTypeRepository;
 import pl.poznan.put.planner_endpoints.Group.Group;
 import pl.poznan.put.planner_endpoints.Group.GroupDTO;
 import pl.poznan.put.planner_endpoints.Group.GroupRepository;
 import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectTypeTeacherDTO;
 import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_Teacher;
 import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_TeacherRepository;
-import pl.poznan.put.planner_endpoints.Teacher.Teacher;
 import pl.poznan.put.planner_endpoints.Teacher.TeacherRepository;
 import pl.poznan.put.planner_endpoints.Subject.Subject;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +41,9 @@ public class SubjectTypeService {
     @Autowired
     private SubjectType_TeacherRepository subjectTypeTeacherRepository;
 
+    @Autowired
+    private ClassroomSubjectTypeRepository classroomSubjectTypeRepository;
+
 
     /**
      * Returns all subjectTypes
@@ -55,7 +56,20 @@ public class SubjectTypeService {
 
     @Transactional
     public List<SubjectTypeDTO> getAllsubjectTypeDTO(){
-        return subjectTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "subjectTypeId")).stream().map(SubjectType::convertToDTO).toList();
+        List<SubjectTypeDTO> subjectTypeDTOS = subjectTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "subjectTypeId")).stream().map(SubjectType::convertToDTO).toList();
+        for( SubjectTypeDTO subjectTypeDTO : subjectTypeDTOS){
+            subjectTypeDTO.classroomList = classroomSubjectTypeRepository.findBySubjectType_SubjectTypeId(subjectTypeDTO.subjectTypeId).stream().map(ClassroomSubjectType::getClassroom).toList();
+        }
+        return subjectTypeDTOS;
+    }
+
+    @Transactional
+    public List<SubjectTypeDTO> getAllsubjectTypeBySubjectIDDTO(Integer id){
+        List<SubjectTypeDTO> subjectTypeDTOS = subjectTypeRepository.findSubjectTypesBySubjectSubjectId(id).stream().map(SubjectType::convertToDTO).toList();
+        for( SubjectTypeDTO subjectTypeDTO : subjectTypeDTOS){
+            subjectTypeDTO.classroomList = classroomSubjectTypeRepository.findBySubjectType_SubjectTypeId(subjectTypeDTO.subjectTypeId).stream().map(ClassroomSubjectType::getClassroom).toList();
+        }
+        return subjectTypeDTOS;
     }
 
     /**
@@ -103,6 +117,13 @@ public class SubjectTypeService {
         }
         saved.teachersList = teachersList;
 
+        for(Classroom c : subjectTypeDTO.classroomList ){
+            ClassroomSubjectType classroomSubjectType = new ClassroomSubjectType();
+            classroomSubjectType.classroom = c;
+            classroomSubjectType.subjectType = saved;
+            classroomSubjectTypeRepository.save(classroomSubjectType);
+        }
+
         return saved.convertToDTO();
     }
 
@@ -146,6 +167,16 @@ public class SubjectTypeService {
                 subjectTypeTeacherRepository.save(stt);
             }
             oldsubjectType.teachersList = teachersList;
+
+            List<ClassroomSubjectType> classroomSubjectTypeList = subjectTypeParams.classroomList.stream().map(c -> c.toClassroomSubjectType(oldsubjectType)).toList();
+            List<ClassroomSubjectType> old =  classroomSubjectTypeRepository.findBySubjectType(oldsubjectType);
+            for(ClassroomSubjectType cst : old ){
+                if (!classroomSubjectTypeList.contains(cst)){
+                    classroomSubjectTypeRepository.delete(cst);
+                }
+            }
+            classroomSubjectTypeRepository.saveAll(classroomSubjectTypeList);
+
             oldsubjectType.groupsList = subjectTypeParams.groupsList.stream().map(this::toGroup).collect(Collectors.toList());
             return subjectTypeRepository.save(oldsubjectType).convertToDTO();
         } else {

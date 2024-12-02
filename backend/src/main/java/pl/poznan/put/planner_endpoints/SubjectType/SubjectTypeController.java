@@ -34,6 +34,18 @@ public class SubjectTypeController {
         return subjectTypeService.getAllsubjectTypeDTO();
     }
 
+    @Operation(summary = "Return all subjectTypes with subject id")
+    @GetMapping("/subject/{id}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = SubjectTypeDTO.class))
+            )
+    })
+    public List<SubjectTypeDTO> getAllSubjectTypeBySubjectID(@PathVariable("id") Integer id) {
+        return subjectTypeService.getAllsubjectTypeBySubjectIDDTO(id);
+    }
+
     @Operation(summary = "Return SubjectType by id")
     @GetMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {

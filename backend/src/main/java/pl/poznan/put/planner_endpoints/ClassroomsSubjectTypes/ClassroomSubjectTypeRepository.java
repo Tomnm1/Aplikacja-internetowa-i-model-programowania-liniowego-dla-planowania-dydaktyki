@@ -13,4 +13,6 @@ public interface ClassroomSubjectTypeRepository extends JpaRepository<ClassroomS
     List<Integer> getAllAssignedClassrooms();
 
     boolean existsByClassroomClassroomIDAndSubjectTypeSubjectTypeId(Integer classroom_classroomID, Integer subjectType_subjectTypeId);
+
+    List<ClassroomSubjectType> findBySubjectType_SubjectTypeId(Integer subjectTypeSubjectTypeId);
 }

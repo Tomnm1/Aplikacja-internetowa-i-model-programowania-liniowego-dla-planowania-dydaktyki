@@ -92,6 +92,11 @@ export interface Building {
     isNew?: boolean;
 }
 
+export interface BuildingDTO {
+    code: string;
+    classroomList: BackendClassroom[];
+}
+
 export interface BackendBuilding {
     buildingId: number;
     code: string;
@@ -279,6 +284,7 @@ export interface SubjectType {
     subject: BackendSubject | { SubjectId: number };
     teachersList: teacherListDTO[];
     groupsList: Group[];
+    classroomList: BackendClassroom[];
     frontId?: string;
 }
 
@@ -300,6 +306,7 @@ export interface BackendSubjectType {
     subject: BackendSubject | { SubjectId: number };
     teachersList: teacherListDTO[];
     groupsList: Group[];
+    classroomList: BackendClassroom[];
     frontId?: string;
 }
 
