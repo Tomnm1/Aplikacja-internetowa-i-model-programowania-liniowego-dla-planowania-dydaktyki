@@ -66,17 +66,31 @@ public class PlanningDataAssemblingService {
         String fieldOfStudyType = planningParams.getFieldOfStudyType();
         String semesterType = planningParams.getSemesterType();
         PlannerData plannerData = new PlannerData();
-        plannerData.setGroups(getAllGroups(fieldOfStudyType, semesterType));
+        plannerData.setGroups(getAllAssignedGroups(fieldOfStudyType, semesterType));
         plannerData.setTeachers(getAllAssignedTeachers());
         plannerData.setRooms(getAllAssignedClassrooms());
         plannerData.setTimeSlots(getAllTimeSlots());
         plannerData.setSubjects(getAllSubjects(fieldOfStudyType, semesterType));
-        plannerData.setTeachersLoad(getTeachersLoad());
+        plannerData.setTeachersLoad(getTeachersLoad(fieldOfStudyType, semesterType));
         plannerData.setClassroomToSubjectTypes(getClassroomToSubjectTypes());
         plannerData.setGroupToSubjectTypes(getGroupToSubjectTypes());
         plannerData.setSubjectTypeToTeachers(getSubjectTypeToTeachers());
         plannerData.setTeachersToSubjectTypes(getTeacherToSubjectTypes());
+        plannerData.setSubjectTypeToGroup(getSubjectTypeToGroup());
         return plannerData;
+    }
+
+    private Map<String, Set<String>> getSubjectTypeToGroup(){
+        List<SubjectTypeGroup> subjectTypeGroupList = subjectTypeGroupService.getAllSubjectTypeGroup();
+        Map<String, Set<String>> subjectTypeToGroup = new HashMap<>();
+        for(SubjectTypeGroup subjectTypeGroup: subjectTypeGroupList){
+            String subjectTypeId = subjectTypeGroup.subjectType.subjectTypeId.toString();
+            String groupId = subjectTypeGroup.group.id.toString();
+            subjectTypeToGroup
+                    .computeIfAbsent(subjectTypeId, k -> new HashSet<>())
+                    .add(groupId);
+        }
+        return subjectTypeToGroup;
     }
 
     private Map<String, Set<String>> getTeacherToSubjectTypes(){
@@ -131,7 +145,7 @@ public class PlanningDataAssemblingService {
         return classroomToSubjectTypes;
     }
 
-    private List<TeacherLoad> getTeachersLoad(){
+    private List<TeacherLoad> getTeachersLoad(String fieldOfStudyType, String semesterType){
         List<Teacher> teachers = teacherService.getAllteachers();
         List<TeacherLoad> result = new ArrayList<>();
         for(Teacher teacher: teachers){
@@ -139,6 +153,9 @@ public class PlanningDataAssemblingService {
 
             List<SubjectTypeTeacher> subjectTypeTeachers = subjectTypeTeacherService.findByTeacher(teacher);
             for(SubjectTypeTeacher subjectTypeTeacher: subjectTypeTeachers){
+                if(!Objects.equals(subjectTypeTeacher.subjectType.subject.semester.typ, semesterType) ||
+                        !Objects.equals(subjectTypeTeacher.subjectType.subject.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType))
+                    continue;
                 List<String> groups = subjectTypeGroupService.findBySubjectType(subjectTypeTeacher.subjectType)
                         .stream()
                         .map(subjectTypeGroup -> subjectTypeGroup.group.id.toString())
@@ -156,7 +173,9 @@ public class PlanningDataAssemblingService {
                             groups,
                             String.valueOf(maxGroups))
                         );
-
+                else{
+                    System.out.println(subjectTypeTeacher.subjectType.type + subjectTypeTeacher.subjectType.subject.name);
+                }
             }
             if(!teacherLoadSubjectList.isEmpty())
                 result.add(new TeacherLoad(teacher.id.toString(), teacherLoadSubjectList));
@@ -244,12 +263,6 @@ public class PlanningDataAssemblingService {
                 .collect(Collectors.toList());
     }
 
-    private List<String> getAllClassrooms(){
-        return classroomService.getAllClassrooms().stream()
-                .map(classroom -> String.valueOf(classroom.classroomID))
-                .collect(Collectors.toList());
-    }
-
     private List<String> getAllAssignedClassrooms(){
         return classroomSubjectTypeService.getAllAssignedClassrooms().stream()
                 .map(String::valueOf)
@@ -262,12 +275,18 @@ public class PlanningDataAssemblingService {
                 .toList();
     }
 
-    private List<String> getAllTeachers() {
-        return teacherService.getAllteachers().stream()
-                .map(teacher -> String.valueOf(teacher.id))
-                .collect(Collectors.toList());
+    private List<String> getAllAssignedGroups(String fieldOfStudyType, String semesterType){
+        Set<Integer> assignedIds = subjectTypeGroupService.getAllAssignedGroups();
+        List<Group> groups = groupService.getAllGroup();
+        List<String> groupIds = new ArrayList<>();
+        for (Group group : groups) {
+            if (Objects.equals(group.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType) &&
+                    Objects.equals(group.semester.typ, semesterType) && assignedIds.contains(group.id)) {
+                groupIds.add(group.id.toString());
+            }
+        }
+        return groupIds;
     }
-
     private List<String> getAllGroups(String fieldOfStudyType, String semesterType) {
         List<Group> groups = groupService.getAllGroup();
         List<String> groupIds = new ArrayList<>();

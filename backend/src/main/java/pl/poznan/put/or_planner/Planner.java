@@ -160,8 +160,7 @@ public class Planner {
         constraintsManager.oneGroupOneClassConstraint(xEvenMap, xOddMap);
 
         logger.log(Level.INFO, " ograniczenie 5");
-        //TODO: To ograniczenie działa dobrze, ale dane w zbieraniu danych z obciążeń jest jakiś problem tj. brakuje w pewnych miejscach danych - dodać walidator
-//        constraintsManager.teachersLoadConstraint(xEvenMap, xOddMap);
+        constraintsManager.teachersLoadConstraint(xEvenMap, xOddMap);
 
         logger.log(Level.INFO, " solver start");
         MPSolver.ResultStatus status = solver.solve();

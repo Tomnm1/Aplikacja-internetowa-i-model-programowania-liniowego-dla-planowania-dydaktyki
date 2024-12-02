@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class SubjectTypeGroupService {
@@ -27,4 +28,6 @@ public class SubjectTypeGroupService {
     public List<SubjectTypeGroup> getAllSubjectTypeGroup(){
         return subjectTypeGroupRepository.findAll();
     }
+
+    public Set<Integer> getAllAssignedGroups(){ return subjectTypeGroupRepository.findAllAssignedGroups(); }
 }

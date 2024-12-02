@@ -17,7 +17,9 @@ import pl.poznan.put.planner_endpoints.Plan.Plan;
 import pl.poznan.put.planner_endpoints.planner.params.PlanningParams;
 import pl.poznan.put.planner_endpoints.planner.service.ClassroomAssignmentService;
 import pl.poznan.put.planner_endpoints.planner.service.PlanningDataAssemblingService;
+import pl.poznan.put.planner_endpoints.planner.service.PlanningDataValidationService;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +33,7 @@ public class PlannerController {
     private final PlanToExcelExportService planToExcelExportService;
     private final ClassroomAssignmentService classroomAssignmentService;
     private final PlanningDataAssemblingService planningDataAssemblingService;
+    private final PlanningDataValidationService planningDataValidationService;
     private final Planner planner;
     private static final Logger logger = Logger.getLogger(PlannerController.class.getName());
 
@@ -40,12 +43,14 @@ public class PlannerController {
             PlanToExcelExportService planToExcelExportService,
             ClassroomAssignmentService classroomAssignmentService,
             PlanningDataAssemblingService planningDataAssemblingService,
+            PlanningDataValidationService planningDataValidationService,
             Planner planner
     ){
         this.insertPlanToDbService = insertPlanToDbService;
         this.planToExcelExportService = planToExcelExportService;
         this.classroomAssignmentService = classroomAssignmentService;
         this.planningDataAssemblingService = planningDataAssemblingService;
+        this.planningDataValidationService = planningDataValidationService;
         this.planner = planner;
     }
 
@@ -88,6 +93,9 @@ public class PlannerController {
 //        PlannerData plannerData = planningDataAssemblingService.startAssembling("N", "zimowy"); // S/N oraz zimowy/letni
         PlannerData plannerData = planningDataAssemblingService.startAssembling(planningParams); // S/N oraz zimowy/letni
         logger.log(Level.INFO,"DataAssembling finished");
+        logger.log(Level.INFO,"DataValidation started");
+        planningDataValidationService.executeValidations(plannerData);
+        logger.log(Level.INFO,"DataValidation finished");
         try {
             List<String> groups = plannerData.getGroups();
             List<String> teachers = plannerData.getTeachers();
@@ -120,6 +128,7 @@ public class PlannerController {
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
+            System.out.println(Arrays.toString(e.getStackTrace()));
             System.out.println(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
