@@ -10,8 +10,10 @@ import {useSnackbar} from 'notistack';
 import TypeModal from "./TypeModal.tsx";
 import AddIcon from "@mui/icons-material/Add";
 import GroupsIcon from '@mui/icons-material/Groups';
+import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
 import SubjectTypesTeachersList from "./SubjectTypesTeachersList.tsx";
 import GroupsModal from './GroupsModal.tsx';
+import SubjectTypesClassroomsModal from './SubjectTypesClassroomsModal.tsx';
 
 interface SubjectTypesFormProps {
     subjectTypes: BackendSubjectType[];
@@ -25,6 +27,7 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
     const {enqueueSnackbar} = useSnackbar();
     const [openTypeModal, setOpenTypeModal] = useState(false);
     const [openGroupsModal, setOpenGroupsModal] = useState(false);
+    const [openClassroomsModal, setOpenClassroomsModal] = useState(false);
     const [openTeachersList, setOpenTeachersList] = useState(false);
     const [currentType, setCurrentType] = useState<BackendSubjectType | null>(null);
 
@@ -46,6 +49,11 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
     const handleGroups = (type: BackendSubjectType) => {
         setCurrentType(type);
         setOpenGroupsModal(true);
+    };
+
+    const handleClassrooms = (type: BackendSubjectType) => {
+        setCurrentType(type);
+        setOpenClassroomsModal(true);
     };
 
     const handleDelete = async (id: number) => {
@@ -125,6 +133,9 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
                                                     color: 'red'
                                                 }}/>)}
                                             </IconButton>
+                                            <IconButton onClick={() => handleClassrooms(type)} disabled={loading}>
+                                                <DashboardCustomizeIcon/>
+                                            </IconButton>
                                             {/*TODO dodać zabezpieczenie pytające czy chcesz usunąć rekord <ConfirmationDialog>*/}
                                             {/*TODO Dodać możliwość usuwania rekordków które nie są jeszcze dodane - tj takie których jeszcze nie ma w bazie, bo główny przedmiot nie został dodany*/}
                                             <IconButton onClick={() => handleDelete(type.subjectTypeId!)}
@@ -171,6 +182,12 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
                     semester={semester}
                     onSave={handleSave}
                 />)}
+            {openClassroomsModal && (<SubjectTypesClassroomsModal
+                open={openClassroomsModal}
+                onClose={() => setOpenClassroomsModal(false)}
+                typeData={currentType}
+                onSave={handleSave}
+            />)}
         </Box>);
 };
 

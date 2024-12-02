@@ -3,7 +3,9 @@ package pl.poznan.put.planner_endpoints.Building;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.poznan.put.planner_endpoints.Classroom.ClassroomRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,12 +17,26 @@ public class BuildingService {
     @Autowired
     private BuildingRepository buildingRepository;
 
+    @Autowired
+    private ClassroomRepository classroomRepository;
+
     /**
      * return all buildings
      * @return list of all building objects
      */
     public List<Building> getAllBuildings() {return buildingRepository.findAll(Sort.by(Sort.Direction.ASC, "code"));}
 
+
+    public List<BuildingDTO> getAllBuildingsDTO() {
+        List<BuildingDTO> buildingDTOS = new ArrayList<>();
+        List<Building> buildings =  buildingRepository.findAll(Sort.by(Sort.Direction.ASC, "code"));
+        for( Building building : buildings ) {
+            BuildingDTO dto = new BuildingDTO();
+            dto.code = building.code;
+            dto.classroomList =  classroomRepository.findClassroomsByBuilding(building);
+            buildingDTOS.add(dto);
+        }
+        return buildingDTOS;}
     /**
      * Finds room by ID
      * @param buildingId ID of building

@@ -15,4 +15,6 @@ public interface ClassroomRepository extends JpaRepository<Classroom, Integer> {
 
     @Query(value = "SELECT * FROM classrooms WHERE capacity >= :capacity ORDER BY RANDOM() LIMIT 3", nativeQuery = true)
     List<Classroom> findRandomClassroomWithCapacity(@Param("capacity") int capacity);
+
+    List<Classroom> findClassroomsByBuilding(Building building);
 }

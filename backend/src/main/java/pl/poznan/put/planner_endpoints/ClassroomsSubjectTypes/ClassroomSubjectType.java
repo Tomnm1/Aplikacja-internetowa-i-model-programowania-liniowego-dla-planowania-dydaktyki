@@ -17,4 +17,8 @@ public class ClassroomSubjectType {
     @ManyToOne
     @JoinColumn(name = "subject_type_id")
     public SubjectType subjectType;
+
+    public Classroom getClassroom() {
+        return classroom;
+    }
 }
