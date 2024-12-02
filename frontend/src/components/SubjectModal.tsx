@@ -11,7 +11,11 @@ import SubjectDetails from './SubjectDetails';
 import SubjectTypesForm from './SubjectTypesForm';
 import {addSubject, fetchSubject, updateSubject} from "../app/slices/subjectSlice";
 import API_ENDPOINTS from '../app/urls';
-import {addSubjectType, fetchSubjectType, updateSubjectType} from "../app/slices/subjectTypeSlice.ts";
+import {
+    addSubjectType,
+    fetchSubjectTypeBySubjectId,
+    updateSubjectType
+} from "../app/slices/subjectTypeSlice.ts";
 import ClearIcon from '@mui/icons-material/Clear';
 import SaveIcon from '@mui/icons-material/Save';
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -54,8 +58,10 @@ const SubjectModal: React.FC<SubjectModalProps> = ({open, onClose, subject, isAd
                 });
 
             if (!isAdding && subject) {
-                dispatch(fetchSubjectType()).unwrap()
+                console.log("jesteśmy");
+                dispatch(fetchSubjectTypeBySubjectId(subject.SubjectId)).unwrap()
                     .then(() => {
+                        console.log(store.getState().subjectsTypes.rows);
                         const types = store.getState().subjectsTypes.rows.filter(st => st.subject.SubjectId === subject.SubjectId);
                         setSubjectTypes(types.map(st => st as BackendSubjectType));
                     })

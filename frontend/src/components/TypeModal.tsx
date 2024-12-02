@@ -24,6 +24,7 @@ const TypeModal: React.FC<TypeModalProps> = ({open, onClose, typeData, onSave}) 
         subject: typeData?.subject || {SubjectId: 0},
         teachersList: typeData?.teachersList || [],
         groupsList: typeData?.groupsList || [],
+        classroomList: typeData?.classroomList || [],
         frontId: typeData?.frontId || `ID-${Date.now()}`,
     });
 
@@ -38,6 +39,7 @@ const TypeModal: React.FC<TypeModalProps> = ({open, onClose, typeData, onSave}) 
                 subject: {SubjectId: 0},
                 teachersList: [],
                 groupsList: [],
+                classroomList: [],
                 frontId: `ID-${Date.now()}`,
             });
         }
