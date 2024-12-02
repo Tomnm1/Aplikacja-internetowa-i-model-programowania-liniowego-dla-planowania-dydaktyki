@@ -58,10 +58,8 @@ const SubjectModal: React.FC<SubjectModalProps> = ({open, onClose, subject, isAd
                 });
 
             if (!isAdding && subject) {
-                console.log("jesteśmy");
                 dispatch(fetchSubjectTypeBySubjectId(subject.SubjectId)).unwrap()
                     .then(() => {
-                        console.log(store.getState().subjectsTypes.rows);
                         const types = store.getState().subjectsTypes.rows.filter(st => st.subject.SubjectId === subject.SubjectId);
                         setSubjectTypes(types.map(st => st as BackendSubjectType));
                     })
@@ -117,7 +115,6 @@ const SubjectModal: React.FC<SubjectModalProps> = ({open, onClose, subject, isAd
                 const subjectTypeData: BackendSubjectType = {
                     ...subjectType, subject: {SubjectId: subjectId},
                 };
-                console.log(subjectTypeData);
                 if (subjectType.subjectTypeId) {
                     await dispatch(updateSubjectType(subjectTypeData)).unwrap();
                 } else {
