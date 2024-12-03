@@ -10,4 +10,9 @@ import java.util.List;
  */
 public interface GeneratedPlanRepository extends JpaRepository<GeneratedPlan, Integer> {
     List<GeneratedPlan> findAllByPlanOrderBySlotsDayAsc(Plan plan);
+    List<GeneratedPlan> findAllByTeacherId(Integer teacherId);
+    List<GeneratedPlan> findAllByClassroomClassroomID(Integer classroomID);
+    List<GeneratedPlan> findAllByGroupId(Integer groupId);
+
 }
+
