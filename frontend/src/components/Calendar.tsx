@@ -1,161 +1,209 @@
 import {useEffect, useMemo, useState} from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import {Autocomplete, Popover, TextField, Typography} from '@mui/material';
-import {EventInput} from '@fullcalendar/core';
-import {EventApi, EventClickArg} from "fullcalendar";
-import {useDispatch, useSelector} from 'react-redux';
-import {fetchClassrooms} from '../app/slices/classroomSlice';
-import {fetchSlots} from '../app/slices/slotsSlice';
-import {fetchTeachers} from '../app/slices/teacherSlice';
-import {AppDispatch, RootState} from '../app/store';
-import {useSnackbar} from "notistack";
+import { Autocomplete, CircularProgress, Popover, TextField, Typography } from '@mui/material';
+import { EventInput } from '@fullcalendar/core';
+import {EventApi, EventClickArg, EventContentArg} from 'fullcalendar';
+import { useSnackbar } from 'notistack';
+import API_ENDPOINTS from '../app/urls.ts';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import {
+    Day,
+    dayMapping,
+    GeneratedPlanDTO,
+    typeMapping,
+    BackendClassroom,
+    BackendTeacher, BackendSemester, cycleMapping,
+} from '../utils/Interfaces.ts';
 
-type timetableProps = {
+type TimetableProps = {
     isAdmin: boolean;
-}
+};
 
-type ContextType = 'teacher' | 'group' | 'classroom';
+type ContextType = 'teacher' | 'semester' | 'classroom';
 
-const contextOptions = [{value: 'teacher', label: 'Nauczyciel'}, {value: 'group', label: 'Grupa'}, {
-    value: 'classroom', label: 'Sala'
-},];
+const contextOptions = [
+    { value: 'teacher', label: 'Nauczyciel' },
+    { value: 'semester', label: 'Semestr' },
+    { value: 'classroom', label: 'Sala' },
+];
 
-const Timetable = ({isAdmin}: timetableProps) => {
-    console.log(isAdmin); //tylko po to żeby mi TS na czerwono nie świecił ok?
+const dayToIndex: { [key in Day]: number } = {
+    [Day.SUNDAY]: 0,
+    [Day.MONDAY]: 1,
+    [Day.TUESDAY]: 2,
+    [Day.WEDNESDAY]: 3,
+    [Day.THURSDAY]: 4,
+    [Day.FRIDAY]: 5,
+    [Day.SATURDAY]: 6,
+};
+
+const Timetable = ({ isAdmin }: TimetableProps) => {
+    isAdmin; //żeby ts nie walił
     const [context, setContext] = useState<ContextType>('teacher');
-    const [selectedItem, setSelectedItem] = useState<string>('');
+    const [selectedItem, setSelectedItem] = useState<{ id: number | undefined; label: string } | null>(null);
     const [selectedEvent, setSelectedEvent] = useState<EventApi | null>(null);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const { enqueueSnackbar } = useSnackbar();
 
-    const {enqueueSnackbar} = useSnackbar();
+    const [classrooms, setClassrooms] = useState<BackendClassroom[]>([]);
+    const [semesters, setSemester] = useState<BackendSemester[]>([]);
+    const [teachers, setTeachers] = useState<BackendTeacher[]>([]);
+    const [events, setEvents] = useState<EventInput[]>([]);
 
-    const dispatch = useDispatch<AppDispatch>();
-
-    useEffect(() => {
-        //todo zamienic slots na dayslots
-        dispatch(fetchSlots()).unwrap().catch((error) => {
-            enqueueSnackbar(`Błąd podczas pobierania slotów: ${error.message}`, {variant: 'error'});
-        });
-        dispatch(fetchClassrooms()).unwrap().catch((error) => {
-            enqueueSnackbar(`Błąd podczas pobierania sal: ${error.message}`, {variant: 'error'});
-        });
-        dispatch(fetchTeachers()).unwrap().catch((error) => {
-            enqueueSnackbar(`Błąd podczas pobierania nauczycieli: ${error.message}`, {variant: 'error'});
-        });
-    }, [dispatch, enqueueSnackbar]);
-
-    const classrooms = useSelector((state: RootState) => state.classrooms.rows);
-    const slots = useSelector((state: RootState) => state.slots.rows);
-    const teachers = useSelector((state: RootState) => state.teachers.rows);
-
-    const classroomsLoading = useSelector((state: RootState) => state.classrooms.loading);
-    const slotsLoading = useSelector((state: RootState) => state.slots.loading);
-    const teachersLoading = useSelector((state: RootState) => state.teachers.loading);
-
-    const isLoading = classroomsLoading || slotsLoading || teachersLoading;
-
-    const contextItems = useMemo(() => ({
-        teacher: teachers.map((teacher) => `${teacher.firstName} ${teacher.lastName}`),
-        group: ['Grupa A', 'Grupa B', 'Grupa C', 'Grupa D', 'Grupa E'],
-        classroom: classrooms.map((classroom) => classroom.code),
-    }), [teachers, classrooms]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [eventsLoading, setEventsLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        if (contextItems[context].length > 0) {
+        setLoading(true);
+        Promise.all([
+            fetch(API_ENDPOINTS.TEACHERS)
+                .then((res) => res.json())
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas pobierania nauczycieli: ${error.message}`, { variant: 'error' });
+                    return [];
+                }),
+            fetch(API_ENDPOINTS.SEMESTERS)
+                .then((res) => res.json())
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas pobierania semestrow: ${error.message}`, { variant: 'error' });
+                    return [];
+                }),
+            fetch(API_ENDPOINTS.CLASSROOMS)
+                .then((res) => res.json())
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas pobierania sal: ${error.message}`, { variant: 'error' });
+                    return [];
+                }),
+        ])
+            .then(([teachersData, semestersData, classroomsData]) => {
+                setTeachers(teachersData);
+                setSemester(semestersData);
+                setClassrooms(classroomsData);
+                setLoading(false);
+            })
+            .catch(() => {
+                setLoading(false);
+            });
+    }, [enqueueSnackbar]);
+
+    const contextItems = useMemo(
+        () => ({
+            teacher: teachers.map((teacher) => ({ id: teacher.id, label: `${teacher.firstName} ${teacher.lastName}` })),
+            semester: semesters.map((semester) => ({ id: semester.semesterId, label: `${semester.number} - (${semester.specialisation.name} - ${semester.specialisation.fieldOfStudy?.name} - ${cycleMapping[semester.specialisation.cycle]})`})),
+            classroom: classrooms.map((classroom) => ({ id: classroom.classroomID, label: classroom.code })),
+        }),
+        [teachers, semesters, classrooms]
+    );
+
+    useEffect(() => {
+        if (contextItems[context] && contextItems[context].length > 0) {
             setSelectedItem(contextItems[context][0]);
         } else {
-            setSelectedItem('');
+            setSelectedItem(null);
         }
+        setEvents([]);
     }, [context, contextItems]);
 
-    const dummyEvents: EventInput[] = useMemo(() => {
-        if (isLoading) return [];
+    useEffect(() => {
+        if (!selectedItem) return;
 
-        return [{
-            id: '1',
-            title: 'Algorytmy i struktury danych',
-            daysOfWeek: [1],
-            startTime: slots.find((s) => s.slot_id === 7)?.start_time || '08:00:00',
-            endTime: slots.find((s) => s.slot_id === 7)?.end_time || '09:30:00',
-            extendedProps: {
-                teacher: 'Jacek Błażewicz', group: 'Grupa A', classroom: 'Sala 101',
-            },
-        }, {
-            id: '111',
-            title: 'Głoszenie prawdy',
-            daysOfWeek: [1],
-            startTime: slots.find((s) => s.slot_id === 8)?.start_time || '08:00:00',
-            endTime: slots.find((s) => s.slot_id === 8)?.end_time || '09:30:00',
-            extendedProps: {
-                teacher: 'Jacek Błażewicz', group: 'Grupa A', classroom: 'Sala 101',
-            },
-        }, {
-            id: '99',
-            title: 'Seminarium instytutowe',
-            daysOfWeek: [5],
-            startTime: slots.find((s) => s.slot_id === 8)?.start_time || '09:45:00',
-            endTime: slots.find((s) => s.slot_id === 10)?.end_time || '16:30:00',
-            extendedProps: {
-                teacher: 'Jacek Błażewicz', group: 'Grupa B', classroom: 'Sala 101',
-            },
-        }, {
-            id: '98',
-            title: 'Algorytmy i struktury danych',
-            daysOfWeek: [3],
-            startTime: slots.find((s) => s.slot_id === 8)?.start_time || '09:45:00',
-            endTime: slots.find((s) => s.slot_id === 8)?.end_time || '11:15:00',
-            extendedProps: {
-                teacher: 'Jacek Błażewicz', group: 'Grupa B', classroom: 'Sala 101',
-            },
-        }, {
-            id: '2',
-            title: 'Fizyka',
-            daysOfWeek: [2],
-            startTime: slots.find((s) => s.slot_id === 5)?.start_time || '09:45:00',
-            endTime: slots.find((s) => s.slot_id === 5)?.end_time || '11:15:00',
-            extendedProps: {
-                teacher: 'Anna Nowak', group: 'Grupa B', classroom: 'Sala 102',
-            },
-        }, {
-            id: '3',
-            title: 'Chemia',
-            daysOfWeek: [3],
-            startTime: slots.find((s) => s.slot_id === 7)?.start_time || '11:45:00',
-            endTime: slots.find((s) => s.slot_id === 7)?.end_time || '13:15:00',
-            extendedProps: {
-                teacher: 'Piotr Wiśniewski', group: 'Grupa C', classroom: 'Sala 103',
-            },
-        }, {
-            id: '4',
-            title: 'Biologia',
-            daysOfWeek: [4],
-            startTime: slots.find((s) => s.slot_id === 8)?.start_time || '13:30:00',
-            endTime: slots.find((s) => s.slot_id === 8)?.end_time || '15:00:00',
-            extendedProps: {
-                teacher: 'Maria Nowicka', group: 'Grupa D', classroom: 'Sala 104',
-            },
-        }, {
-            id: '5',
-            title: 'Historia',
-            daysOfWeek: [5],
-            startTime: slots.find((s) => s.slot_id === 9)?.start_time || '15:10:00',
-            endTime: slots.find((s) => s.slot_id === 9)?.end_time || '16:40:00',
-            extendedProps: {
-                teacher: 'Andrzej Kwiatkowski', group: 'Grupa E', classroom: 'Sala 105',
-            },
-        },];
-    }, [isLoading, slots, teachers]);
+        setEventsLoading(true);
 
-    const filteredEvents = useMemo(() => {
-        return dummyEvents.filter((event: EventInput) => {
-            return event.extendedProps?.[context] === selectedItem;
-        });
-    }, [dummyEvents, context, selectedItem]);
+        let endpoint = '';
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
+        switch (context) {
+            case 'teacher':
+                endpoint = API_ENDPOINTS.GENERATED_PLAN_TEACHERS(selectedItem.id!);
+                break;
+            case 'semester':
+                endpoint = API_ENDPOINTS.GENERATED_PLAN_SEMESTER(selectedItem.id!);
+                break;
+            case 'classroom':
+                endpoint = API_ENDPOINTS.GENERATED_PLAN_CLASSROOM(selectedItem.id!);
+                break;
+            default:
+                break;
+        }
+
+        if (endpoint) {
+            fetch(endpoint)
+                .then((res) => res.json())
+                .then((data: GeneratedPlanDTO[]) => {
+                    const initialGroupedData: { [key: string]: any } = {};
+
+                    data.forEach((item) => {
+                        const key = `${item.slotsDay.day}|${item.slotsDay.slot.startTime}|${item.slotsDay.slot.endTime}|${item.teacherId}|${item.classroomId}|${item.isEvenWeek}|${item.subjectName}`;
+
+                        if (!initialGroupedData[key]) {
+                            initialGroupedData[key] = {
+                                ...item,
+                                groupCodes: [item.groupCode],
+                            };
+                        } else {
+                            if (!initialGroupedData[key].groupCodes.includes(item.groupCode)) {
+                                initialGroupedData[key].groupCodes.push(item.groupCode);
+                            }
+                        }
+                    });
+
+                    const finalGroupedData: { [key: string]: any } = {};
+
+                    Object.values(initialGroupedData).forEach((item: any) => {
+                        const key = `${item.slotsDay.day}|${item.slotsDay.slot.startTime}|${item.slotsDay.slot.endTime}|${item.teacherId}|${item.classroomId}|${item.subjectName}`;
+
+                        if (!finalGroupedData[key]) {
+                            finalGroupedData[key] = {
+                                ...item,
+                                isEvenWeeks: [item.isEvenWeek],
+                            };
+                        } else {
+                            if (!finalGroupedData[key].isEvenWeeks.includes(item.isEvenWeek)) {
+                                finalGroupedData[key].isEvenWeeks.push(item.isEvenWeek);
+                            }
+                            finalGroupedData[key].groupCodes = Array.from(
+                                new Set([...finalGroupedData[key].groupCodes, ...item.groupCodes])
+                            );
+                        }
+                    });
+
+                    const eventsData = Object.values(finalGroupedData).map((item: any) => {
+                        const dayOfWeek = dayToIndex[item.slotsDay.day as Day];
+
+                        const isBothWeeks = item.isEvenWeeks.length > 1;
+
+                        const event: EventInput = {
+                            id: item.id.toString(),
+                            title: item.subjectName,
+                            daysOfWeek: [dayOfWeek],
+                            startTime: item.slotsDay.slot.startTime,
+                            endTime: item.slotsDay.slot.endTime,
+                            extendedProps: {
+                                subjectType: typeMapping[item.classTypeOwn as keyof typeof typeMapping],
+                                teacher: `${item.teacherFirstName.charAt(0)}. ${item.teacherLastName}`,
+                                group: item.groupCodes.join(', '),
+                                classroom: `Sala: ${item.classroomCode}`,
+                                isEvenWeek: isBothWeeks ? null : item.isEvenWeeks[0],
+                                dayName: dayMapping[item.slotsDay.day as keyof typeof dayMapping],
+                                semester: `${item.slotsDay.day}|${item.slotsDay.slot.startTime}|${item.slotsDay.slot.endTime}|${item.teacherId}|${item.classroomId}|${item.subjectName}`,
+                            },
+                        };
+                        return event;
+                    });
+
+                    setEvents(eventsData);
+                    setEventsLoading(false);
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas pobierania planu: ${error.message}`, { variant: 'error' });
+                    setEvents([]);
+                    setEventsLoading(false);
+                });
+        } else {
+            setEvents([]);
+            setEventsLoading(false);
+        }
+    }, [context, selectedItem, enqueueSnackbar]);
 
     const handleEventClick = (clickInfo: EventClickArg) => {
         setSelectedEvent(clickInfo.event);
@@ -170,84 +218,141 @@ const Timetable = ({isAdmin}: timetableProps) => {
 
     const openPopover = Boolean(anchorEl);
 
-    const formatTime = (date: any) => {
-        return date ? date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '';
+    const formatTime = (date: Date | null | undefined) => {
+        return date ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
     };
 
-    return (<div className={"p-8"}>
-        <div className={"flex gap-2 w-full"}>
-            <Autocomplete
-                sx={{width: 300}}
-                options={contextOptions}
-                getOptionLabel={(option) => option.label}
-                value={contextOptions.find((option) => option.value === context) || null}
-                onChange={(_event, newValue) => {
-                    if (newValue) {
-                        const newContext = newValue.value as ContextType;
-                        setContext(newContext);
-                    }
-                }}
-                renderInput={(params) => (<TextField {...params} label="Kontekst" variant="outlined" fullWidth/>)}
-            />
-            <Autocomplete
-                sx={{width: 300}}
-                options={contextItems[context]}
-                value={selectedItem || null}
-                onChange={(_event, newValue) => {
-                    setSelectedItem(newValue || '');
-                }}
-                renderInput={(params) => (<TextField {...params} label="Wybierz" variant="outlined" fullWidth/>)}
-            />
+    const renderEventContent = (eventInfo: EventContentArg) => {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                {eventInfo.event.extendedProps.isEvenWeek !== null && (
+                    <div className="absolute top-0 right-0 p-1">
+                        <EventNoteIcon fontSize="small" />
+                    </div>
+                )}
+                <b className={"break-keep"}>{eventInfo.timeText}</b>
+                <div className={"line-clamp-1"}>{eventInfo.event.title}</div>
+                <div>{eventInfo.event.extendedProps.subjectType}</div>
+                <div>{eventInfo.event.extendedProps.teacher}</div>
+                <div>{eventInfo.event.extendedProps.classroom}</div>
+            </div>
+        );
+    };
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center p-5">
+                <CircularProgress />
+            </div>
+        );
+    }
+
+    return (
+        <div className={'py-8 px-2 w-full overflow-auto'}>
+            <div className={'flex gap-2 w-full'}>
+                <Autocomplete
+                    key={context}
+                    sx={{ width: 300 }}
+                    options={contextOptions}
+                    getOptionLabel={(option) => option.label}
+                    value={contextOptions.find((option) => option.value === context) || null}
+                    onChange={(_event, newValue) => {
+                        if (newValue) {
+                            const newContext = newValue.value as ContextType;
+                            setContext(newContext);
+                        }
+                    }}
+                    renderInput={(params) => <TextField {...params} label="Kontekst" variant="outlined" fullWidth />}
+                />
+                <Autocomplete
+                    key={selectedItem ? selectedItem.id : 'select'}
+                    sx={{ width: 300 }}
+                    options={contextItems[context]}
+                    getOptionLabel={(option) => option.label}
+                    value={selectedItem}
+                    onChange={(_event, newValue) => {
+                        setSelectedItem(newValue);
+                    }}
+                    renderOption={(props, option) => (
+                        <li {...props} key={option.id}>
+                            {option.label}
+                        </li>
+                    )}
+                    renderInput={(params) => <TextField {...params} label="Wybierz" variant="outlined" fullWidth />}
+                />
+            </div>
+
+            {eventsLoading ? (
+                <div className="flex items-center justify-center p-5">
+                    <CircularProgress />
+                </div>
+            ) : (
+                <FullCalendar
+                    plugins={[timeGridPlugin]}
+                    initialView="timeGridWeek"
+                    locale="pl"
+                    headerToolbar={{
+                        left: '',
+                        center: '',
+                        right: '',
+                    }}
+                    firstDay={1}
+                    initialDate={new Date()}
+                    events={events}
+                    allDaySlot={false}
+                    slotMinTime="08:00:00"
+                    slotMaxTime="20:00:00"
+                    expandRows={true}
+                    slotLabelFormat={{
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        omitZeroMinute: false,
+                    }}
+                    slotLabelInterval="01:30:00"
+                    dayHeaderFormat={{ weekday: 'long' }}
+                    eventContent={renderEventContent}
+                    eventClick={handleEventClick}
+                    eventOverlap={false}
+                    slotEventOverlap={false}
+                />
+            )}
+
+            <Popover
+                open={openPopover}
+                anchorEl={anchorEl}
+                onClose={handlePopoverClose}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+            >
+                <Typography sx={{ p: 2 }}>
+                    <strong>{selectedEvent?.title}</strong>
+                    <br />
+                    {selectedEvent?.extendedProps.semester}
+                    <br /><br/>
+                    <strong>Nauczyciel:</strong> {selectedEvent?.extendedProps?.teacher}
+                    <br />
+                    <strong>Grupa:</strong> {selectedEvent?.extendedProps?.group}
+                    <br />
+                    <strong>Sala:</strong> {selectedEvent?.extendedProps?.classroom}
+                    <br />
+                    <strong>Czas:</strong> {formatTime(selectedEvent?.start)} - {formatTime(selectedEvent?.end)}
+                    {selectedEvent?.extendedProps?.isEvenWeek !== null && (
+                        <>
+                            <br />
+                            <strong>Tydzień:</strong>{' '}
+                            {selectedEvent?.extendedProps?.isEvenWeek ? 'Parzysty' : 'Nieparzysty'}
+                        </>
+                    )}
+                </Typography>
+            </Popover>
         </div>
-
-        <FullCalendar
-            plugins={[timeGridPlugin]}
-            initialView="timeGridWeek"
-            locale="pl"
-            headerToolbar={{
-                left: '', center: '', right: '',
-            }}
-            firstDay={1}
-            initialDate={new Date()}
-            events={filteredEvents}
-            allDaySlot={false}
-            slotMinTime="08:00:00"
-            slotMaxTime="20:00:00"
-            height="auto"
-            expandRows={true}
-            slotLabelFormat={{
-                hour: '2-digit', minute: '2-digit', omitZeroMinute: false,
-            }}
-            slotLabelInterval="01:30:00"
-            dayHeaderFormat={{weekday: 'long'}}
-            eventClick={handleEventClick}
-        />
-
-        <Popover
-            open={openPopover}
-            anchorEl={anchorEl}
-            onClose={handlePopoverClose}
-            anchorOrigin={{
-                vertical: 'top', horizontal: 'left',
-            }}
-            transformOrigin={{
-                vertical: 'top', horizontal: 'right',
-            }}
-        >
-            <Typography sx={{p: 2}}>
-                <strong>{selectedEvent?.title}</strong>
-                <br/>
-                <strong>Nauczyciel:</strong> {selectedEvent?.extendedProps?.teacher}
-                <br/>
-                <strong>Grupa:</strong> {selectedEvent?.extendedProps?.group}
-                <br/>
-                <strong>Sala:</strong> {selectedEvent?.extendedProps?.classroom}
-                <br/>
-                <strong>Czas:</strong> {formatTime(selectedEvent?.start)} - {formatTime(selectedEvent?.end)}
-            </Typography>
-        </Popover>
-    </div>);
+    );
 };
 
 export default Timetable;

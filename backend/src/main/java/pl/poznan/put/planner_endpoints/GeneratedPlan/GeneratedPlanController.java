@@ -57,16 +57,17 @@ public class GeneratedPlanController {
         return GeneratedPlanService.getGeneratedPlansByClassroomId(classroomID);
     }
 
-    @Operation(summary = "Return GeneratedPlans filtered by groupId")
-    @GetMapping("/group/{groupId}")
+    @Operation(summary = "Return GeneratedPlans filtered by semesterId")
+    @GetMapping("/semester/{semesterId}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     array = @ArraySchema(schema = @Schema(implementation = GeneratedPlanDTO.class))
             )
     })
-    public List<GeneratedPlanDTO> getGeneratedPlansByGroupId(@PathVariable("groupId") Integer classroomID) {
-        return GeneratedPlanService.getGeneratedPlansByGroupId(classroomID);
+
+    public List<GeneratedPlanDTO> findAllByGroupSemesterSemesterId(@PathVariable("semesterId") Integer semesterId) {
+        return GeneratedPlanService.findAllByGroupSemesterSemesterId(semesterId);
     }
 
 
