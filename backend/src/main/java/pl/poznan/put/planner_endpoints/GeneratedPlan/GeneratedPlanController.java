@@ -29,9 +29,47 @@ public class GeneratedPlanController {
                     array = @ArraySchema(schema = @Schema(implementation = GeneratedPlan.class))
             )
     })
-    public List<GeneratedPlan> getAllGeneratedPlans() {
-        return GeneratedPlanService.getAllGeneratedPlans();
+    public List<GeneratedPlanDTO> getAllGeneratedPlans() {
+        return GeneratedPlanService.getAllGeneratedPlansDTO();
     }
+
+    @Operation(summary = "Return GeneratedPlans filtered by Teacher ID")
+    @GetMapping("/teacher/{teacherId}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = GeneratedPlanDTO.class))
+            )
+    })
+    public List<GeneratedPlanDTO> getGeneratedPlansByTeacherId(@PathVariable("teacherId") Integer teacherId) {
+        return GeneratedPlanService.getGeneratedPlansByTeacherId(teacherId);
+    }
+
+    @Operation(summary = "Return GeneratedPlans filtered by Classroom ID")
+    @GetMapping("/classroom/{classroomID}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = GeneratedPlanDTO.class))
+            )
+    })
+    public List<GeneratedPlanDTO> getGeneratedPlansByClassroomId(@PathVariable("classroomID") Integer classroomID) {
+        return GeneratedPlanService.getGeneratedPlansByClassroomId(classroomID);
+    }
+
+    @Operation(summary = "Return GeneratedPlans filtered by groupId")
+    @GetMapping("/group/{groupId}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = GeneratedPlanDTO.class))
+            )
+    })
+    public List<GeneratedPlanDTO> getGeneratedPlansByGroupId(@PathVariable("groupId") Integer classroomID) {
+        return GeneratedPlanService.getGeneratedPlansByGroupId(classroomID);
+    }
+
+
 
     @Operation(summary = "Return GeneratedPlans by id")
     @GetMapping("/{id}")
