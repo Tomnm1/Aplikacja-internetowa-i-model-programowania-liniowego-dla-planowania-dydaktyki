@@ -14,4 +14,6 @@ public interface SubjectTypeRepository extends JpaRepository<SubjectType, Intege
 
     @Query("SELECT st FROM SubjectType st WHERE st.subject.SubjectId = :subjectId")
     List<SubjectType> findSubjectTypesBySubjectSubjectId(Integer subjectId);
+
+    List<SubjectType> findAllBySubject(Subject subject);
 }
