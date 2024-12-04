@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import static pl.poznan.put.constans.Constans.FieldsOfStudyTypes.*;
 public class PlanToExcelExportService {
     private final GeneratedPlanService generatedPlanService;
     private final SlotsDayService slotsDayService;
+    Workbook workbook = new XSSFWorkbook();
 
     @Autowired
     PlanToExcelExportService(
@@ -43,8 +45,6 @@ public class PlanToExcelExportService {
     @Transactional
     public void exportPlanToExcel(Plan plan) throws IOException {
         Random random = new Random();
-
-        Workbook workbook = new XSSFWorkbook();
 
         Map<Semester, List<GeneratedPlan>> semesterListMap = new HashMap<>();
         Map<Subject, XSSFCellStyle> subjectColors = new HashMap<>();
@@ -75,6 +75,7 @@ public class PlanToExcelExportService {
             Sheet sheet = workbook.createSheet(semester.specialisation.fieldOfStudy.name + " " +
                     semester.specialisation.cycle + " " + semester.specialisation.name + " " + semester.number);
             processSheet(sheet, semesterListMap.get(semester), slots, subjectColors);
+            mergeCellsIfEqual(sheet, 2, 2);
         }
 
         try (FileOutputStream fileOut = new FileOutputStream("Plan_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + ".xlsx")) {
@@ -108,7 +109,7 @@ public class PlanToExcelExportService {
                               Map<Subject, XSSFCellStyle> subjectColors){
         Row sheetNameRow = sheet.createRow(0);
         Row headerRow = sheet.createRow(1);
-        headerRow.createCell(0).setCellValue("Grupa");
+        headerRow.createCell(1).setCellValue("Grupa");
 
         Map<Group, Integer> groups = new HashMap<>();
 
@@ -128,19 +129,50 @@ public class PlanToExcelExportService {
             if(planObject.isEvenWeek) rowIndex++;
             Row row = sheet.getRow(rowIndex);
             XSSFCellStyle cellStyle = subjectColors.get(planObject.subjectType.subject);
+            cellStyle.setAlignment(HorizontalAlignment.CENTER);
+            cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
             Cell cell = row.createCell(groups.get(planObject.group));
-            cell.setCellValue(
-                    planObject.classroom.code + " " + planObject.subjectType.subject.name + " " +
-                    planObject.teacher.firstName + " " + planObject.teacher.lastName + " " + planObject.subjectType.type
+
+            String shortValue = String.format(
+                    "%s %s %s %s",
+                    planObject.classroom.code,
+                    getInitials(planObject.subjectType.subject.name),
+                    getInitials(planObject.teacher.firstName + " " + planObject.teacher.lastName),
+                    getInitials(planObject.subjectType.type.toString())
             );
+            cell.setCellValue(shortValue);
             cell.setCellStyle(cellStyle);
+
+            CreationHelper factory = workbook.getCreationHelper();
+            Drawing<?> drawing = sheet.createDrawingPatriarch();
+            ClientAnchor anchor = factory.createClientAnchor();
+            anchor.setCol1(cell.getColumnIndex());
+            anchor.setCol2(cell.getColumnIndex() + 2);
+            anchor.setRow1(row.getRowNum());
+            anchor.setRow2(row.getRowNum() + 2);
+
+            Comment comment = drawing.createCellComment(anchor);
+            RichTextString fullInfo = factory.createRichTextString(
+                    String.format(
+                            "%s %s %s %s %s",
+                            planObject.classroom.code,
+                            planObject.subjectType.subject.name,
+                            planObject.teacher.firstName,
+                            planObject.teacher.lastName,
+                            planObject.subjectType.type
+                    )
+            );
+            comment.setString(fullInfo);
+            comment.setAuthor("Auto-Generated");
+            cell.setCellComment(comment);
+
             sheet.autoSizeColumn(groups.get(planObject.group));
         }
     }
 
     private void prepareHeaderAndRows(Sheet sheet, Row headerRow, Map<Group, Integer> groups,
                                       Map<SlotsDay, Integer> slots, Row sheetNameRow){
-        int firstGroupColumnIndex = 1;
+        int firstGroupColumnIndex = 2;
         int lastGroupColumnIndex = firstGroupColumnIndex + groups.size();
 
         Cell cell = sheetNameRow.createCell(firstGroupColumnIndex);
@@ -155,7 +187,7 @@ public class PlanToExcelExportService {
 
         List<Group> sortedGroups = groups.keySet()
                 .stream()
-                .sorted(Comparator.comparing(group -> group.code))
+                .sorted(Comparator.comparing(group -> this.extractNumberFromGroupCode(group.code)))
                 .toList();
         for (Group group : sortedGroups) {
             groups.put(group, firstGroupColumnIndex++);
@@ -164,13 +196,144 @@ public class PlanToExcelExportService {
         for(Group group: groups.keySet()){
             headerRow.createCell(groups.get(group)).setCellValue(group.code);
         }
-        for(SlotsDay slotsDay: slots.keySet()){
-            Row row = sheet.createRow(slots.get(slotsDay));
-            row.createCell(0).setCellValue(slotsDay.day.toString() + " " + slotsDay.slot.startTime + " P");
-            row = sheet.createRow(slots.get(slotsDay) + 1);
-            row.createCell(0).setCellValue(slotsDay.day.toString() + " " + slotsDay.slot.startTime + " N");
+
+        XSSFCellStyle dayCellStyle = (XSSFCellStyle) workbook.createCellStyle();
+        dayCellStyle.setRotation((short) 90);
+        dayCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        dayCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+        XSSFFont boldFont = (XSSFFont) workbook.createFont();
+        boldFont.setBold(true);
+        dayCellStyle.setFont(boldFont);
+
+        for (SlotsDay slotsDay : slots.keySet()) {
+            int startRow = slots.get(slotsDay);
+            int endRow = startRow + 1;
+
+            Row row = sheet.createRow(startRow);
+            row.createCell(1).setCellValue(slotsDay.slot.startTime + " P");
+
+            Row nextRow = sheet.createRow(endRow);
+            nextRow.createCell(1).setCellValue(slotsDay.slot.startTime + " N");
+
+            Cell dayCell = row.createCell(0);
+            dayCell.setCellValue(slotsDay.day.toString());
+            dayCell.setCellStyle(dayCellStyle);
+
             sheet.autoSizeColumn(0);
+            sheet.autoSizeColumn(1);
         }
 
+        String previousDay = null;
+        int mergeStartRow = -1;
+        int currentRow = 0;
+
+        while (currentRow <= sheet.getLastRowNum()) {
+            Row row = sheet.getRow(currentRow);
+            if (row == null) {
+                currentRow++;
+                continue;
+            }
+            Cell dayCell = row.getCell(0);
+            if (dayCell == null) {
+                currentRow++;
+                continue;
+            }
+
+            String currentDay = dayCell.getStringCellValue();
+
+            if (!currentDay.equals(previousDay)) {
+                if (mergeStartRow != -1 && previousDay != null) {
+                    sheet.addMergedRegion(new CellRangeAddress(mergeStartRow, currentRow - 1, 0, 0));
+                }
+                previousDay = currentDay;
+                mergeStartRow = currentRow;
+            }
+
+            currentRow++;
+        }
+
+        if (mergeStartRow != -1 && previousDay != null) {
+            sheet.addMergedRegion(new CellRangeAddress(mergeStartRow, sheet.getLastRowNum(), 0, 0));
+        }
+    }
+
+    public void mergeCellsIfEqual(Sheet sheet, int startRow, int startCol) {
+        for (int row = startRow; row <= sheet.getLastRowNum(); row++) {
+            Row currentRow = sheet.getRow(row);
+            if (currentRow == null) continue;
+
+            int mergeStartCol = startCol;
+            String lastValue = null;
+
+            for (int col = startCol; col <= currentRow.getLastCellNum(); col++) {
+                Cell cell = currentRow.getCell(col);
+                String cellValue = (cell != null) ? cell.getStringCellValue() : null;
+
+                if (lastValue == null || !lastValue.equals(cellValue)) {
+                    if (mergeStartCol < col - 1) {
+                        addMergedRegionIfPossible(sheet, row, row, mergeStartCol, col - 1);
+                    }
+                    mergeStartCol = col;
+                }
+
+                lastValue = cellValue;
+            }
+
+            if (mergeStartCol < currentRow.getLastCellNum()) {
+                addMergedRegionIfPossible(sheet, row, row, mergeStartCol, currentRow.getLastCellNum() - 1);
+            }
+        }
+
+        for (int col = startCol; col <= sheet.getRow(startRow).getLastCellNum(); col++) {
+            int mergeStartRow = startRow;
+            String lastValue = null;
+
+            for (int row = startRow; row <= sheet.getLastRowNum(); row++) {
+                Row currentRow = sheet.getRow(row);
+                if (currentRow == null) continue;
+
+                Cell cell = currentRow.getCell(col);
+                String cellValue = (cell != null) ? cell.getStringCellValue() : null;
+
+                if (lastValue == null || !lastValue.equals(cellValue)) {
+                    if (mergeStartRow < row - 1) {
+                        addMergedRegionIfPossible(sheet, mergeStartRow, row - 1, col, col);
+                    }
+                    mergeStartRow = row;
+                }
+                lastValue = cellValue;
+            }
+
+            if (mergeStartRow < sheet.getLastRowNum()) {
+                addMergedRegionIfPossible(sheet, mergeStartRow, sheet.getLastRowNum(), col, col);
+            }
+        }
+    }
+
+    private void addMergedRegionIfPossible(Sheet sheet, int firstRow, int lastRow, int firstCol, int lastCol) {
+        CellRangeAddress newRegion = new CellRangeAddress(firstRow, lastRow, firstCol, lastCol);
+        for (CellRangeAddress existingRegion : sheet.getMergedRegions()) {
+            if (existingRegion.intersects(newRegion)) {
+                return;
+            }
+        }
+        sheet.addMergedRegion(newRegion);
+    }
+
+
+    private String getInitials(String fullName) {
+        StringBuilder initials = new StringBuilder();
+        for (String part : fullName.split(" ")) {
+            if (!part.isEmpty()) {
+                initials.append(part.charAt(0));
+            }
+        }
+        return initials.toString().toUpperCase();
+    }
+
+    private int extractNumberFromGroupCode(String code){
+        String numberPart = code.replaceAll("\\D+", "");
+        return numberPart.isEmpty() ? 0 : Integer.parseInt(numberPart);
     }
 }
