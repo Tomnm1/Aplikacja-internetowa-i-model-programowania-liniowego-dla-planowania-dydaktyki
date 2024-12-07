@@ -9,6 +9,7 @@ public class TeacherDTO {
     public String firstName;
     public String lastName;
     public Degree degree;
+    public Boolean isAdmin;
     public Map<String, String> preferences = new HashMap<>();
     public List<Integer> subjectTypesList;
 }

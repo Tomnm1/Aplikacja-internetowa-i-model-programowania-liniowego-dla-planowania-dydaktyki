@@ -132,7 +132,7 @@ public class PlanningDataAssemblingService {
     }
 
     private List<TeacherLoad> getTeachersLoad(){
-        List<Teacher> teachers = teacherService.getAllteachers();
+        List<Teacher> teachers = teacherService.getAllTeachers();
         List<TeacherLoad> result = new ArrayList<>();
         for(Teacher teacher: teachers){
             List<TeacherLoadSubject> teacherLoadSubjectList = new ArrayList<>();
@@ -258,7 +258,7 @@ public class PlanningDataAssemblingService {
     }
 
     private List<String> getAllTeachers() {
-        return teacherService.getAllteachers().stream()
+        return teacherService.getAllTeachers().stream()
                 .map(teacher -> String.valueOf(teacher.id))
                 .collect(Collectors.toList());
     }

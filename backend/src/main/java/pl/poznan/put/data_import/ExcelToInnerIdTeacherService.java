@@ -56,7 +56,7 @@ public class ExcelToInnerIdTeacherService {
             this.result.add("Teacher " + firstName + " " + secondName + " " + lastName + " does not exist.");
         } else {
             teacher.innerId = innerId;
-            teacherService.updateteacherByID(teacher.id, teacher);
+            teacherService.updateTeacherByID(teacher.id, teacher);
         }
     }
 }
