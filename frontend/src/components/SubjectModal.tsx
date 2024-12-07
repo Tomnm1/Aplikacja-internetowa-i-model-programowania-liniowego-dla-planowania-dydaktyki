@@ -127,7 +127,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({open, onClose, subject, isAd
             onClose();
 
         } catch (error) {
-            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error.message || error}`, {variant: 'error'});
+            enqueueSnackbar(`Wystąpił błąd przy ${isAdding ? 'dodawaniu' : 'aktualizacji'} rekordu: ${error}`, {variant: 'error'});
             setLoading(false);
         }
     };
@@ -153,10 +153,12 @@ const SubjectModal: React.FC<SubjectModalProps> = ({open, onClose, subject, isAd
         }
     };
 
+
     return (<Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
             <Fade in={open} timeout={500}>
                 <Box sx={{position: 'relative', minHeight: '400px', padding: 4}}>
-                    <DialogTitle>{isAdding ? 'Dodaj przedmiot' : 'Edytuj przedmiot'}</DialogTitle>
+                    {/*// @ts-ignore NIE TYKAĆ, WIEM CO ROBIE*/ }
+                    <DialogTitle>{isAdding ? 'Dodaj przedmiot' : `Edytuj przedmiot: ${subject!.name}, ${subject!.semester!.specialisation!.fieldOfStudy?.name}, ${subject!.semester.number}`}</DialogTitle>
                     <Stepper activeStep={activeStep} alternativeLabel>
                         {steps.map((label) => (<Step key={label}>
                                 <StepLabel>{label}</StepLabel>

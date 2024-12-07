@@ -1,5 +1,6 @@
 package pl.poznan.put.planner_endpoints.GeneratedPlan;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,34 @@ public class GeneratedPlanService {
      * @return list of all generatedPlan objects
      */
     public List<GeneratedPlan> getAllGeneratedPlans() {return generatedPlanRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));}
+
+    @Transactional
+    public List<GeneratedPlanDTO> getAllGeneratedPlansDTO(){
+        return generatedPlanRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream().map(GeneratedPlan::convertToDTO).toList();
+    }
+
+    @Transactional
+    public List<GeneratedPlanDTO> getGeneratedPlansByTeacherId(Integer teacherId) {
+        return generatedPlanRepository.findAllByTeacherId(teacherId)
+                .stream()
+                .map(GeneratedPlan::convertToDTO)
+                .toList();
+    }
+    @Transactional
+    public List<GeneratedPlanDTO> getGeneratedPlansByClassroomId(Integer classroomID) {
+        return generatedPlanRepository.findAllByClassroomClassroomID (classroomID)
+                .stream()
+                .map(GeneratedPlan::convertToDTO)
+                .toList();
+    }
+    @Transactional
+    public List<GeneratedPlanDTO> getGeneratedPlansByGroupId(Integer groupId) {
+        return generatedPlanRepository.findAllByGroupId (groupId)
+                .stream()
+                .map(GeneratedPlan::convertToDTO)
+                .toList();
+    }
+
 
     /**
      * Finds room by ID

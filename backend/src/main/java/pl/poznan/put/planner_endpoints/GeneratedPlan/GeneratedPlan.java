@@ -5,7 +5,9 @@ import pl.poznan.put.planner_endpoints.Classroom.Classroom;
 import pl.poznan.put.planner_endpoints.Group.Group;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
 import pl.poznan.put.planner_endpoints.SlotsDay.SlotsDay;
+import pl.poznan.put.planner_endpoints.SubjectType.ClassTypeOwn;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectType;
+import pl.poznan.put.planner_endpoints.Teacher.Degree;
 import pl.poznan.put.planner_endpoints.Teacher.Teacher;
 
 /**
@@ -38,4 +40,23 @@ public class GeneratedPlan {
     public SubjectType subjectType;
     @Column(name = "even_week")
     public Boolean isEvenWeek;
+
+    public GeneratedPlanDTO convertToDTO() {
+        GeneratedPlanDTO dto = new GeneratedPlanDTO();
+        dto.id = this.id;
+        dto.isEvenWeek = this.isEvenWeek;
+        dto.planId = this.plan.planId;
+        dto.slotsDay = this.slotsDay;
+        dto.groupId = this.group.id;
+        dto.groupCode = this.group.code;
+        dto.teacherId = this.teacher.id;
+        dto.teacherFirstName = this.teacher.firstName;
+        dto.teacherLastName = this.teacher.lastName;
+        dto.degree = this.teacher.degree;
+        dto.classroomId = this.classroom.classroomID;
+        dto.classroomCode = this.classroom.code;
+        dto.subjectTypeId = this.subjectType.subjectTypeId;
+        dto.classTypeOwn = this.subjectType.type;
+        return dto;
+    }
 }
