@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
 /**
@@ -34,7 +33,7 @@ public class TeacherController {
     })
     @Transactional
     public List<TeacherDTO> getAllTeachers() {
-        return teacherService.getAllteachersDTO();
+        return teacherService.getAllTeachersDTO();
     }
 
     @Operation(summary = "Return teachers by id")
@@ -47,7 +46,20 @@ public class TeacherController {
     })
     @Transactional
     public TeacherDTO getTeacherByID(@PathVariable("id") Integer id) {
-        return teacherService.getteacherDTOByID(id);
+        return teacherService.getTeacherDTOByID(id);
+    }
+
+    @Operation(summary = "Check if user has admin privileges")
+    @GetMapping("/testPrivileges/{id}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = Boolean.class)
+            )
+    })
+    @Transactional
+    public Boolean getTeacherByEloginID(@PathVariable("id") String id) {
+        return teacherService.checkIfAdminByEloginId(id);
     }
 
     @Operation(summary = "Create teachers from provided JSON")
@@ -72,7 +84,7 @@ public class TeacherController {
             )
     })
     public Teacher updateTeacherByID(@PathVariable("id") Integer id, @RequestBody Teacher teacherParams){
-        return teacherService.updateteacherByID(id, teacherParams);
+        return teacherService.updateTeacherByID(id, teacherParams);
     }
 
     @Operation(summary = "Update specified teacher's email from provided JSON")
@@ -93,7 +105,7 @@ public class TeacherController {
             @Content(schema = @Schema(hidden = true))
     })
     public void deleteAllTeacher() {
-        teacherService.deleteAllteachers();
+        teacherService.deleteAllTeachers();
     }
 
     @Operation(summary = "Delete specified Teacher")
@@ -102,6 +114,6 @@ public class TeacherController {
             @Content(schema = @Schema(hidden = true))
     })
     public void deleteTeacher(@PathVariable("id") Integer id) {
-        teacherService.deleteteacherByID(id);
+        teacherService.deleteTeacherByID(id);
     }
 }

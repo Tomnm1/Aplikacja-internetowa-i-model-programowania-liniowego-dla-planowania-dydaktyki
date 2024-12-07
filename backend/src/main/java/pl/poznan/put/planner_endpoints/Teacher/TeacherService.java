@@ -34,7 +34,7 @@ public class TeacherService {
     }
 
     @Transactional
-    public List<Teacher> getAllteachers(){
+    public List<Teacher> getAllTeachers(){
         return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
@@ -49,7 +49,7 @@ public class TeacherService {
      * @param size total number of pages
      * @return Page object containing all found teachers objects
      */
-    public Page<Teacher> getteacherPage(Integer page, Integer size){
+    public Page<Teacher> getTeacherPage(Integer page, Integer size){
         return teacherRepository.findAll(PageRequest.of(page,size));
     }
 
@@ -59,18 +59,18 @@ public class TeacherService {
      * @return Optional - empty or with Subject
      */
 
-    public Optional<Teacher> getteacherByID(Integer id){
+    public Optional<Teacher> getTeacherByID(Integer id){
         return teacherRepository.findById(id);
     }
 
     @Transactional
-    public TeacherDTO getteacherDTOByID(Integer id){
+    public TeacherDTO getTeacherDTOByID(Integer id){
         Teacher teacher = teacherRepository.findById(id).orElseThrow();
         return teacher.convertToDTO();
     }
 
     /**
-     * Creates an Teacher
+     * Creates a Teacher
      * @param teacher object to be inserted into DB
      * @return saved Teacher
      */
@@ -85,7 +85,7 @@ public class TeacherService {
      * @return saved Teacher or null
      */
     @Transactional
-    public Teacher updateteacherByID(Integer id, Teacher teacherParams){
+    public Teacher updateTeacherByID(Integer id, Teacher teacherParams){
         Optional<Teacher> teacher = teacherRepository.findById(id);
         if (teacher.isPresent()) {
             Teacher oldteacher = teacher.get();
@@ -96,6 +96,8 @@ public class TeacherService {
             oldteacher.secondName = teacherParams.secondName;
             oldteacher.usosId = teacherParams.usosId;
             oldteacher.innerId = teacherParams.innerId;
+            //oldteacher.isAdmin = teacherParams.isAdmin; // Maybe separate endpoint, that can only be accessed by admin?
+            oldteacher.subjectTypesList = teacherParams.subjectTypesList;
 //            oldteacher.subjectTypesList = teacherParams.subjectTypesList;
             return teacherRepository.save(oldteacher);
         } else {
@@ -118,14 +120,14 @@ public class TeacherService {
      * Deletes Teacher by ID
      * @param id id
      */
-    public void deleteteacherByID(Integer id){
+    public void deleteTeacherByID(Integer id){
         teacherRepository.deleteById(id);
     }
 
     /**
      * Deletes all teachers
      */
-    public void deleteAllteachers(){
+    public void deleteAllTeachers(){
         teacherRepository.deleteAll();
     }
 
@@ -139,6 +141,28 @@ public class TeacherService {
 
     public Teacher findByUsosId(int usosId){
         return teacherRepository.findByUsosId(usosId);
+    }
+
+    /**
+     * Finds Teacher by EloginId
+     * @param eloginId id from elogin token
+     * @return Teacher or null
+     */
+    public Optional<Teacher> findByEloginId(String eloginId){ return teacherRepository.findByEloginId(eloginId); }
+
+    /**
+     * Finds user by EloginId and checks if user is admin
+     * @param eloginId id from elogin token
+     * @return Boolean if user exists or null if user does not exist
+     */
+    public Boolean checkIfAdminByEloginId(String eloginId) {
+        Optional<Teacher> teacher = teacherRepository.findByEloginId(eloginId);
+        if (teacher.isPresent()) {
+            Teacher challenger = teacher.get();
+            return challenger.isAdmin;
+        } else {
+            return null;
+        }
     }
 
     public Teacher findRandomTeacher(){ return teacherRepository.findRandomTeacher(); }
