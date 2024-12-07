@@ -11,6 +11,7 @@ public class TeacherDTO {
     public String lastName;
     public String email;
     public Degree degree;
+    public Boolean isAdmin;
     public Map<String, String> preferences = new HashMap<>();
     public List<Integer> subjectTypesList;
     public Integer usosId;
