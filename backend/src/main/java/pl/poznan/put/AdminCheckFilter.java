@@ -9,58 +9,41 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.stereotype.Component;
 import pl.poznan.put.planner_endpoints.Teacher.Teacher;
-import pl.poznan.put.planner_endpoints.Teacher.TeacherService;
+import pl.poznan.put.planner_endpoints.Teacher.TeacherRepository;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.Set;
 
 @Component
 public class AdminCheckFilter extends OncePerRequestFilter {
 
-    private final TeacherService userService;
-    private final Set<String> adminEndpoints = Set.of("/admins"); // TODO Tu w przyszłości może być endpoint do zarządzania adminami oraz inne rzeczy do których user nie potrzebuje dostępu
+    private final TeacherRepository userRepository;
 
-    public AdminCheckFilter(TeacherService userRepository) {
-        this.userService = userRepository;
+    public AdminCheckFilter(TeacherRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String requestPath = request.getRequestURI();
-
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            String email = jwt.getClaimAsString("sub");
+            String eloginId = jwt.getClaimAsString("uid");
 
-            Optional<Teacher> teacher = userService.findByEloginId(email);
+            Optional<Teacher> teacher = userRepository.findByEloginId(eloginId);
 
             if (teacher.isPresent()) {
-                if (adminEndpoints.contains(requestPath)) {
-                    Teacher user = teacher.get();
-                    if (user.isAdmin) {
-                        filterChain.doFilter(request, response);
-                    } else {
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        response.getWriter().write("Unauthorized: Admin access required");
-                    }
+                Teacher user = teacher.get();
+                if (user.isAdmin) {
+                    filterChain.doFilter(request, response);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("Unauthorized: Admin access required eee");
                 }
             } else {
-                Teacher newUser = new Teacher();
-
-                newUser.firstName = jwt.getClaimAsString("gnm");
-                newUser.lastName = jwt.getClaimAsString("snm");
-                newUser.email = jwt.getClaimAsString("sub");
-                newUser.isAdmin = false;
-
-                userService.createTeacher(newUser);
-
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Unauthorized: User was not registered");
-
+                response.getWriter().write("Unauthorized: Admin access required ttt");
             }
         }
-        filterChain.doFilter(request, response);
     }
 }
