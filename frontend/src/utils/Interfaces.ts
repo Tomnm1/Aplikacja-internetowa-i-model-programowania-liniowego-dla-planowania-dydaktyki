@@ -316,26 +316,33 @@ export interface SubjectTypeState {
     error: string | null;
 }
 
-// export interface GeneratedPlan {
-//     id: number;
-//     plan: Plan;
-//     slotsDay: BackendSlotsDay;
-//     group: Group;
-//     teacher: BackendTeacher;
-//     classroom: BackendClassroom;
-//     subjectType: BackendSubjectType;
-//     isEvenWeek: boolean;
-// }
-
-export interface GeneratedPlan {
+export interface GeneratedPlanDTO {
     id: number;
-    plan: Plan;
-    slotsDay: SlotsDay;
-    group: Group;
-    teacher: Teacher;
-    classroom: Classroom;
-    subjectType: SubjectType;
     isEvenWeek: boolean;
+    planId: number;
+    slotsDay: {
+        SlotsDayId: number;
+        day: Day;
+        slot: {
+            slotId: number;
+            startTime: string;
+            endTime: string;
+        };
+    };
+    groupId: number;
+    groupCode: string;
+    teacherId: number;
+    teacherFirstName: string;
+    teacherLastName: string;
+    degree: keyof typeof degrees;
+    classroomId: number;
+    classroomCode: string;
+    subjectTypeId: number;
+    subjectName: string;
+    classTypeOwn: Type;
+    specializationName: string;
+    specializationSemester: string;
+    specializationId : number;
 }
 
 export interface Plan {

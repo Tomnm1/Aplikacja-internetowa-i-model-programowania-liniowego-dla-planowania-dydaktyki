@@ -138,7 +138,7 @@ const Subjects: React.FC = () => {
                 open={isDialogOpen}
                 onClose={handleDialogClose}
                 title="Potwierdzenie"
-                content="Czy na pewno chcesz usunąć ten slot dnia?"
+                content="Czy na pewno chcesz usunąć ten przedmiot?"
                 action="Potwierdź"
             />
             {isModalOpen && (<SubjectModal

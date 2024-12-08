@@ -18,5 +18,9 @@ public class GeneratedPlanDTO {
     public Integer classroomId;
     public String classroomCode;
     public Integer subjectTypeId;
+    public String subjectName;
     public ClassTypeOwn classTypeOwn;
+    public String specializationName;
+    public String specializationSemester;
+    public Integer specializationId;
 }

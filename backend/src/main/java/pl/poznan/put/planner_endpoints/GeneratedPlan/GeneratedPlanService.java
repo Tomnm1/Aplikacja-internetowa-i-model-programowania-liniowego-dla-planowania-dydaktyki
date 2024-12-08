@@ -43,8 +43,8 @@ public class GeneratedPlanService {
                 .toList();
     }
     @Transactional
-    public List<GeneratedPlanDTO> getGeneratedPlansByGroupId(Integer groupId) {
-        return generatedPlanRepository.findAllByGroupId (groupId)
+    public List<GeneratedPlanDTO> findAllByGroupSemesterSemesterId(Integer semesterId) {
+        return generatedPlanRepository.findAllByGroupSemesterSemesterId (semesterId)
                 .stream()
                 .map(GeneratedPlan::convertToDTO)
                 .toList();
