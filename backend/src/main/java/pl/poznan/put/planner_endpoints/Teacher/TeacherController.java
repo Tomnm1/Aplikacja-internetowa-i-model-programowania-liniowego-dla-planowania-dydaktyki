@@ -72,7 +72,7 @@ public class TeacherController {
     })
     public Teacher createTeacher(@RequestBody Teacher teacher){
         //teacher.degree = Degree.valueOf(teacher.degree.getDisplayName());
-        return teacherService.createteacher(teacher);
+        return teacherService.createTeacher(teacher);
     }
 
     @Operation(summary = "Update specified teachers from provided JSON")

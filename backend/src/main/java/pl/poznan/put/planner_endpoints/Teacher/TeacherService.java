@@ -74,6 +74,8 @@ public class TeacherService {
      * @param teacher object to be inserted into DB
      * @return saved Teacher
      */
+    public Teacher createTeacher(Teacher teacher){
+        System.out.print(teacher);
     public Teacher createteacher(Teacher teacher){
         return teacherRepository.save(teacher);
     }
