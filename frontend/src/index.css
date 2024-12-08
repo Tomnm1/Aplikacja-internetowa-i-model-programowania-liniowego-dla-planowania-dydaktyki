@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-/* Style for events */
 .fc-event {
     background-color: #1976d2 !important;
     color: #ffffff !important;
@@ -12,6 +10,8 @@
     padding: 6px 8px !important;
     margin: 2px 0 !important;
     transition: background-color 0.3s ease-in-out !important;
+    font-size: 0.85em!important;
+    line-height: 1.4em!important;
 }
 
 .fc-event:hover {
@@ -40,3 +40,17 @@
 .fc-timegrid-slot {
     border: 1px solid #f0f0f0 !important;
 }
+
+.break-keep {
+    white-space: nowrap;
+}
+
+.fc {
+    width: 100%;
+}
+
+.fc .fc-col-header-cell,
+.fc .fc-timegrid-col {
+    width: auto !important;
+}
+

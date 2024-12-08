@@ -56,7 +56,11 @@ public class GeneratedPlan {
         dto.classroomId = this.classroom.classroomID;
         dto.classroomCode = this.classroom.code;
         dto.subjectTypeId = this.subjectType.subjectTypeId;
+        dto.subjectName = this.subjectType.subject.name;
         dto.classTypeOwn = this.subjectType.type;
+        dto.specializationName = this.group.semester.specialisation.name;
+        dto.specializationSemester = this.group.semester.number;
+        dto.specializationId = this.group.semester.semesterId;
         return dto;
     }
 }
