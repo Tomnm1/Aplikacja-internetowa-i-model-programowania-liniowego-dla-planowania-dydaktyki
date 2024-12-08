@@ -343,6 +343,7 @@ export interface GeneratedPlanDTO {
     specializationName: string;
     specializationSemester: string;
     specializationId : number;
+    fieldOfStudyName: string;
 }
 
 export interface Plan {
