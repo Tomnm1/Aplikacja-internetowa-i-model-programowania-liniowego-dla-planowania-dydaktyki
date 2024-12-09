@@ -25,11 +25,11 @@ const GroupsModal: React.FC<GroupsModalProps> = ({ open, onClose, typeData,semes
     useEffect(() => {
         fetch(`${API_ENDPOINTS.GROUPS}/semester/${semester}`)
             .then(res => res.json())
-            .then((data: Group[]) => setGroups(data))
+            .then((data: Group[]) => setGroups(data.sort( (a,b) => Number(a.code.slice(1)) > Number(b.code.slice(1)) ? 1 : -1 )))
             .catch(err => {
                 enqueueSnackbar(`Wystąpił błąd przy pobieraniu grup: ${err}`, { variant: 'error' });
             });
-    }, [enqueueSnackbar]);
+    }, [enqueueSnackbar, semester]);
 
     const handleClick = (group: Group) => {
         setFormData((prev) => {
@@ -38,7 +38,6 @@ const GroupsModal: React.FC<GroupsModalProps> = ({ open, onClose, typeData,semes
             }
             return [...prev, group];
         });
-        console.log(formData);
     };
 
     const isSelected = (index: number) => formData.some(g => g.id === index);

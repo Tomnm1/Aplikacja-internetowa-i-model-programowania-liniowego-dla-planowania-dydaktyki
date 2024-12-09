@@ -1,14 +1,31 @@
-import {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import {Autocomplete, CircularProgress, Popover, TextField, Typography} from '@mui/material';
+import {
+    Autocomplete,
+    CircularProgress, FormControl,
+    InputLabel,
+    MenuItem,
+    Popover,
+    Select,
+    TextField,
+    Typography
+} from '@mui/material';
 import {EventInput} from '@fullcalendar/core';
 import {EventApi, EventClickArg, EventContentArg} from 'fullcalendar';
 import {useSnackbar} from 'notistack';
 import API_ENDPOINTS from '../app/urls.ts';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import {
-    BackendClassroom, BackendSemester, BackendTeacher, cycleMapping, Day, dayMapping, GeneratedPlanDTO, typeMapping,
+    BackendClassroom,
+    BackendSemester,
+    BackendTeacher,
+    cycleMapping,
+    Day,
+    dayMapping,
+    GeneratedPlanDTO,
+    Plan,
+    typeMapping,
 } from '../utils/Interfaces.ts';
 import {useAppSelector} from "../hooks/hooks.ts";
 import {RootState} from "../app/store.ts";
@@ -35,12 +52,14 @@ const Timetable = () => {
     const {userId, role} = useAppSelector((state: RootState) => state.auth);
     const [selectedItem, setSelectedItem] = useState<{ id: number | undefined; label: string } | null>(null);
     const [selectedEvent, setSelectedEvent] = useState<EventApi | null>(null);
+    const [selectedPlan, setSelectedPlan] = useState<number>(0);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const {enqueueSnackbar} = useSnackbar();
 
     const [classrooms, setClassrooms] = useState<BackendClassroom[]>([]);
     const [semesters, setSemester] = useState<BackendSemester[]>([]);
     const [teachers, setTeachers] = useState<BackendTeacher[]>([]);
+    const [plans, setPlans] = useState<Plan[]>([]);
     const [events, setEvents] = useState<EventInput[]>([]);
 
     const [loading, setLoading] = useState<boolean>(true);
@@ -63,11 +82,17 @@ const Timetable = () => {
             .catch((error) => {
                 enqueueSnackbar(`Błąd podczas pobierania sal: ${error.message}`, {variant: 'error'});
                 return [];
+            }), fetch(API_ENDPOINTS.PLANS)
+            .then((res) => res.json())
+            .catch((error) => {
+                enqueueSnackbar(`Błąd podczas pobierania planów: ${error.message}`, {variant: 'error'});
+                return [];
             }),])
-            .then(([teachersData, semestersData, classroomsData]) => {
+            .then(([teachersData, semestersData, classroomsData, plansData]) => {
                 setTeachers(teachersData);
                 setSemester(semestersData);
                 setClassrooms(classroomsData);
+                setPlans(plansData);
                 setLoading(false);
             })
             .catch(() => {
@@ -107,7 +132,7 @@ const Timetable = () => {
     )
 
         useEffect(() => {
-            if (!selectedItem) return;
+            if (!selectedItem || selectedPlan === 0) return;
 
             setEventsLoading(true);
 
@@ -115,13 +140,13 @@ const Timetable = () => {
 
             switch (context) {
                 case 'teacher':
-                    endpoint = API_ENDPOINTS.GENERATED_PLAN_TEACHERS(selectedItem.id!);
+                    endpoint = API_ENDPOINTS.GENERATED_PLAN_TEACHERS(selectedItem.id!,selectedPlan );
                     break;
                 case 'semester':
-                    endpoint = API_ENDPOINTS.GENERATED_PLAN_SEMESTER(selectedItem.id!);
+                    endpoint = API_ENDPOINTS.GENERATED_PLAN_SEMESTER(selectedItem.id!,selectedPlan);
                     break;
                 case 'classroom':
-                    endpoint = API_ENDPOINTS.GENERATED_PLAN_CLASSROOM(selectedItem.id!);
+                    endpoint = API_ENDPOINTS.GENERATED_PLAN_CLASSROOM(selectedItem.id!,selectedPlan);
                     break;
                 default:
                     break;
@@ -200,7 +225,7 @@ const Timetable = () => {
                 setEvents([]);
                 setEventsLoading(false);
             }
-        }, [context, selectedItem, enqueueSnackbar]);
+        }, [context, selectedItem, selectedPlan, enqueueSnackbar]);
 
         const handleEventClick = (clickInfo: EventClickArg) => {
             setSelectedEvent(clickInfo.event);
@@ -240,6 +265,22 @@ const Timetable = () => {
 
         return (<div className={'py-8 px-2 w-full overflow-auto'}>
                 {role === 'admin' && (<div className={'flex gap-2 w-full'}>
+                    <FormControl sx={{width: 300}} disabled={loading}>
+                    <InputLabel id="plan-label">Plan</InputLabel>
+                    <Select
+                        labelId="plan-label"
+                        value={selectedPlan}
+                        onChange={(event) => {
+                                setSelectedPlan(event.target.value as number);
+                        }}
+                        label="Plan"
+                        variant="outlined"
+                    >
+                        {Object.values(plans).map((plan) => (<MenuItem key={plan.planId} value={plan.planId}>
+                            {`${plan.name} ${new Date(plan.creationDate).toLocaleString()}`}
+                        </MenuItem>))}
+                    </Select>
+                    </FormControl>
                         <Autocomplete
                             key={context}
                             sx={{width: 300}}
