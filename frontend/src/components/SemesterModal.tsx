@@ -25,6 +25,7 @@ import {useSnackbar} from "notistack";
 import ActionButton from "../utils/ActionButton.tsx";
 import SaveIcon from "@mui/icons-material/Save";
 import ClearIcon from "@mui/icons-material/Clear";
+import {fetchWithAuth} from "../app/fetchWithAuth.ts";
 
 interface SemesterModalProps {
     open: boolean;
@@ -50,7 +51,7 @@ const SemesterModal: React.FC<SemesterModalProps> = ({open, onClose, semester, i
 
     useEffect(() => {
         if (isAdding) {
-            fetch(API_ENDPOINTS.SPECIALISATIONS)
+            fetchWithAuth(API_ENDPOINTS.SPECIALISATIONS)
                 .then(res => res.json())
                 .then((data: BackendSpecialisation[]) => setSpecialisations(data))
                 .catch(err => {

@@ -24,25 +24,34 @@ const Login: React.FC = () => {
         }
     };
 
+    const handleLogin = () => {
+        const systemId = 'TU-ID';
+        window.location.href = `https://elogin.put.poznan.pl/?do=Authorize&system=${systemId}`;
+    };
+
     return (<Container maxWidth="sm">
-            <Box mt={10} p={4} boxShadow={3} borderRadius={2}>
-                {error && <Alert severity="error">{error}</Alert>}
-                <form onSubmit={handleSubmit}>
-                    <TextField
-                        label="Username (admin or userId)"
-                        variant="outlined"
-                        fullWidth
-                        required
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        margin="normal"
-                    />
-                    <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
-                        {loading ? <CircularProgress size={24}/> : 'Zaloguj się'}
-                    </Button>
-                </form>
-            </Box>
-        </Container>);
+        <Box mt={10} p={4} boxShadow={3} borderRadius={2}>
+            {error && <Alert severity="error">{error}</Alert>}
+            <form onSubmit={handleSubmit}>
+                <TextField
+                    label="Username (admin or userId)"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    margin="normal"
+                />
+                <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
+                    {loading ? <CircularProgress size={24}/> : 'Zaloguj się'}
+                </Button>
+            </form>
+
+            <button onClick={handleLogin}>
+                Zaloguj się przez eKonto
+            </button>
+        </Box>
+    </Container>);
 };
 
 export default Login;

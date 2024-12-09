@@ -1,13 +1,14 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {API_ENDPOINTS} from '../urls';
 import {Group, GroupState} from '../../utils/Interfaces';
+import {fetchWithAuth} from "../fetchWithAuth.ts";
 
 const initialState: GroupState = {
     rows: [], loading: false, error: null,
 };
 
-export const fetchGroup = createAsyncThunk<Group[], number>('group/fetchGroups', async (semesterId) => {
-    const response = await fetch(`${API_ENDPOINTS.GROUPS}/semester/${semesterId}`);
+export const fetchGroup = createAsyncThunk<Group[], number>('group/fetchWithAuthGroups', async (semesterId) => {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.GROUPS}/semester/${semesterId}`);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -30,7 +31,7 @@ const groupSlice = createSlice({
             })
             .addCase(fetchGroup.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch groups';
+                state.error = action.error.message || 'Failed to fetchWithAuth groups';
             })
     },
 });

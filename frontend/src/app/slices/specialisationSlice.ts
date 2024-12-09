@@ -1,6 +1,7 @@
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {BackendSpecialisation, Specialisation} from '../../utils/Interfaces';
 import {API_ENDPOINTS} from '../urls';
+import {fetchWithAuth} from "../fetchWithAuth.ts";
 
 interface SpecialisationsState {
     rows: Specialisation[];
@@ -12,10 +13,10 @@ const initialState: SpecialisationsState = {
     rows: [], loading: false, error: null,
 };
 
-export const fetchSpecialisations = createAsyncThunk<Specialisation[]>('specialisations/fetchSpecialisations', async () => {
-    const response = await fetch(API_ENDPOINTS.SPECIALISATIONS);
+export const fetchSpecialisations = createAsyncThunk<Specialisation[]>('specialisations/fetchWithAuthSpecialisations', async () => {
+    const response = await fetchWithAuth(API_ENDPOINTS.SPECIALISATIONS);
     if (!response.ok) {
-        throw new Error('Failed to fetch specialisations');
+        throw new Error('Failed to fetchWithAuth specialisations');
     }
     const data: BackendSpecialisation[] = await response.json();
     const adjustedData: Specialisation[] = data.map((spec) => ({
@@ -29,7 +30,7 @@ export const fetchSpecialisations = createAsyncThunk<Specialisation[]>('speciali
 });
 
 export const addSpecialisation = createAsyncThunk<Specialisation, BackendSpecialisation>('specialisations/addSpecialisation', async (specData) => {
-    const response = await fetch(API_ENDPOINTS.SPECIALISATIONS, {
+    const response = await fetchWithAuth(API_ENDPOINTS.SPECIALISATIONS, {
         method: 'POST', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(specData),
@@ -57,7 +58,7 @@ export const updateSpecialisation = createAsyncThunk<Specialisation, BackendSpec
         throw new Error('specialisationId is required for updating');
     }
 
-    const response = await fetch(`${API_ENDPOINTS.SPECIALISATIONS}/${specData.specialisationId}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SPECIALISATIONS}/${specData.specialisationId}`, {
         method: 'PUT', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(specData),
@@ -81,7 +82,7 @@ export const updateSpecialisation = createAsyncThunk<Specialisation, BackendSpec
 });
 
 export const deleteSpecialisation = createAsyncThunk<number, number>('specialisations/deleteSpecialisation', async (id) => {
-    const response = await fetch(`${API_ENDPOINTS.SPECIALISATIONS}/${id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SPECIALISATIONS}/${id}`, {
         method: 'DELETE',
     });
 
@@ -105,7 +106,7 @@ const specialisationsSlice = createSlice({
             })
             .addCase(fetchSpecialisations.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch specialisations';
+                state.error = action.error.message || 'Failed to fetchWithAuth specialisations';
             })
             .addCase(addSpecialisation.fulfilled, (state, action: PayloadAction<Specialisation>) => {
                 state.rows.push(action.payload);
