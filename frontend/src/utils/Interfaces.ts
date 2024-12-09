@@ -64,19 +64,25 @@ export const typeMapping: { [key in Type]: string } = {
 export interface BackendTeacher {
     id?: number;
     firstName: string;
+    secondName: string;
     lastName: string;
     degree: string;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
+    usosId: number;
+    innerId: number;
 }
 
 export interface Teacher {
     id: number;
     firstName: string;
+    secondName: string;
     lastName: string;
     degree: string;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
+    usosId: number;
+    innerId: number;
 }
 
 export interface TeachersState {

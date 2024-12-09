@@ -8,7 +8,14 @@ import {useSnackbar} from 'notistack';
 
 interface TeacherDetailsProps {
     formData: {
-        id: number; firstName: string; lastName: string; degree: string; subjectTypesList: SubjectType[] | [];
+        id: number;
+        firstName: string;
+        secondName: string;
+        lastName: string;
+        degree: string;
+        subjectTypesList: SubjectType[] | [];
+        innerId: number;
+        usosId: number;
     };
     setFormData: React.Dispatch<React.SetStateAction<any>>;
     loading: boolean;
@@ -56,6 +63,15 @@ const TeacherDetails: React.FC<TeacherDetailsProps> = ({formData, setFormData, l
         />
         <TextField
             margin="normal"
+            label="Drugie imię"
+            name="secondName"
+            value={formData.secondName}
+            onChange={handleInputChange}
+            fullWidth
+            disabled={loading}
+        />
+        <TextField
+            margin="normal"
             label="Nazwisko"
             name="lastName"
             value={formData.lastName}
@@ -79,6 +95,26 @@ const TeacherDetails: React.FC<TeacherDetailsProps> = ({formData, setFormData, l
                 </MenuItem>))}
             </Select>
         </FormControl>
+        <TextField
+            margin="normal"
+            label="Wewnętrzne ID"
+            name="innerId"
+            value={formData.innerId}
+            onChange={handleInputChange}
+            fullWidth
+            disabled={loading}
+            required
+        />
+        <TextField
+            margin="normal"
+            label="USOS ID"
+            name="usosId"
+            value={formData.usosId}
+            onChange={handleInputChange}
+            fullWidth
+            disabled={loading}
+            required
+        />
     </Box>);
 };
 
