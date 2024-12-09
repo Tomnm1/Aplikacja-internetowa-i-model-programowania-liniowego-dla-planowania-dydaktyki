@@ -57,6 +57,7 @@ public class Teacher {
     public List<SubjectType> subjectTypesList;
 
     @OneToMany(mappedBy = "teacher")
+    @JsonIgnore
     public List<SubjectType_Teacher> subjectTypesTeacherList;
 
     public TeacherDTO convertToDTO(){
