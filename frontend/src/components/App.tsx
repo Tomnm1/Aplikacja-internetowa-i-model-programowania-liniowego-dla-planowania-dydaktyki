@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import Home from './Home';
 import Employees from './Teachers.tsx';
@@ -17,8 +17,33 @@ import SlotsDays from "./SlotsDays.tsx";
 import Semesters from "./Semesters.tsx";
 import Subjects from "./Subjects.tsx";
 import UserPlan from "./UserPlan.tsx";
+import {useDispatch} from "react-redux";
+import {loginUser} from "../app/slices/authSlice.ts";
 
 const App: React.FC = () => {
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const hash = window.location.hash;
+        if (hash.includes('access_token')) {
+            const params = new URLSearchParams(hash.substring(1));
+            const accessToken = params.get('access_token');
+            const state = params.get('state');
+
+            if (accessToken) {
+                localStorage.setItem('access_token', accessToken);
+                dispatch(loginUser(accessToken));
+                window.history.replaceState(null, '', window.location.pathname);
+            }
+        } else {
+            const storedToken = localStorage.getItem('access_token');
+            if (!storedToken) {
+                const systemId = 'TU-WPISZ-ID';
+                window.location.href = `https://elogin.put.poznan.pl/?do=Authorize&system=${systemId}`;
+            }
+        }
+    }, [dispatch]);
+
     return (
         <Router>
             <Routes>

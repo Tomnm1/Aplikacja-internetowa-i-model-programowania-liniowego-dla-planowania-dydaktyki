@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_ENDPOINTS } from '../urls';
 import { BackendTeacher } from '../../utils/Interfaces';
+import jwtDecode from 'jwt-decode';
+
 
 interface AuthState {
     isAuthenticated: boolean;
@@ -20,8 +22,16 @@ const initialState: AuthState = {
     error: null,
 };
 
+interface DecodedToken {
+    uid: string;
+    gnm: string;
+    snm: string;
+}
+
 const storedAuth = localStorage.getItem('auth');
+const storedToken = localStorage.getItem('access_token');
 const parsedAuth: AuthState | null = storedAuth ? JSON.parse(storedAuth) : null;
+
 
 export const loginUser = createAsyncThunk<
     { role: 'admin' | 'user'; userId: string; user?: BackendTeacher },
@@ -29,13 +39,19 @@ export const loginUser = createAsyncThunk<
     { rejectValue: string }
 >(
     'auth/loginUser',
-    async (username: string, { rejectWithValue }) => {
+    async (accessToken: string, { rejectWithValue }) => {
         try {
-            if (username === 'admin') {
+            const decoded: DecodedToken = jwtDecode(accessToken);
+            const userId = decoded.uid;
+
+            if (userId === 'admin') { //tu sie wpisze ID pani Paulinki i kogo tam jeszcze potrzeba
                 return { role: 'admin', userId: 'admin' };
             } else {
-                const userId = username.trim();
-                const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${userId}`);
+                const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${userId}`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
                 if (!response.ok) {
                     throw new Error('Nie znaleziono użytkownika');
                 }
@@ -48,7 +64,7 @@ export const loginUser = createAsyncThunk<
     }
 );
 
-const authSlice = createSlice({
+export const authSlice = createSlice({
     name: 'auth',
     initialState: parsedAuth || initialState,
     reducers: {
@@ -60,6 +76,7 @@ const authSlice = createSlice({
             state.loading = false;
             state.error = null;
             localStorage.removeItem('auth');
+            localStorage.removeItem('access_token');
         },
     },
     extraReducers: (builder) => {

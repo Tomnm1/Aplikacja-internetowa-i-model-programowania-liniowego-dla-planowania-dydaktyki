@@ -27,6 +27,7 @@ import {useSnackbar} from "notistack";
 import ActionButton from "../utils/ActionButton.tsx";
 import SaveIcon from "@mui/icons-material/Save";
 import ClearIcon from "@mui/icons-material/Clear";
+import {fetchWithAuth} from "../app/fetchWithAuth.ts";
 
 interface ClassroomModalProps {
     open: boolean;
@@ -70,7 +71,7 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({open, onClose, classroom
 
     useEffect(() => {
         if (isAdding) {
-            fetch(API_ENDPOINTS.BUILDINGS)
+            fetchWithAuth(API_ENDPOINTS.BUILDINGS)
                 .then((res) => res.json())
                 .then((data: BackendBuilding[]) => {
                     setBuildings(data);
@@ -84,7 +85,7 @@ const ClassroomModal: React.FC<ClassroomModalProps> = ({open, onClose, classroom
                     enqueueSnackbar(`Wystąpił błąd przy pobieraniu budynków: ${err}`, {variant: 'error'});
                 });
         } else if (classroom) {
-            fetch(`${API_ENDPOINTS.BUILDINGS}/${classroom.buildingId}`)
+            fetchWithAuth(`${API_ENDPOINTS.BUILDINGS}/${classroom.buildingId}`)
                 .then((res) => res.json())
                 .then((data: BackendBuilding) => {
                     setFormData((prev) => ({

@@ -9,6 +9,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import ClearIcon from "@mui/icons-material/Clear";
 import API_ENDPOINTS from "../app/urls.ts";
 import Grid from '@mui/material/Grid2';
+import {fetchWithAuth} from "../app/fetchWithAuth.ts";
 
 interface GroupsModalProps {
     open: boolean;
@@ -23,7 +24,7 @@ const GroupsModal: React.FC<GroupsModalProps> = ({ open, onClose, typeData,semes
     const [formData, setFormData] = useState<Group[]>(typeData?.groupsList || []);
 
     useEffect(() => {
-        fetch(`${API_ENDPOINTS.GROUPS}/semester/${semester}`)
+        fetchWithAuth(`${API_ENDPOINTS.GROUPS}/semester/${semester}`)
             .then(res => res.json())
             .then((data: Group[]) => setGroups(data))
             .catch(err => {
