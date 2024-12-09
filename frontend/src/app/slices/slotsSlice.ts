@@ -2,6 +2,7 @@ import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {GridRowId, GridRowModesModel} from '@mui/x-data-grid';
 import {API_ENDPOINTS} from '../urls';
 import {BackendSlot, LocalTime, Slot, SlotsState} from '../../utils/Interfaces';
+import {fetchWithAuth} from "../fetchWithAuth.ts";
 
 const initialState: SlotsState = {
     rows: [],
@@ -13,8 +14,8 @@ const initialState: SlotsState = {
     error: null,
 };
 
-export const fetchSlots = createAsyncThunk<Slot[]>('slots/fetchSlots', async () => {
-    const response = await fetch(API_ENDPOINTS.SLOTS);
+export const fetchSlots = createAsyncThunk<Slot[]>('slots/fetchWithAuthSlots', async () => {
+    const response = await fetchWithAuth(API_ENDPOINTS.SLOTS);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -32,7 +33,7 @@ export const addSlot = createAsyncThunk<{
     const slotData = {
         startTime: slot.start_time, endTime: slot.end_time,
     };
-    const response = await fetch(API_ENDPOINTS.SLOTS, {
+    const response = await fetchWithAuth(API_ENDPOINTS.SLOTS, {
         method: 'POST', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(slotData),
@@ -51,7 +52,7 @@ export const updateSlot = createAsyncThunk<Slot, Slot>('slots/updateSlot', async
     const slotData = {
         startTime: slot.start_time, endTime: slot.end_time,
     };
-    const response = await fetch(`${API_ENDPOINTS.SLOTS}/${slot.slot_id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SLOTS}/${slot.slot_id}`, {
         method: 'PUT', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(slotData),
@@ -67,7 +68,7 @@ export const updateSlot = createAsyncThunk<Slot, Slot>('slots/updateSlot', async
 });
 
 export const deleteSlot = createAsyncThunk<GridRowId, GridRowId>('slots/deleteSlot', async (id: GridRowId) => {
-    const response = await fetch(`${API_ENDPOINTS.SLOTS}/${id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SLOTS}/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
@@ -106,7 +107,7 @@ const slotSlice = createSlice({
             })
             .addCase(fetchSlots.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch slots';
+                state.error = action.error.message || 'Failed to fetchWithAuth slots';
             })
             .addCase(addSlot.fulfilled, (state, action) => {
                 const {tempId, slot} = action.payload;
