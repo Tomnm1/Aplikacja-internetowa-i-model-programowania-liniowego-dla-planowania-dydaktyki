@@ -34,43 +34,40 @@ public class GeneratedPlanController {
     }
 
     @Operation(summary = "Return GeneratedPlans filtered by Teacher ID")
-    @GetMapping("/teacher/{teacherId}")
+    @GetMapping("{planId}/teacher/{teacherId}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     array = @ArraySchema(schema = @Schema(implementation = GeneratedPlanDTO.class))
             )
     })
-    public List<GeneratedPlanDTO> getGeneratedPlansByTeacherId(@PathVariable("teacherId") Integer teacherId) {
-        return GeneratedPlanService.getGeneratedPlansByTeacherId(teacherId);
+    public List<GeneratedPlanDTO> getGeneratedPlansByTeacherId(@PathVariable("teacherId") Integer teacherId, @PathVariable("planId") Integer planId ) {
+        return GeneratedPlanService.getGeneratedPlansByTeacherId(teacherId, planId);
     }
 
     @Operation(summary = "Return GeneratedPlans filtered by Classroom ID")
-    @GetMapping("/classroom/{classroomID}")
+    @GetMapping("{planId}/classroom/{classroomID}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     array = @ArraySchema(schema = @Schema(implementation = GeneratedPlanDTO.class))
             )
     })
-    public List<GeneratedPlanDTO> getGeneratedPlansByClassroomId(@PathVariable("classroomID") Integer classroomID) {
-        return GeneratedPlanService.getGeneratedPlansByClassroomId(classroomID);
+    public List<GeneratedPlanDTO> getGeneratedPlansByClassroomId(@PathVariable("classroomID") Integer classroomID, @PathVariable("planId") Integer planId) {
+        return GeneratedPlanService.getGeneratedPlansByClassroomId(classroomID, planId);
     }
 
     @Operation(summary = "Return GeneratedPlans filtered by semesterId")
-    @GetMapping("/semester/{semesterId}")
+    @GetMapping("{planId}/semester/{semesterId}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
             @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     array = @ArraySchema(schema = @Schema(implementation = GeneratedPlanDTO.class))
             )
     })
-
-    public List<GeneratedPlanDTO> findAllByGroupSemesterSemesterId(@PathVariable("semesterId") Integer semesterId) {
-        return GeneratedPlanService.findAllByGroupSemesterSemesterId(semesterId);
+    public List<GeneratedPlanDTO> findAllByGroupSemesterSemesterId(@PathVariable("semesterId") Integer semesterId, @PathVariable("planId") Integer planId) {
+        return GeneratedPlanService.findAllByGroupSemesterSemesterId(semesterId, planId);
     }
-
-
 
     @Operation(summary = "Return GeneratedPlans by id")
     @GetMapping("/{id}")

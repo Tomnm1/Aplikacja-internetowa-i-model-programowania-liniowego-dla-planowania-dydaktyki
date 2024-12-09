@@ -13,6 +13,6 @@ import pl.poznan.put.planner_endpoints.Semester.Semester;
 public interface GroupRepository  extends JpaRepository<Group, Integer> {
     Group findByCodeAndSemester(String code, Semester semester);
 
-    @Query(value = "SELECT * FROM groups g WHERE g.semester_id = :id AND g.group_type = 'laboratoria'", nativeQuery = true)
+    @Query(value = "SELECT * FROM groups g WHERE g.semester_id = :id AND g.group_type = 'laboratoria' ORDER BY g.code", nativeQuery = true)
     List<Group> findBysemester_id(Integer id);
 }
