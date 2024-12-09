@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.jna.platform.unix.solaris.LibKstat;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.*;
 import org.hibernate.type.SqlTypes;
 import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_Teacher;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
@@ -45,6 +45,7 @@ public class Teacher {
     public Degree degree;
     @Column(name = "preferences", columnDefinition = "json")
     @Type(JsonType.class)
+    @Fetch(FetchMode.JOIN)
     public Map<String, String> preferences = new HashMap<>();
     @ManyToMany
     @JoinTable(
@@ -56,6 +57,7 @@ public class Teacher {
     public List<SubjectType> subjectTypesList;
 
     @OneToMany(mappedBy = "teacher")
+    @JsonIgnore
     public List<SubjectType_Teacher> subjectTypesTeacherList;
 
     public TeacherDTO convertToDTO(){

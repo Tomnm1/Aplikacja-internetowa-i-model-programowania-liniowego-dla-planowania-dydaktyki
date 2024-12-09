@@ -29,22 +29,22 @@ public class GeneratedPlanService {
     }
 
     @Transactional
-    public List<GeneratedPlanDTO> getGeneratedPlansByTeacherId(Integer teacherId) {
-        return generatedPlanRepository.findAllByTeacherId(teacherId)
+    public List<GeneratedPlanDTO> getGeneratedPlansByTeacherId(Integer teacherId, Integer planId) {
+        return generatedPlanRepository.findAllByTeacherIdAndPlan_PlanId(teacherId, planId)
                 .stream()
                 .map(GeneratedPlan::convertToDTO)
                 .toList();
     }
     @Transactional
-    public List<GeneratedPlanDTO> getGeneratedPlansByClassroomId(Integer classroomID) {
-        return generatedPlanRepository.findAllByClassroomClassroomID (classroomID)
+    public List<GeneratedPlanDTO> getGeneratedPlansByClassroomId(Integer classroomID, Integer planId) {
+        return generatedPlanRepository.findAllByClassroomClassroomIDAndPlan_PlanId (classroomID, planId)
                 .stream()
                 .map(GeneratedPlan::convertToDTO)
                 .toList();
     }
     @Transactional
-    public List<GeneratedPlanDTO> findAllByGroupSemesterSemesterId(Integer semesterId) {
-        return generatedPlanRepository.findAllByGroupSemesterSemesterId (semesterId)
+    public List<GeneratedPlanDTO> findAllByGroupSemesterSemesterId(Integer semesterId, Integer planId) {
+        return generatedPlanRepository.findAllByGroupSemesterSemesterIdAndPlan_PlanId (semesterId, planId)
                 .stream()
                 .map(GeneratedPlan::convertToDTO)
                 .toList();

@@ -12,9 +12,11 @@ export const API_ENDPOINTS = {
     SUBJECT: `${API_BASE}/subjects`,
     SUBJECT_TYPE: `${API_BASE}/subjectTypes`,
     GROUPS: `${API_BASE}/groups`,
-    GENERATED_PLAN_TEACHERS: (id: number) => `${API_BASE}/generatedPlans/teacher/${id}`,
-    GENERATED_PLAN_CLASSROOM: (id: number) => `${API_BASE}/generatedPlans/classroom/${id}`,
-    GENERATED_PLAN_SEMESTER: (id: number) => `${API_BASE}/generatedPlans/semester/${id}`,
+    GENERATED_PLAN: `${API_BASE}/generatedPlans`,
+    PLANS: `${API_BASE}/plans`,
+    GENERATED_PLAN_TEACHERS: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/teacher/${id}`,
+    GENERATED_PLAN_CLASSROOM: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/classroom/${id}`,
+    GENERATED_PLAN_SEMESTER: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/semester/${id}`,
 };
 
 export default API_ENDPOINTS;
