@@ -23,4 +23,5 @@ public class GeneratedPlanDTO {
     public String specializationName;
     public String specializationSemester;
     public Integer specializationId;
+    public String fieldOfStudyName;
 }

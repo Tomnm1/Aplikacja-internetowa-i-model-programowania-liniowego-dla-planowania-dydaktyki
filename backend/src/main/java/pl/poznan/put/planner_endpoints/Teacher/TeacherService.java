@@ -59,6 +59,7 @@ public class TeacherService {
     public Optional<Teacher> getteacherByID(Integer id){
         return teacherRepository.findById(id);
     }
+
     @Transactional
     public TeacherDTO getteacherDTOByID(Integer id){
         Teacher teacher = teacherRepository.findById(id).orElseThrow();

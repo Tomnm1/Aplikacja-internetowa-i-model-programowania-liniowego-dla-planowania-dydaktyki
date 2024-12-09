@@ -1,8 +1,8 @@
+import Timetable from "./Calendar.tsx";
+
 const UserPlan = () => {
     return (
-        <div>
-            plan
-        </div>
+        <Timetable />
     );
 };
 
