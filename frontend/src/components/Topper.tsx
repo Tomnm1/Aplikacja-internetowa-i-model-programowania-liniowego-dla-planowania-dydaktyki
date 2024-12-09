@@ -3,13 +3,14 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import put_logo_text from "../assets/put_logo_text.png"
 import put_logo from "../assets/put_logo.png"
 import {logout} from "../app/slices/authSlice.ts";
-import {useAppDispatch} from "../hooks/hooks.ts";
+import {useAppDispatch, useAppSelector} from "../hooks/hooks.ts";
 import {useNavigate} from "react-router-dom";
 
 const Topper = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    //const userId = useAppSelector((state) => state.auth.userId);
+    const {user, role} = useAppSelector((state) => state.auth);
+
 
     const handleLogout = () => {
         dispatch(logout());
@@ -34,10 +35,11 @@ const Topper = () => {
             <div className={"hidden flex-row items-center gap-5 sm:flex"}>
                 <div className={"flex flex-col"}>
                     <h2 className={"text-xl text-white"}>
-                        imie.nazwisko
+                        {/*//todo zmienic na username jak powstanie*/}
+                        {role === "user" ? `${user!.firstName} ${user!.lastName}` :  "Administrator"}
                     </h2>
                     <h3 className={"text-md text-gray-400"}>
-                        @put.poznan.pl
+                        {role === "user" && "@put.poznan.pl"}
                     </h3>
 
                 </div>
