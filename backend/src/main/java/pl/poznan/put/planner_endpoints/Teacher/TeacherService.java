@@ -30,7 +30,7 @@ public class TeacherService {
      */
     @Transactional
     public List<TeacherDTO> getAllteachersDTO(){
-        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream().map(Teacher::convertToDTO).toList();
+        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "firstName","lastName")).stream().map(Teacher::convertToDTO).toList();
     }
 
     @Transactional
@@ -72,7 +72,6 @@ public class TeacherService {
      * @return saved Teacher
      */
     public Teacher createteacher(Teacher teacher){
-        System.out.print(teacher);
         return teacherRepository.save(teacher);
     }
 
@@ -94,7 +93,7 @@ public class TeacherService {
             oldteacher.secondName = teacherParams.secondName;
             oldteacher.usosId = teacherParams.usosId;
             oldteacher.innerId = teacherParams.innerId;
-            oldteacher.subjectTypesList = teacherParams.subjectTypesList;
+//            oldteacher.subjectTypesList = teacherParams.subjectTypesList;
             return teacherRepository.save(oldteacher);
         } else {
             return null;

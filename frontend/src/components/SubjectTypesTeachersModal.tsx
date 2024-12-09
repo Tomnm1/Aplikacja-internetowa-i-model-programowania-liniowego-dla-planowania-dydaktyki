@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {
-    Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField,
+    Autocomplete,
+    Dialog, DialogActions, DialogContent, DialogTitle, TextField,
 } from '@mui/material';
 import {BackendSubjectType, BackendTeacher, teacherListDTO} from '../utils/Interfaces';
 import {useSnackbar} from 'notistack';
-import {SelectChangeEvent} from '@mui/material/Select';
 import ActionButton from "../utils/ActionButton.tsx";
 import SaveIcon from "@mui/icons-material/Save";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -56,12 +56,9 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({
         }));
     };
 
-    const handleTeacherChange = (event: SelectChangeEvent) => {
-        const selectedTeacherId = event.target.value as string;
-        console.log(selectedTeacherId);
-        console.log(teachers);
-        const selectedTeacher = teachers.find(teacher => teacher!.id!.toString() == selectedTeacherId);
-        console.log(selectedTeacher);
+    const handleTeacherChange = (selectedTeacherId: number) => {
+        // const selectedTeacherId = event.target.value as string;
+        const selectedTeacher = teachers.find(teacher => teacher!.id! == selectedTeacherId);
         setFormData({
             ...formData,
             teacherId: Number(selectedTeacherId),
@@ -83,20 +80,25 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({
     return (<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle>{typeData ? 'Edytuj Prowadzącego' : 'Dodaj Prowadzącego'}</DialogTitle>
             <DialogContent>
-                {!typeData ? (<FormControl fullWidth margin="normal">
-                        <InputLabel id="teacher-label">Prowadzący</InputLabel>
-                        <Select
-                            labelId="teacher-label"
-                            name="teacher"
-                            value={formData.teacherId.toString()}
-                            onChange={handleTeacherChange}
-                            label="Prowadzący"
-                        >
-                            {Object.values(teachers).map((teacher) => (<MenuItem key={teacher.id} value={teacher.id}>
-                                    {`${teacher.firstName} ${teacher.lastName}`}
-                                </MenuItem>))}
-                        </Select>
-                    </FormControl>) : (<TextField
+                {!typeData ? (
+                        <Autocomplete
+                            value={teachers.find(teacher => teacher.id === formData.teacherId)}
+                            onChange={(_event, newValue) => {
+                                if (newValue) {
+                                    handleTeacherChange(newValue.id!);
+                                }
+                            }}
+                            options={Object.values(teachers)}
+                            getOptionLabel={(option) => `${option.firstName} ${option.lastName}`}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Prowadzący"
+                                    variant="outlined"
+                                    margin="normal"
+                                />
+                            )}
+                        />) : (<TextField
                         margin="normal"
                         label="Prowadzący"
                         value={`${formData.teacherFirstName} ${formData.teacherLastName}`}
