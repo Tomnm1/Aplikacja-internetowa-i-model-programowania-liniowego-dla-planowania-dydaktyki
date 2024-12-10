@@ -356,6 +356,17 @@ export interface Plan {
     planId: number;
     name: string;
     creationDate: string;
+    published: boolean;
+    isNew?: boolean;
+}
+
+export interface PlanState {
+    rows: Plan[];
+    rowModesModel: GridRowModesModel;
+    selectedRowId: GridRowId | null;
+    selectedRowCode: string | null;
+    loading: boolean;
+    error: string | null;
 }
 
 export type SlotPreference = 0 | 1 | -1;
