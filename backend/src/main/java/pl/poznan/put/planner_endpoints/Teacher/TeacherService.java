@@ -38,6 +38,9 @@ public class TeacherService {
         return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
+    public List<Teacher> getAllTeachersWithPreferences(){
+        return teacherRepository.findAllTeachersWithPreferences();
+    }
 
 
     /**

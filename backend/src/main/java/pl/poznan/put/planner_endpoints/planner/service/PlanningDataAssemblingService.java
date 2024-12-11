@@ -1,11 +1,14 @@
 package pl.poznan.put.planner_endpoints.planner.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.poznan.put.or_planner.data.PlannerData;
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoadSubject;
+import pl.poznan.put.or_planner.data.helpers.TeacherPreferences;
 import pl.poznan.put.planner_endpoints.Classroom.ClassroomService;
 import pl.poznan.put.planner_endpoints.ClassroomsSubjectTypes.ClassroomSubjectType;
 import pl.poznan.put.planner_endpoints.ClassroomsSubjectTypes.ClassroomSubjectTypeService;
@@ -77,6 +80,7 @@ public class PlanningDataAssemblingService {
         plannerData.setTimeSlots(getAllTimeSlots());
         plannerData.setSubjects(getAllSubjects(fieldOfStudyType, semesterType));
         plannerData.setTeachersLoad(getTeachersLoad(fieldOfStudyType, semesterType));
+        plannerData.setTeacherPreferences(getAllTeacherSlotPreferences());
         plannerData.setClassroomToSubjectTypes(getClassroomToSubjectTypes());
         plannerData.setGroupToSubjectTypes(getGroupToSubjectTypes());
         plannerData.setSubjectTypeToTeachers(getSubjectTypeToTeachers());
@@ -426,6 +430,34 @@ public class PlanningDataAssemblingService {
         }
         return groupIds;
     }
+
+    private List<TeacherPreferences> getAllTeacherSlotPreferences() {
+        List<Teacher> teachers = teacherService.getAllTeachersWithPreferences();
+        return teachers.stream()
+                .map(teacher -> {
+                    TeacherPreferences preferences = new TeacherPreferences();
+                    preferences.setTeacherId(String.valueOf(teacher.id));
+                    try {
+                        String slotsJson = teacher.preferences.get("slots");
+                        if (slotsJson != null) {
+                            Map<String, Integer> slotsPreferences = new ObjectMapper().readValue(
+                                    slotsJson, new TypeReference<>() {
+                                    }
+                            );
+
+                            preferences.setPreferences(slotsPreferences);
+                        } else {
+                            preferences.setPreferences(Collections.emptyMap());
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error parsing 'slots' preferences for teacherId: " + teacher.id, e);
+                    }
+                    return preferences;
+                })
+                .collect(Collectors.toList());
+    }
+
+
     private List<String> getAllGroups(String fieldOfStudyType, String semesterType) {
         List<Group> groups = groupService.getAllGroup();
         List<String> groupIds = new ArrayList<>();

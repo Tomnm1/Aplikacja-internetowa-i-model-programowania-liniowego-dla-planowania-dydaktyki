@@ -2,6 +2,7 @@ package pl.poznan.put.or_planner.data;
 
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
+import pl.poznan.put.or_planner.data.helpers.TeacherPreferences;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ public class PlannerData {
     private List<String> timeSlots;
     private List<PlannerClassType> subjects;
     private List<TeacherLoad> teachersLoad;
+    private List<TeacherPreferences> teacherPreferences;
     private Map<String, Set<String>> subjectTypeToTeachers;
     private Map<String, Set<String>> groupToSubjectTypes;
     private Map<String, Set<String>> classroomToSubjectTypes;
@@ -21,6 +23,14 @@ public class PlannerData {
     private Map<String, Set<String>> subjectTypeToGroup;
 
     public PlannerData() {
+    }
+
+    public List<TeacherPreferences> getTeacherPreferences() {
+        return teacherPreferences;
+    }
+
+    public void setTeacherPreferences(List<TeacherPreferences> teacherPreferences) {
+        this.teacherPreferences = teacherPreferences;
     }
 
     public void setSubjectTypeToGroup(Map<String, Set<String>> subjectTypeToGroup){

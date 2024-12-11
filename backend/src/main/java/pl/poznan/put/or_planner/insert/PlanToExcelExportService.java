@@ -31,7 +31,6 @@ import static pl.poznan.put.constans.Constans.FieldsOfStudyTypes.*;
 public class PlanToExcelExportService {
     private final GeneratedPlanService generatedPlanService;
     private final SlotsDayService slotsDayService;
-    Workbook workbook = new XSSFWorkbook();
 
     @Autowired
     PlanToExcelExportService(
@@ -44,6 +43,7 @@ public class PlanToExcelExportService {
 
     @Transactional
     public void exportPlanToExcel(Plan plan) throws IOException {
+        Workbook workbook = new XSSFWorkbook();
         Random random = new Random();
 
         Map<Semester, List<GeneratedPlan>> semesterListMap = new HashMap<>();
@@ -74,7 +74,7 @@ public class PlanToExcelExportService {
         for (Semester semester: semesterListMap.keySet()){
             Sheet sheet = workbook.createSheet(semester.specialisation.fieldOfStudy.name + " " +
                     semester.specialisation.cycle + " " + semester.specialisation.name + " " + semester.number);
-            processSheet(sheet, semesterListMap.get(semester), slots, subjectColors);
+            processSheet(workbook, sheet, semesterListMap.get(semester), slots, subjectColors);
             mergeCellsIfEqual(sheet, 2, 2);
         }
 
@@ -105,7 +105,7 @@ public class PlanToExcelExportService {
         return slots;
     }
 
-    private void processSheet(Sheet sheet, List<GeneratedPlan> planObjects, Map<SlotsDay, Integer> slots,
+    private void processSheet(Workbook workbook, Sheet sheet, List<GeneratedPlan> planObjects, Map<SlotsDay, Integer> slots,
                               Map<Subject, XSSFCellStyle> subjectColors){
         Row sheetNameRow = sheet.createRow(0);
         Row headerRow = sheet.createRow(1);
@@ -117,12 +117,12 @@ public class PlanToExcelExportService {
             groups.putIfAbsent(planObject.group, null);
         }
 
-        prepareHeaderAndRows(sheet, headerRow, groups, slots, sheetNameRow);
+        prepareHeaderAndRows(workbook, sheet, headerRow, groups, slots, sheetNameRow);
 
-        insertPlannedDataOnSheet(sheet, planObjects, slots, subjectColors, groups);
+        insertPlannedDataOnSheet(workbook, sheet, planObjects, slots, subjectColors, groups);
     }
 
-    private void insertPlannedDataOnSheet(Sheet sheet, List<GeneratedPlan> planObjects, Map<SlotsDay, Integer> slots,
+    private void insertPlannedDataOnSheet(Workbook workbook, Sheet sheet, List<GeneratedPlan> planObjects, Map<SlotsDay, Integer> slots,
                                           Map<Subject, XSSFCellStyle> subjectColors, Map<Group, Integer> groups){
         for(GeneratedPlan planObject: planObjects){
             int rowIndex = slots.get(planObject.slotsDay);
@@ -170,7 +170,7 @@ public class PlanToExcelExportService {
         }
     }
 
-    private void prepareHeaderAndRows(Sheet sheet, Row headerRow, Map<Group, Integer> groups,
+    private void prepareHeaderAndRows(Workbook workbook, Sheet sheet, Row headerRow, Map<Group, Integer> groups,
                                       Map<SlotsDay, Integer> slots, Row sheetNameRow){
         int firstGroupColumnIndex = 2;
         int lastGroupColumnIndex = firstGroupColumnIndex + groups.size();
@@ -211,10 +211,10 @@ public class PlanToExcelExportService {
             int endRow = startRow + 1;
 
             Row row = sheet.createRow(startRow);
-            row.createCell(1).setCellValue(slotsDay.slot.startTime + " P");
+            row.createCell(1).setCellValue(slotsDay.slot.startTime + "-" + slotsDay.slot.endTime + " P");
 
             Row nextRow = sheet.createRow(endRow);
-            nextRow.createCell(1).setCellValue(slotsDay.slot.startTime + " N");
+            nextRow.createCell(1).setCellValue(slotsDay.slot.startTime + "-" + slotsDay.slot.endTime + " N");
 
             Cell dayCell = row.createCell(0);
             dayCell.setCellValue(slotsDay.day.toString());

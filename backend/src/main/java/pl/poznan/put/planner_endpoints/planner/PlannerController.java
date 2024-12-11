@@ -10,6 +10,7 @@ import pl.poznan.put.or_planner.data.PlannerData;
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.PlannerSubject;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
+import pl.poznan.put.or_planner.data.helpers.TeacherPreferences;
 import pl.poznan.put.or_planner.insert.InsertPlanToDbService;
 import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
@@ -63,12 +64,13 @@ public class PlannerController {
             List<String> timeSlots = plannerData.getTimeSlots();
             List<PlannerClassType> subjects = plannerData.getSubjects();
             List<TeacherLoad> teachersLoad = plannerData.getTeachersLoad();
+            List<TeacherPreferences> teacherPreferences = plannerData.getTeacherPreferences();
             Map<String, Set<String>> subjectTypeToTeachers = plannerData.getSubjectTypeToTeachers();
             Map<String, Set<String>> groupToSubjectTypes = plannerData.getGroupToSubjectTypes();
             Map<String, Set<String>> classroomToSubjectTypes = plannerData.getClassroomToSubjectTypes();
             Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
 
-            planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, subjectTypeToTeachers,
+            planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences, subjectTypeToTeachers,
                     groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
 
             List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
@@ -103,6 +105,7 @@ public class PlannerController {
             List<String> timeSlots = plannerData.getTimeSlots();
             List<PlannerClassType> subjects = plannerData.getSubjects();
             List<TeacherLoad> teachersLoad = plannerData.getTeachersLoad();
+            List<TeacherPreferences> teacherPreferences = plannerData.getTeacherPreferences();
             Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -112,8 +115,8 @@ public class PlannerController {
             Map<String, Set<String>> groupToSubjectTypes = plannerData.getGroupToSubjectTypes();
             Map<String, Set<String>> classroomToSubjectTypes = plannerData.getClassroomToSubjectTypes();
 
-            planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, subjectTypeToTeachers,
-                    groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
+            planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences,
+                    subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
 
             List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
 
@@ -143,42 +146,6 @@ public class PlannerController {
             System.out.println(e.getMessage());
             System.out.println(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    public void printScheduleAsTable(List<String[]> schedule, List<String> groups, List<String> timeSlots) {
-        int numGroups = groups.size();
-        int numTimeSlots = timeSlots.size();
-
-        System.out.println("Pierwszy slot - tydzień parzysty \nDrugi slot tydzień nieparzysty");
-        System.out.print("    Time        |");
-        for (int g = 0; g < numGroups; ++g) {
-            System.out.print("-------" + groups.get(g) + "------|");
-        }
-        System.out.println();
-
-        for (int t = 0; t < numTimeSlots; ++t) {
-            // Drukowanie dla tygodnia parzystego
-            System.out.print(timeSlots.get(t) + " (even) |");
-            for (int g = 0; g < numGroups; ++g) {
-                if (schedule.get(t * 2)[g] != null) {  // W harmonogramie parzysty tydzień ma indeksy 0, 2, 4, ...
-                    System.out.print(schedule.get(t * 2)[g] + "|");
-                } else {
-                    System.out.print("---------------|");
-                }
-            }
-            System.out.println();
-
-            // Drukowanie dla tygodnia nieparzystego
-            System.out.print(timeSlots.get(t) + " (odd)  |");
-            for (int g = 0; g < numGroups; ++g) {
-                if (schedule.get(t * 2 + 1)[g] != null) {  // W harmonogramie nieparzysty tydzień ma indeksy 1, 3, 5, ...
-                    System.out.print(schedule.get(t * 2 + 1)[g] + "|");
-                } else {
-                    System.out.print("---------------|");
-                }
-            }
-            System.out.println();
         }
     }
 }
