@@ -19,7 +19,7 @@ import java.util.Set;
 public class AdminCheckFilter extends OncePerRequestFilter {
 
     private final TeacherService userService;
-    private final Set<String> adminEndpoints = Set.of("/admins"); // Tu w przyszłości może być endpoint do zarządzania adminami oraz inne rzeczy do których user nie potrzebuje dostępu
+    private final Set<String> adminEndpoints = Set.of("/admins"); // TODO Tu w przyszłości może być endpoint do zarządzania adminami oraz inne rzeczy do których user nie potrzebuje dostępu
 
     public AdminCheckFilter(TeacherService userRepository) {
         this.userService = userRepository;
@@ -32,9 +32,9 @@ public class AdminCheckFilter extends OncePerRequestFilter {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            String eloginId = jwt.getClaimAsString("uid");
+            String email = jwt.getClaimAsString("sub");
 
-            Optional<Teacher> teacher = userService.findByEloginId(eloginId);
+            Optional<Teacher> teacher = userService.findByEloginId(email);
 
             if (teacher.isPresent()) {
                 if (adminEndpoints.contains(requestPath)) {
@@ -51,7 +51,7 @@ public class AdminCheckFilter extends OncePerRequestFilter {
 
                 newUser.firstName = jwt.getClaimAsString("gnm");
                 newUser.lastName = jwt.getClaimAsString("snm");
-                newUser.eloginId = jwt.getClaimAsString("uid");
+                newUser.email = jwt.getClaimAsString("sub");
                 newUser.isAdmin = false;
 
                 userService.createTeacher(newUser);
