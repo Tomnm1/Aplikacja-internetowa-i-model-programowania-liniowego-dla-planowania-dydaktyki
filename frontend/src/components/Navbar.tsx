@@ -28,6 +28,8 @@ const routes: RouteItem[] = [{
     name: "Sale", link: "/classrooms", icon: <RoomPreferencesIcon/>, roles: ['admin'],
 }, {
     name: "Kalendarz", link: "/calendar", icon: <CalendarMonth/>, roles: ['admin'],
+},{
+    name: "Plany", link: "/plans", icon: <CalendarMonth/>, roles: ['admin'],
 }, {
     name: "Budynki", link: "/buildings", icon: <BusinessIcon/>, roles: ['admin'],
 }, {

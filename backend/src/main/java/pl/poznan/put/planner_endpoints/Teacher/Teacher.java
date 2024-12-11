@@ -64,10 +64,13 @@ public class Teacher {
         TeacherDTO dto = new TeacherDTO();
         dto.id = this.id;
         dto.firstName = this.firstName;
+        dto.secondName = this.secondName;
         dto.lastName = this.lastName;
         dto.degree = this.degree;
         dto.preferences = this.preferences;
         dto.subjectTypesList = this.subjectTypesTeacherList.stream().map(SubjectType_Teacher::getSubjetTyprId).collect(Collectors.toList());
+        dto.usosId = this.usosId;
+        dto.innerId = this.innerId;
         return dto;
     }
 }

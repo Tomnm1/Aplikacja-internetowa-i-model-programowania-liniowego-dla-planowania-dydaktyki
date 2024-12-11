@@ -11,6 +11,7 @@ import semestersReducer from './slices/semesterSlice.ts';
 import subjectReducer from './slices/subjectSlice.ts'
 import subjectTypeReducer from './slices/subjectTypeSlice.ts'
 import groupsReducer from './slices/groupSlice.ts'
+import plansReducer from './slices/planSlice.ts'
 
 export const store = configureStore({
     reducer: {
@@ -27,6 +28,7 @@ export const store = configureStore({
         subjects: subjectReducer,
         subjectsTypes: subjectTypeReducer,
         groups: groupsReducer,
+        plans: plansReducer,
     },
 });
 

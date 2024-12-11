@@ -17,6 +17,7 @@ import SlotsDays from "./SlotsDays.tsx";
 import Semesters from "./Semesters.tsx";
 import Subjects from "./Subjects.tsx";
 import UserPlan from "./UserPlan.tsx";
+import Plans from "./Plans.tsx";
 
 const App: React.FC = () => {
     return (
@@ -30,6 +31,7 @@ const App: React.FC = () => {
                             <Route path="/employees" element={<Employees />} />
                             <Route path="/classrooms" element={<Classrooms />} />
                             <Route path="/calendar" element={<Calendar/>} />
+                            <Route path="/plans" element={<Plans/>} />
                             <Route path="/buildings" element={<Buildings />} />
                             <Route path="/fieldofstudies" element={<FieldOfStudies />} />
                             <Route path="/specialisations" element={<Specialisations />} />

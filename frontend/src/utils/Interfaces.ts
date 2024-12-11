@@ -64,19 +64,25 @@ export const typeMapping: { [key in Type]: string } = {
 export interface BackendTeacher {
     id?: number;
     firstName: string;
+    secondName: string;
     lastName: string;
     degree: string;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
+    usosId: number;
+    innerId: number;
 }
 
 export interface Teacher {
     id: number;
     firstName: string;
+    secondName: string;
     lastName: string;
     degree: string;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
+    usosId: number;
+    innerId: number;
 }
 
 export interface TeachersState {
@@ -350,6 +356,17 @@ export interface Plan {
     planId: number;
     name: string;
     creationDate: string;
+    published: boolean;
+    isNew?: boolean;
+}
+
+export interface PlanState {
+    rows: Plan[];
+    rowModesModel: GridRowModesModel;
+    selectedRowId: GridRowId | null;
+    selectedRowCode: string | null;
+    loading: boolean;
+    error: string | null;
 }
 
 export type SlotPreference = 0 | 1 | -1;

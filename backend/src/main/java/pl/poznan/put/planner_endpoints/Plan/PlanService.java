@@ -46,7 +46,7 @@ public class PlanService {
         if (plan.isPresent()){
             Plan oldPlan = plan.get();
             oldPlan.name = planParams.name;
-            oldPlan.creationDate = planParams.creationDate;
+            oldPlan.published = planParams.published;
             return planRepository.save(oldPlan);
         } else {
             return null;
