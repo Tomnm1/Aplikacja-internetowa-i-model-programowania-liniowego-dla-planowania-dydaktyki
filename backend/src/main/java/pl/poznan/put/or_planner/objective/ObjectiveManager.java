@@ -3,11 +3,15 @@ package pl.poznan.put.or_planner.objective;
 import com.google.ortools.linearsolver.MPObjective;
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.poznan.put.or_planner.data.helpers.GroupListService;
+import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.TeacherPreferences;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,11 +20,36 @@ public class ObjectiveManager {
     private MPObjective objective;
     private List<String> teachers;
     private List<String> timeSlots;
+    private List<String> groups;
+    private List<String> rooms;
+    private List<PlannerClassType> subjects;
+    private Map<String, Set<String>> teachersToSubjectTypes;
+    private Map<String, Set<String>> subjectTypeToTeachers;
+    private Map<String, Set<String>> groupToSubjectTypes;
+    private Map<String, Set<String>> classroomToSubjectTypes;
+    private final GroupListService groupListService;
 
-    public void initialize(List<String> teachers, List<String> timeSlots, MPObjective objective){
+    @Autowired
+    ObjectiveManager(
+            GroupListService groupListService
+    ){
+        this.groupListService = groupListService;
+    }
+
+    public void initialize(List<String> teachers, List<String> timeSlots, MPObjective objective, List<String> groups,
+                           List<String> rooms, List<PlannerClassType> subjects, Map<String, Set<String>> teachersToSubjectTypes,
+                           Map<String, Set<String>> subjectTypeToTeachers, Map<String, Set<String>> groupToSubjectTypes,
+                           Map<String, Set<String>> classroomToSubjectTypes){
         this.objective = objective;
         this.teachers = teachers;
         this.timeSlots = timeSlots;
+        this.groups = groups;
+        this.rooms = rooms;
+        this.subjects = subjects;
+        this.teachersToSubjectTypes = teachersToSubjectTypes;
+        this.subjectTypeToTeachers = subjectTypeToTeachers;
+        this.groupToSubjectTypes = groupToSubjectTypes;
+        this.classroomToSubjectTypes = classroomToSubjectTypes;
     }
 
     public void manageTeacherPreferences(Map<String, MPVariable> xEvenMap, Map<String, MPVariable> xOddMap,
@@ -48,8 +77,20 @@ public class ObjectiveManager {
             MPVariable var = varEntry.getValue();
 
             Matcher matcher = pattern.matcher(varName);
-            if (matcher.matches()) {
-                objective.setCoefficient(var, preferenceValue);
+            if(matcher.matches()) {
+                String[] variableParams = varName.split("_");
+                String groupId = groups.get(Integer.parseInt(variableParams[1]));
+                String roomId = rooms.get(Integer.parseInt(variableParams[2]));
+                PlannerClassType subjectType = subjects.get(Integer.parseInt(variableParams[4]));
+
+                Set<String> mainGroupsSet = subjectType.getGroupMappings().keySet();
+
+                if (teachersToSubjectTypes.get(teachers.get(teacherId)).contains(subjectType.getId())
+                        && classroomToSubjectTypes.get(roomId).contains(subjectType.getId())
+                        && groupToSubjectTypes.get(groupId).contains(subjectType.getId())
+                        && mainGroupsSet.contains(groupId)) {
+                    objective.setCoefficient(var, preferenceValue);
+                }
             }
         }
     }

@@ -5,6 +5,7 @@ import com.google.ortools.linearsolver.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.poznan.put.or_planner.constraints.ConstraintsManager;
+import pl.poznan.put.or_planner.data.helpers.GroupListService;
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
 import pl.poznan.put.or_planner.data.helpers.TeacherPreferences;
@@ -30,6 +31,8 @@ public class Planner {
     ConstraintsManager constraintsManager;
     final
     ObjectiveManager objectiveManager;
+    final
+    GroupListService groupListService;
     final
     ClassroomSubjectTypeService classroomSubjectTypeService;
     private Map<String, Set<String>> subjectTypeToTeachers;
@@ -62,12 +65,14 @@ public class Planner {
             SubjectTypeGroupService subjectTypeGroupService,
             ConstraintsManager constraintsManager,
             ClassroomSubjectTypeService classroomSubjectTypeService,
-            ObjectiveManager objectiveManager) {
+            ObjectiveManager objectiveManager,
+            GroupListService groupListService) {
         this.subjectTypeTeacherService = subjectTypeTeacherService;
         this.subjectTypeGroupService = subjectTypeGroupService;
         this.constraintsManager = constraintsManager;
         this.classroomSubjectTypeService = classroomSubjectTypeService;
         this.objectiveManager = objectiveManager;
+        this.groupListService = groupListService;
     }
 
     public void initialize(List<String> groups, List<String> teachers, List<String> rooms, List<String> timeSlots,
@@ -117,11 +122,12 @@ public class Planner {
         logger.log(Level.INFO, "zmienne");
         for (int p = 0; p < numSubjects; ++p) {
             String subjectId = subjects.get(p).getId();
+            List<String> allGroups = groupListService.getGroupsFromGroupMapping(subjects.get(p).getGroupMappings());
             for (int n = 0; n < numTeachers; ++n) {
                 if(!subjectTypeToTeachers.get(subjectId).contains(teachers.get(n)))
                     continue;
                 for (int g = 0; g < numGroups; ++g) {
-                    if(!groupToSubjectTypes.get(groups.get(g)).contains(subjectId))
+                    if(!allGroups.contains(groups.get(g)))
                         continue;
                     for (int s = 0; s < numRooms; ++s) {
                         if(!classroomToSubjectTypes.get(rooms.get(s)).contains(subjectId))
@@ -158,105 +164,75 @@ public class Planner {
         logger.log(Level.INFO, " ograniczenie 5");
         constraintsManager.teachersLoadConstraint(xEvenMap, xOddMap);
 
-        logger.log(Level.INFO, "Przypisanie funkcji celu");
-//        objectiveManager.initialize(teachers, timeSlots, objective);
-        objectiveManager.manageTeacherPreferences(xEvenMap, xOddMap, teacherPreferences);
-        logger.log(Level.INFO, "Funkcja celu przypisana");
+//        logger.log(Level.INFO, "Przypisanie funkcji celu");
+//        objectiveManager.initialize(teachers, timeSlots, objective, groups, rooms, subjects, teachersToSubjectTypes,
+//                subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes);
+//        objectiveManager.manageTeacherPreferences(xEvenMap, xOddMap, teacherPreferences);
+//        logger.log(Level.INFO, "Funkcja celu przypisana");
 
         logger.log(Level.INFO, " solver start");
         solver.enableOutput();
 
-        try (PrintWriter out = new PrintWriter("filename.txt")) {
-            out.println(solver.exportModelAsLpFormat());
-        }
+//        try (PrintWriter out = new PrintWriter("filename.txt")) {
+//            out.println(solver.exportModelAsLpFormat());
+//        }
 
 //        objective.setMaximization();
-//        solver.se
         MPSolverParameters solverParameters = new MPSolverParameters();
-//        double gap = 0.0;
-//        double maxGap = 0.3;
-//        while(gap < maxGap){
-//            solver.setTimeLimit(200000);
-//            solverParameters.setDoubleParam(MPSolverParameters.DoubleParam.RELATIVE_MIP_GAP, gap);
+
+//            solver.setTimeLimit(120*1000);
         MPSolver.ResultStatus status = solver.solve(solverParameters);
         logger.log(Level.INFO, " solver stop");
         if (status == MPSolver.ResultStatus.OPTIMAL || status == MPSolver.ResultStatus.FEASIBLE) {
             logger.log(Level.INFO, "Found a " + status + " solution!");
 //            logger.log(Level.INFO, "Objective value = " + objective.value());
-//                break;
         } else {
             logger.log(Level.INFO, "No feasible solution found");
-//                gap += 0.02;
-//                logger.log(Level.INFO, "Increasing gap to: " + gap);
         }
-//        }
-
         logger.log(Level.INFO, "Solution analysing started");
         List<PlannedSlot> scheduleTable = new ArrayList<>();
-        for (int p = 0; p < numSubjects; ++p) {
-            PlannerClassType plannerClassType = subjects.get(p);
-            String subjectId = plannerClassType.getId();
-            for (int n = 0; n < numTeachers; ++n) {
-                if(!subjectTypeToTeachers.get(subjectId).contains(teachers.get(n)))
-                    continue;
-                for (int g = 0; g < numGroups; ++g) {
-                    if(!groupToSubjectTypes.get(groups.get(g)).contains(subjectId))
-                        continue;
-                    for (int s = 0; s < numRooms; ++s) {
-                        if(!classroomToSubjectTypes.get(rooms.get(s)).contains(subjectId))
-                            continue;
-                        for (int t = 0; t < numTimeSlots; ++t) {
-                            String varNameEven = "xEven_" + g + "_" + s + "_" + t + "_" + p + "_" + n;
-                            String varNameOdd = "xOdd_" + g + "_" + s + "_" + t + "_" + p + "_" + n;
 
-                            MPVariable evenVar = xEvenMap.get(varNameEven);
-                            MPVariable oddVar = xOddMap.get(varNameOdd);
-                            if (evenVar.solutionValue() == 1) {
-                                Map<String, List<String>> groupMappings = plannerClassType.getGroupMappings();
-                                List<String> groupsToAssign = groupMappings.get(groups.get(g));
-                                if(groupsToAssign == null) {
-                                    System.out.println(subjectId + " " + teachers.get(n));
-                                }
+        xEvenMap.forEach((xEvenName, xEven) -> {
+            if(xEven.solutionValue() == 1)
+                prepareAndAddToResultTable(xEven, scheduleTable, true);
+        });
 
-                                PlannedSlot evenSlot = new PlannedSlot(timeSlots.get(t), groups.get(g), teachers.get(n),
-                                        rooms.get(s), subjectId, true);
-                                scheduleTable.add(evenSlot);
+        xOddMap.forEach((xOddName, xOdd) -> {
+            if(xOdd.solutionValue() == 1)
+                prepareAndAddToResultTable(xOdd, scheduleTable, false);
+        });
 
-                                for(String group: groupsToAssign){
-                                    PlannedSlot evenGroupSlot = new PlannedSlot(timeSlots.get(t), group, teachers.get(n),
-                                            rooms.get(s), subjectId, true);
-                                    scheduleTable.add(evenGroupSlot);
-                                }
-                            }
-                            if (oddVar.solutionValue() == 1) {
-                                Map<String, List<String>> groupMappings = plannerClassType.getGroupMappings();
-                                List<String> groupsToAssign = groupMappings.get(groups.get(g));
-
-                                PlannedSlot oddSlot = new PlannedSlot(timeSlots.get(t), groups.get(g), teachers.get(n),
-                                        rooms.get(s), subjectId, false);
-                                scheduleTable.add(oddSlot);
-                                if(groupsToAssign == null) {
-                                    System.out.println(subjectId + " " + teachers.get(n));
-                                }
-
-                                for(String group: groupsToAssign){
-                                    PlannedSlot evenGroupSlot = new PlannedSlot(timeSlots.get(t), group, teachers.get(n),
-                                            rooms.get(s), subjectId, false);
-                                    scheduleTable.add(evenGroupSlot);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
         logger.log(Level.INFO, "Solution analyzing finished");
         xOddMap.clear();
         xEvenMap.clear();
         constraintsManager.cleanup();
-//        objectiveManager.cleanup();
+        objectiveManager.cleanup();
         solver.delete();
         return scheduleTable;
+    }
+
+    private void prepareAndAddToResultTable(MPVariable variable,  List<PlannedSlot> scheduleTable, boolean isEven){
+        String variableName = variable.name();
+        String[] variableParams = variableName.split("_");
+        String groupId = groups.get(Integer.parseInt(variableParams[1]));
+        String roomId = rooms.get(Integer.parseInt(variableParams[2]));
+        String slotId = timeSlots.get(Integer.parseInt(variableParams[3]));
+        PlannerClassType subjectType = subjects.get(Integer.parseInt(variableParams[4]));
+        String teacherId = teachers.get(Integer.parseInt(variableParams[5]));
+
+        Map<String, List<String>> groupMappings = subjectType.getGroupMappings();
+        List<String> groupsToAssign = groupMappings.get(groupId);
+        if(groupsToAssign == null) {
+            System.out.println(subjectType.getId() + " " + teacherId);
+        }
+
+        PlannedSlot plannedSlot = new PlannedSlot(slotId, groupId, teacherId, roomId, subjectType.getId(), isEven);
+        scheduleTable.add(plannedSlot);
+
+        for(String group: groupsToAssign){
+            PlannedSlot evenGroupSlot = new PlannedSlot(slotId, group, teacherId, roomId, subjectType.getId(), isEven);
+            scheduleTable.add(evenGroupSlot);
+        }
     }
 
     public void cleanup() {
