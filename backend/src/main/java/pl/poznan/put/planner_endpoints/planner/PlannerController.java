@@ -101,8 +101,6 @@ public class PlannerController {
                 PlannerData plannerData = planningDataAssemblingService.startAssembling(planningParams);
                 logger.log(Level.INFO,"DataAssembling finished");
                 logger.log(Level.INFO,"DataValidation started");
-            planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences,
-                    subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
 
                 planningDataValidationService.executeValidations(plannerData);
                 logger.log(Level.INFO,"DataValidation finished");
@@ -115,15 +113,15 @@ public class PlannerController {
                 List<String> timeSlots = plannerData.getTimeSlots();
                 List<PlannerClassType> subjects = plannerData.getSubjects();
                 List<TeacherLoad> teachersLoad = plannerData.getTeachersLoad();
-                Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
-
+                List<TeacherPreferences> teacherPreferences = plannerData.getTeacherPreferences();
                 Map<String, Set<String>> subjectTypeToTeachers = plannerData.getSubjectTypeToTeachers();
                 Map<String, Set<String>> groupToSubjectTypes = plannerData.getGroupToSubjectTypes();
                 Map<String, Set<String>> classroomToSubjectTypes = plannerData.getClassroomToSubjectTypes();
+                Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
 
                 planningProgressService.setProgress(jobId, 50, PlanningStatus.IN_PROGRESS);
 
-                planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, subjectTypeToTeachers,
+                planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences, subjectTypeToTeachers,
                         groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
 
                 List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
