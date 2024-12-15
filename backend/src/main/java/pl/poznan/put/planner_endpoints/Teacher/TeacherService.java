@@ -30,7 +30,7 @@ public class TeacherService {
      */
     @Transactional
     public List<TeacherDTO> getAllteachersDTO(){
-        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "firstName","lastName")).stream().map(Teacher::convertToDTO).toList();
+        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "lastName", "firstName")).stream().map(Teacher::convertToDTO).toList();
     }
 
     @Transactional
