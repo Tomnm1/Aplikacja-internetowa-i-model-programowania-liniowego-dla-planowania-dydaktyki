@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
-    Button, FormControl, InputLabel, LinearProgress, MenuItem, Select, SelectChangeEvent, Typography
+    Button, FormControl, InputLabel, LinearProgress, MenuItem, Select, SelectChangeEvent, TextField, Typography
 } from '@mui/material';
 import {useSnackbar} from 'notistack';
 import API_ENDPOINTS from '../app/urls.ts';
@@ -11,9 +11,10 @@ interface PlanningProgress {
 }
 
 const Home: React.FC = () => {
+    const [planName, setPlanName] = useState('');
     const [fieldOfStudyType, setFieldOfStudyType] = useState<string>('stacjonarne');
     const [semesterType, setSemesterType] = useState<string>('zimowy');
-    const [jobId, setJobId] = useState<number | null>(null);
+    const [jobId, setJobId] = useState<string | null>(null);
     const [progressData, setProgressData] = useState<PlanningProgress | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const {enqueueSnackbar} = useSnackbar();
@@ -21,21 +22,20 @@ const Home: React.FC = () => {
     useEffect(() => {
         const savedJobId = localStorage.getItem('planningJobId');
         if (savedJobId) {
-            const parsedId = Number(savedJobId);
-            if (!Number.isNaN(parsedId)) {
-                setJobId(parsedId);
-            } else {
-                localStorage.removeItem('planningJobId');
-            }
+            setJobId(savedJobId);
+        } else {
+            localStorage.removeItem('planningJobId');
         }
     }, []);
 
-    const checkProgress = useCallback(async (currentJobId: number) => {
+    const checkProgress = useCallback(async (currentJobId: string) => {
         try {
             const res = await fetch(API_ENDPOINTS.PLANNING_PROGRESS(currentJobId), {
                 method: 'GET', headers: {'Content-Type': 'application/json'}
             });
+            console.log(res);
             if (res.ok) {
+                console.log(res.body);
                 const data = await res.json() as PlanningProgress;
                 setProgressData(data);
 
@@ -49,6 +49,7 @@ const Home: React.FC = () => {
                     setJobId(null);
                 }
             } else if (res.status === 404) {
+                console.log(res.body);
                 enqueueSnackbar('Nie odnaleziono postępu dla zadanego jobId.', {variant: 'warning'});
                 localStorage.removeItem('planningJobId');
                 setJobId(null);
@@ -61,12 +62,13 @@ const Home: React.FC = () => {
     }, [enqueueSnackbar]);
 
     useEffect(() => {
+        console.log(progressData, jobId)
         if (jobId === null) return;
-        if (progressData?.status !== 'IN_PROGRESS') return;
+        // if (progressData?.status !== 'IN_PROGRESS') return;
         checkProgress(jobId);
         const interval = setInterval(() => {
             checkProgress(jobId);
-        }, 5000);
+        }, 50000);
         return () => clearInterval(interval);
     }, [jobId, progressData, checkProgress]);
 
@@ -77,15 +79,14 @@ const Home: React.FC = () => {
             const res = await fetch(API_ENDPOINTS.START_PLANNING, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({fieldOfStudyType, semesterType})
+                body: JSON.stringify({fieldOfStudyType, semesterType, planName})
             });
 
             setLoading(false);
-
             if (res.status === 202) {
                 const data = await res.json();
-                const newJobId = Number(data.jobId);
-                if (!Number.isNaN(newJobId)) {
+                const newJobId = data.jobId;
+                if (newJobId) {
                     setJobId(newJobId);
                     localStorage.setItem('planningJobId', String(newJobId));
                     enqueueSnackbar('Rozpoczęto generowanie planu, proszę czekać.', {variant: 'info'});
@@ -106,32 +107,46 @@ const Home: React.FC = () => {
         <section className="flex flex-col justify-around items-center content-center gap-4 p-4">
             <Typography variant="h4">Generuj nowy plan</Typography>
 
-            <div className="flex gap-4 w-full max-w-md justify-center items-center">
-                <FormControl fullWidth>
-                    <InputLabel id="fieldOfStudyType-label">Typ Studiów</InputLabel>
-                    <Select
-                        labelId="fieldOfStudyType-label"
-                        value={fieldOfStudyType}
-                        label="Typ Studiów"
-                        onChange={(event: SelectChangeEvent) => setFieldOfStudyType(event.target.value)}
-                    >
-                        <MenuItem value="niestacjonarne">Niestacjonarne</MenuItem>
-                        <MenuItem value="stacjonarne">Stacjonarne</MenuItem>
-                    </Select>
-                </FormControl>
+            <div className="flex gap-4 w-full max-w-md justify-center items-center flex-col">
+                <div className="flex flex-row items-center">
+                    <FormControl className="w-[29rem]">
+                        <TextField
+                            required
+                            label="Nazwa planu"
+                            value={planName}
+                            onChange={(e) => {
+                                setPlanName(e.target.value)
+                            }}
+                        />
+                    </FormControl>
+                </div>
+                <div className="flex flex-row gap-4">
+                    <FormControl className="w-56">
+                        <InputLabel id="fieldOfStudyType-label">Typ Studiów</InputLabel>
+                        <Select
+                            labelId="fieldOfStudyType-label"
+                            value={fieldOfStudyType}
+                            label="Typ Studiów"
+                            onChange={(event: SelectChangeEvent) => setFieldOfStudyType(event.target.value)}
+                        >
+                            <MenuItem value="niestacjonarne">Niestacjonarne</MenuItem>
+                            <MenuItem value="stacjonarne">Stacjonarne</MenuItem>
+                        </Select>
+                    </FormControl>
 
-                <FormControl fullWidth>
-                    <InputLabel id="semesterType-label">Semestr</InputLabel>
-                    <Select
-                        labelId="semesterType-label"
-                        value={semesterType}
-                        label="Semestr"
-                        onChange={(event: SelectChangeEvent) => setSemesterType(event.target.value)}
-                    >
-                        <MenuItem value="zimowy">Zimowy</MenuItem>
-                        <MenuItem value="letni">Letni</MenuItem>
-                    </Select>
-                </FormControl>
+                    <FormControl className="w-56">
+                        <InputLabel id="semesterType-label">Semestr</InputLabel>
+                        <Select
+                            labelId="semesterType-label"
+                            value={semesterType}
+                            label="Semestr"
+                            onChange={(event: SelectChangeEvent) => setSemesterType(event.target.value)}
+                        >
+                            <MenuItem value="zimowy">Zimowy</MenuItem>
+                            <MenuItem value="letni">Letni</MenuItem>
+                        </Select>
+                    </FormControl>
+                </div>
             </div>
 
             {jobId !== null && progressData && progressData.status === 'IN_PROGRESS' && (
