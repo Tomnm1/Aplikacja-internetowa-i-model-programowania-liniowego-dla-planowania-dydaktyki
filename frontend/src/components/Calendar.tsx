@@ -24,7 +24,8 @@ import {RootState} from "../app/store.ts";
 
 type ContextType = 'teacher' | 'semester' | 'classroom';
 
-const contextOptions = [{value: 'teacher', label: 'Nauczyciel'}, {
+const contextOptions = [
+    {value: 'teacher', label: 'Nauczyciel'}, {
     value: 'semester', label: 'Semestr'
 }, {value: 'classroom', label: 'Sala'},];
 
@@ -261,6 +262,7 @@ const Timetable = () => {
             <FormControl sx={{width: 300}} disabled={loading}>
                 <InputLabel id="plan-label">Plan</InputLabel>
                 <Select
+                    autoWidth
                     labelId="plan-label"
                     value={selectedPlan}
                     onChange={(event) => {
@@ -301,7 +303,9 @@ const Timetable = () => {
                 renderOption={(props, option) => (<li {...props} key={option.id}>
                     {option.label}
                 </li>)}
-                renderInput={(params) => <TextField {...params} label="Wybierz" variant="outlined"
+                renderInput={(params) => <TextField {...params}
+                                                    label={contextOptions.find((option) => option.value === context)?.label || ''}
+                                                    variant="outlined"
                                                     fullWidth/>}
             />
         </div>)}

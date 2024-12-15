@@ -1,5 +1,6 @@
 package pl.poznan.put.planner_endpoints.planner;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +76,8 @@ public class PlannerController {
 
             List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
 
-            Plan plan = insertPlanToDbService.insertSlots(optimizedSchedule);
+            //TODO: to nie jest używane na froncie to wpisałem cokolwiek żeby java mnie kochała
+            Plan plan = insertPlanToDbService.insertSlots(optimizedSchedule, "NAZWA");
 
             planToExcelExportService.exportPlanToExcel(plan);
 
@@ -94,7 +96,7 @@ public class PlannerController {
         logger.log(Level.INFO,"DataAssembling started");
 
         String jobId = UUID.randomUUID().toString();
-
+        logger.log(Level.INFO,"Job id is {0}", jobId);
         planningProgressService.setProgress(jobId, 0, PlanningStatus.IN_PROGRESS);
         CompletableFuture.runAsync(() -> {
             try {
@@ -120,17 +122,17 @@ public class PlannerController {
                 Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
 
                 planningProgressService.setProgress(jobId, 50, PlanningStatus.IN_PROGRESS);
-
                 planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences, subjectTypeToTeachers,
                         groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
 
                 List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
 
+
                 planningProgressService.setProgress(jobId, 80, PlanningStatus.IN_PROGRESS);
 
                 planner.cleanup();
 
-                Plan plan = insertPlanToDbService.insertSlots(optimizedSchedule);
+                Plan plan = insertPlanToDbService.insertSlots(optimizedSchedule, planningParams.getPlanName());
 
                 planToExcelExportService.exportPlanToExcel(plan);
 
