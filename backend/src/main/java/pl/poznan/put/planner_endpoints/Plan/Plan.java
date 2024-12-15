@@ -18,4 +18,6 @@ public class Plan {
     public String name;
     @Column(name = "creation_date")
     public LocalDateTime creationDate;
+    @Column(name = "published")
+    public Boolean published;
 }

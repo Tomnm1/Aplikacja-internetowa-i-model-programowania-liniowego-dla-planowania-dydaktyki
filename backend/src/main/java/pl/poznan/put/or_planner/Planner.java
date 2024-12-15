@@ -1,29 +1,25 @@
 package pl.poznan.put.or_planner;
 
 import com.google.ortools.Loader;
-import com.google.ortools.linearsolver.MPObjective;
-import com.google.ortools.linearsolver.MPSolver;
-import com.google.ortools.linearsolver.MPVariable;
+import com.google.ortools.linearsolver.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.poznan.put.or_planner.constraints.ConstraintsManager;
+import pl.poznan.put.or_planner.data.helpers.GroupListService;
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
+import pl.poznan.put.or_planner.data.helpers.TeacherPreferences;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
+import pl.poznan.put.or_planner.objective.ObjectiveManager;
 import pl.poznan.put.planner_endpoints.ClassroomsSubjectTypes.ClassroomSubjectTypeService;
 import pl.poznan.put.planner_endpoints.SubjectTypeGroup.SubjectTypeGroupService;
 import pl.poznan.put.planner_endpoints.SubjectTypeTeacher.SubjectTypeTeacherService;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-/**
- * Weź se wyloguj
- * if(Objects.equals(groups.get(g), "L1") && Objects.equals(subjects.get(p), "PTC"))
- *                   System.out.println("wykluczam kombinację: " + groups.get(g) + " " + rooms.get(s) +
- *                   " " + timeSlots.get(t) + " " + subjects.get(p) + " " + teachers.get(n)) + " " + typesOfClasses.get(c);
- */
 
 @Service
 public class Planner {
@@ -33,6 +29,10 @@ public class Planner {
     SubjectTypeGroupService subjectTypeGroupService;
     final
     ConstraintsManager constraintsManager;
+    final
+    ObjectiveManager objectiveManager;
+    final
+    GroupListService groupListService;
     final
     ClassroomSubjectTypeService classroomSubjectTypeService;
     private Map<String, Set<String>> subjectTypeToTeachers;
@@ -46,6 +46,7 @@ public class Planner {
     private List<String> timeSlots;
     private List<PlannerClassType> subjects;
     private List<TeacherLoad> teacherLoadList;
+    private List<TeacherPreferences> teacherPreferences;
 
     private int numGroups;
     private int numRooms;
@@ -63,15 +64,19 @@ public class Planner {
             SubjectTypeTeacherService subjectTypeTeacherService,
             SubjectTypeGroupService subjectTypeGroupService,
             ConstraintsManager constraintsManager,
-            ClassroomSubjectTypeService classroomSubjectTypeService) {
+            ClassroomSubjectTypeService classroomSubjectTypeService,
+            ObjectiveManager objectiveManager,
+            GroupListService groupListService) {
         this.subjectTypeTeacherService = subjectTypeTeacherService;
         this.subjectTypeGroupService = subjectTypeGroupService;
         this.constraintsManager = constraintsManager;
         this.classroomSubjectTypeService = classroomSubjectTypeService;
+        this.objectiveManager = objectiveManager;
+        this.groupListService = groupListService;
     }
 
     public void initialize(List<String> groups, List<String> teachers, List<String> rooms, List<String> timeSlots,
-                           List<PlannerClassType> subjects, List<TeacherLoad> teacherLoadList,
+                           List<PlannerClassType> subjects, List<TeacherLoad> teacherLoadList, List<TeacherPreferences> teacherPreferences,
                            Map<String, Set<String>> subjectTypeToTeachers, Map<String, Set<String>> groupToSubjectTypes,
                            Map<String, Set<String>> classroomToSubjectTypes, Map<String, Set<String>> teachersToSubjectTypes){
         Loader.loadNativeLibraries();
@@ -81,6 +86,7 @@ public class Planner {
         this.timeSlots = timeSlots;
         this.subjects = subjects;
         this.teacherLoadList = teacherLoadList;
+        this.teacherPreferences = teacherPreferences;
 
         this.numGroups = groups.size();
         this.numSubjects = subjects.size();
@@ -102,17 +108,13 @@ public class Planner {
         }
     }
 
-    public List<PlannedSlot> optimizeSchedule() {
+    public List<PlannedSlot> optimizeSchedule() throws FileNotFoundException {
         logger.log(Level.INFO, "Schedule optimization started");
         MPSolver solver = MPSolver.createSolver("SCIP");
-        MPObjective objective = solver.objective();
-        objective.setMinimization();
+//        MPObjective objective = solver.objective();
+
         // Variables - dana grupa g, w danej sali s, o danym czasie t, ma przedmiot p z nauczycielem n
         logger.log(Level.INFO, "tab na zmienne");
-//        MPVariable[][][][][] xEven =
-//                new MPVariable[numGroups][numRooms][evenTimeSlots.size()][numSubjects][numTeachers];
-//        MPVariable[][][][][] xOdd =
-//                new MPVariable[numGroups][numRooms][oddTimeSlots.size()][numSubjects][numTeachers];
 
         Map<String, MPVariable> xEvenMap = new HashMap<>();
         Map<String, MPVariable> xOddMap = new HashMap<>();
@@ -120,11 +122,12 @@ public class Planner {
         logger.log(Level.INFO, "zmienne");
         for (int p = 0; p < numSubjects; ++p) {
             String subjectId = subjects.get(p).getId();
+            List<String> allGroups = groupListService.getGroupsFromGroupMapping(subjects.get(p).getGroupMappings());
             for (int n = 0; n < numTeachers; ++n) {
                 if(!subjectTypeToTeachers.get(subjectId).contains(teachers.get(n)))
                     continue;
                 for (int g = 0; g < numGroups; ++g) {
-                    if(!groupToSubjectTypes.get(groups.get(g)).contains(subjectId))
+                    if(!allGroups.contains(groups.get(g)))
                         continue;
                     for (int s = 0; s < numRooms; ++s) {
                         if(!classroomToSubjectTypes.get(rooms.get(s)).contains(subjectId))
@@ -133,7 +136,6 @@ public class Planner {
                             String varNameEven = "xEven_" + g + "_" + s + "_" + t + "_" + p + "_" + n;
                             String varNameOdd = "xOdd_" + g + "_" + s + "_" + t + "_" + p + "_" + n;
 
-                            // Tworzymy zmienne i zapisujemy w mapach
                             xEvenMap.put(varNameEven, solver.makeBoolVar(varNameEven));
                             xOddMap.put(varNameOdd, solver.makeBoolVar(varNameOdd));
                         }
@@ -162,75 +164,75 @@ public class Planner {
         logger.log(Level.INFO, " ograniczenie 5");
         constraintsManager.teachersLoadConstraint(xEvenMap, xOddMap);
 
+//        logger.log(Level.INFO, "Przypisanie funkcji celu");
+//        objectiveManager.initialize(teachers, timeSlots, objective, groups, rooms, subjects, teachersToSubjectTypes,
+//                subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes);
+//        objectiveManager.manageTeacherPreferences(xEvenMap, xOddMap, teacherPreferences);
+//        logger.log(Level.INFO, "Funkcja celu przypisana");
+
         logger.log(Level.INFO, " solver start");
-        MPSolver.ResultStatus status = solver.solve();
+        solver.enableOutput();
+
+//        try (PrintWriter out = new PrintWriter("filename.txt")) {
+//            out.println(solver.exportModelAsLpFormat());
+//        }
+
+//        objective.setMaximization();
+        MPSolverParameters solverParameters = new MPSolverParameters();
+
+//            solver.setTimeLimit(120*1000);
+        MPSolver.ResultStatus status = solver.solve(solverParameters);
         logger.log(Level.INFO, " solver stop");
-
         if (status == MPSolver.ResultStatus.OPTIMAL || status == MPSolver.ResultStatus.FEASIBLE) {
-            System.out.println("Found a " + status + " solution!");
+            logger.log(Level.INFO, "Found a " + status + " solution!");
+//            logger.log(Level.INFO, "Objective value = " + objective.value());
         } else {
-            System.out.println("No feasible solution found.");
-            return null;
+            logger.log(Level.INFO, "No feasible solution found");
         }
-
         logger.log(Level.INFO, "Solution analysing started");
         List<PlannedSlot> scheduleTable = new ArrayList<>();
-        for (int p = 0; p < numSubjects; ++p) {
-            PlannerClassType plannerClassType = subjects.get(p);
-            String subjectId = plannerClassType.getId();
-            for (int n = 0; n < numTeachers; ++n) {
-                if(!teacherCanTeach(Integer.parseInt(teachers.get(n)), Integer.parseInt(subjectId)))
-                    continue;
-                for (int g = 0; g < numGroups; ++g) {
-                    if(!groupHasSubjectType(Integer.parseInt(groups.get(g)), Integer.parseInt(subjectId)))
-                        continue;
-                    for (int s = 0; s < numRooms; ++s) {
-                        if(!classroomIsAssignedToSubject(Integer.parseInt(rooms.get(s)), Integer.parseInt(subjectId)))
-                            continue;
-                        for (int t = 0; t < numTimeSlots; ++t) {
-                            String varNameEven = "xEven_" + g + "_" + s + "_" + t + "_" + p + "_" + n;
-                            String varNameOdd = "xOdd_" + g + "_" + s + "_" + t + "_" + p + "_" + n;
 
-                            MPVariable evenVar = xEvenMap.get(varNameEven);
-                            MPVariable oddVar = xOddMap.get(varNameOdd);
-                            if (evenVar.solutionValue() == 1) {
-                                Map<String, List<String>> groupMappings = plannerClassType.getGroupMappings();
-                                List<String> groupsToAssign = groupMappings.get(groups.get(g));
+        xEvenMap.forEach((xEvenName, xEven) -> {
+            if(xEven.solutionValue() == 1)
+                prepareAndAddToResultTable(xEven, scheduleTable, true);
+        });
 
-                                PlannedSlot evenSlot = new PlannedSlot(timeSlots.get(t), groups.get(g), teachers.get(n),
-                                        rooms.get(s), subjectId, true);
-                                scheduleTable.add(evenSlot);
+        xOddMap.forEach((xOddName, xOdd) -> {
+            if(xOdd.solutionValue() == 1)
+                prepareAndAddToResultTable(xOdd, scheduleTable, false);
+        });
 
-                                for(String group: groupsToAssign){
-                                    PlannedSlot evenGroupSlot = new PlannedSlot(timeSlots.get(t), group, teachers.get(n),
-                                            rooms.get(s), subjectId, true);
-                                    scheduleTable.add(evenGroupSlot);
-                                }
-                            }
-                            if (oddVar.solutionValue() == 1) {
-                                Map<String, List<String>> groupMappings = plannerClassType.getGroupMappings();
-                                List<String> groupsToAssign = groupMappings.get(groups.get(g));
-
-                                PlannedSlot oddSlot = new PlannedSlot(timeSlots.get(t), groups.get(g), teachers.get(n),
-                                        rooms.get(s), subjectId, false);
-                                scheduleTable.add(oddSlot);
-
-                                for(String group: groupsToAssign){
-                                    PlannedSlot evenGroupSlot = new PlannedSlot(timeSlots.get(t), group, teachers.get(n),
-                                            rooms.get(s), subjectId, false);
-                                    scheduleTable.add(evenGroupSlot);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
         logger.log(Level.INFO, "Solution analyzing finished");
         xOddMap.clear();
         xEvenMap.clear();
         constraintsManager.cleanup();
+        objectiveManager.cleanup();
+        solver.delete();
         return scheduleTable;
+    }
+
+    private void prepareAndAddToResultTable(MPVariable variable,  List<PlannedSlot> scheduleTable, boolean isEven){
+        String variableName = variable.name();
+        String[] variableParams = variableName.split("_");
+        String groupId = groups.get(Integer.parseInt(variableParams[1]));
+        String roomId = rooms.get(Integer.parseInt(variableParams[2]));
+        String slotId = timeSlots.get(Integer.parseInt(variableParams[3]));
+        PlannerClassType subjectType = subjects.get(Integer.parseInt(variableParams[4]));
+        String teacherId = teachers.get(Integer.parseInt(variableParams[5]));
+
+        Map<String, List<String>> groupMappings = subjectType.getGroupMappings();
+        List<String> groupsToAssign = groupMappings.get(groupId);
+        if(groupsToAssign == null) {
+            System.out.println(subjectType.getId() + " " + teacherId);
+        }
+
+        PlannedSlot plannedSlot = new PlannedSlot(slotId, groupId, teacherId, roomId, subjectType.getId(), isEven);
+        scheduleTable.add(plannedSlot);
+
+        for(String group: groupsToAssign){
+            PlannedSlot evenGroupSlot = new PlannedSlot(slotId, group, teacherId, roomId, subjectType.getId(), isEven);
+            scheduleTable.add(evenGroupSlot);
+        }
     }
 
     public void cleanup() {
@@ -240,23 +242,12 @@ public class Planner {
         this.timeSlots = null;
         this.subjects = null;
         this.teacherLoadList = null;
+        this.teacherPreferences = null;
         this.evenTimeSlots = null;
         this.oddTimeSlots = null;
         this.subjectTypeToTeachers = null;
         this.groupToSubjectTypes = null;
         this.classroomToSubjectTypes = null;
-    }
-
-    private boolean teacherCanTeach(int teacherId, int subjectTypeId){
-        return subjectTypeTeacherService.teacherCanTeach(teacherId, subjectTypeId);
-    }
-
-    private boolean groupHasSubjectType(int groupId, int subjectTypeId){
-        return subjectTypeGroupService.groupHasSubjectType(groupId, subjectTypeId);
-    }
-
-    private boolean classroomIsAssignedToSubject(int classroomId, int subjectTypeId){
-        return classroomSubjectTypeService.classroomIsAssignedToSubject(classroomId, subjectTypeId);
     }
 }
 

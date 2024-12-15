@@ -11,6 +11,11 @@ public class ConstraintBuilder {
         this.constraint = solver.makeConstraint(lowerBound, upperBound, name);
     }
 
+    public ConstraintBuilder(MPSolver solver, String name, double upperBound) {
+        this.constraint = solver.makeConstraint(name);
+        this.constraint.setUb(upperBound);
+    }
+
     public void setCoefficient(MPVariable variable, double coefficient) {
         this.constraint.setCoefficient(variable, coefficient);
     }

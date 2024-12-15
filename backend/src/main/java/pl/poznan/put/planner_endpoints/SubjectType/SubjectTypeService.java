@@ -54,6 +54,10 @@ public class SubjectTypeService {
         return subjectTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "subjectTypeId"));
     }
 
+    public List<SubjectType> getAllSubjectTypeBySubject(Subject subject){
+        return subjectTypeRepository.findAllBySubject(subject);
+    }
+
     @Transactional
     public List<SubjectTypeDTO> getAllsubjectTypeDTO(){
         List<SubjectTypeDTO> subjectTypeDTOS = subjectTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "subjectTypeId")).stream().map(SubjectType::convertToDTO).toList();
@@ -94,8 +98,6 @@ public class SubjectTypeService {
     public SubjectType getSubjectTypeBySubjectAndType(Subject subject, ClassTypeOwn type){
         return subjectTypeRepository.findSubjectTypeBySubjectAndType(subject, type);
     }
-
-
 
     public SubjectType createsubjectType(SubjectType subjectType){
         return subjectTypeRepository.save(subjectType);

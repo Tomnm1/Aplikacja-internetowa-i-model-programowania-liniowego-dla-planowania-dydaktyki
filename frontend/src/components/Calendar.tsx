@@ -79,11 +79,13 @@ const Timetable = () => {
                 enqueueSnackbar(`Błąd podczas pobierania planów: ${error.message}`, {variant: 'error'});
                 return [];
             }),])
-            .then(([teachersData, semestersData, classroomsData, plansData]) => {
+            .then(([teachersData, semestersData, classroomsData, plansData]:[any,any,any,Plan[]]) => {
                 setTeachers(teachersData);
                 setSemester(semestersData);
                 setClassrooms(classroomsData);
                 setPlans(plansData);
+                setSelectedPlan(():number => {
+                    return plansData.find((plan: Plan) => plan.published)?.planId || 0;}  );
                 setLoading(false);
             })
             .catch(() => {

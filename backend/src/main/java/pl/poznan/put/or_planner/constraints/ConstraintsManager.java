@@ -4,12 +4,10 @@ import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.poznan.put.or_planner.data.helpers.GroupListService;
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoadSubject;
-import pl.poznan.put.planner_endpoints.ClassroomsSubjectTypes.ClassroomSubjectTypeService;
-import pl.poznan.put.planner_endpoints.SubjectTypeGroup.SubjectTypeGroupService;
-import pl.poznan.put.planner_endpoints.SubjectTypeTeacher.SubjectTypeTeacherService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +34,7 @@ public class ConstraintsManager {
 
     private List<String> evenTimeSlots;
     private List<String> oddTimeSlots;
-
-    private final SubjectTypeTeacherService subjectTypeTeacherService;
-    private final SubjectTypeGroupService subjectTypeGroupService;
-    private final ClassroomSubjectTypeService classroomSubjectTypeService;
+    private final GroupListService groupListService;
     private Map<String, Set<String>> teachersToSubjectTypes;
     private Map<String, Set<String>> subjectTypeToTeachers;
     private Map<String, Set<String>> groupToSubjectTypes;
@@ -47,13 +42,9 @@ public class ConstraintsManager {
 
     @Autowired
     ConstraintsManager(
-            SubjectTypeTeacherService subjectTypeTeacherService,
-            SubjectTypeGroupService subjectTypeGroupService,
-            ClassroomSubjectTypeService classroomSubjectTypeService
+            GroupListService groupListService
     ){
-        this.subjectTypeTeacherService = subjectTypeTeacherService;
-        this.subjectTypeGroupService = subjectTypeGroupService;
-        this.classroomSubjectTypeService = classroomSubjectTypeService;
+        this.groupListService = groupListService;
     }
 
 
@@ -98,9 +89,9 @@ public class ConstraintsManager {
         for (int s = 0; s < numRooms; ++s) {
             for (int t = 0; t < numTimeSlots; ++t) {
                 ConstraintBuilder roomOccupationConstraintEven = new ConstraintBuilder(
-                        solver, "RoomOccupiedEvenWeek_" + s + "_" + t, 0, 1);
+                        solver, "RoomOccupiedEvenWeek_" + s + "_" + t,  1);
                 ConstraintBuilder roomOccupationConstraintOdd = new ConstraintBuilder(
-                        solver, "RoomOccupiedOddWeek_" + s + "_" + t, 0, 1);
+                        solver, "RoomOccupiedOddWeek_" + s + "_" + t, 1);
 
                 iterateAllGroupsSubjectsTeachers(roomOccupationConstraintEven, roomOccupationConstraintOdd, xEvenMap, xOddMap,
                         1, t, s, WEEKLY);
@@ -187,14 +178,15 @@ public class ConstraintsManager {
         }
     }
 
+    //Raczej nie trzeba upraszczać
     private void assignSubjectToGroupConstraint(Map<String, MPVariable> xEvenMap, Map<String, MPVariable> xOddMap,
                                                 List<Integer> roomIndices, List<Integer> teacherIndices,
                                                 int assignedGroupIndex, int subject, String frequency){
         for (int roomIndex : roomIndices) {
             for (int teacherIndex : teacherIndices) {
                 for (int t = 0; t < numTimeSlots; ++t) {
-                    ConstraintBuilder assignedGroupConstraintEven = new ConstraintBuilder(solver, "Assigned group even week: " + assignedGroupIndex + "_subject_" + subject, 0, 1);
-                    ConstraintBuilder assignedGroupConstraintOdd = new ConstraintBuilder(solver, "Assigned group odd week: " + assignedGroupIndex + "_subject_" + subject, 0, 1);
+                    ConstraintBuilder assignedGroupConstraintEven = new ConstraintBuilder(solver, "Assigned group even week: " + assignedGroupIndex + "_subject_" + subject,  1);
+                    ConstraintBuilder assignedGroupConstraintOdd = new ConstraintBuilder(solver, "Assigned group odd week: " + assignedGroupIndex + "_subject_" + subject,  1);
 
                     handleWeeks(assignedGroupConstraintEven, assignedGroupConstraintOdd, xEvenMap, xOddMap, frequency,
                             1, 1, assignedGroupIndex, roomIndex, t, subject, teacherIndex);
@@ -229,9 +221,9 @@ public class ConstraintsManager {
                         String varNameEven = "xEven_" + assignedGroupIndex + "_" + roomIndex + "_" + t + "_" + subject + "_" + teacherIndex;
                         String varNameOdd = "xOdd_" + assignedGroupIndex + "_" + roomIndex + "_" + t + "_" + subject + "_" + teacherIndex;
 
-                        ConstraintBuilder blockGroupsEven = new ConstraintBuilder(solver, "Even Group " + assignedGroupIndex + " blocks groups " + blockedGroupIndex, 0, 1);
+                        ConstraintBuilder blockGroupsEven = new ConstraintBuilder(solver, "Even Group " + assignedGroupIndex + " blocks groups " + blockedGroupIndex, 1);
                         blockGroupsEven.setCoefficient(xEvenMap.get(varNameEven), 1);
-                        ConstraintBuilder blockGroupsOdd = new ConstraintBuilder(solver, "Odd Group " + assignedGroupIndex + " blocks groups " + blockedGroupIndex, 0, 1);
+                        ConstraintBuilder blockGroupsOdd = new ConstraintBuilder(solver, "Odd Group " + assignedGroupIndex + " blocks groups " + blockedGroupIndex, 1);
                         blockGroupsOdd.setCoefficient(xOddMap.get(varNameOdd), 1);
 
                         iterateAllRoomsTeachersSubjects(blockGroupsEven, blockGroupsOdd, xEvenMap, xOddMap, 1, blockedGroupIndex, t, frequency);
@@ -244,8 +236,8 @@ public class ConstraintsManager {
     public void oneTeacherOneClassConstraint(Map<String, MPVariable> xEvenMap, Map<String, MPVariable> xOddMap){
         for (int teacher = 0; teacher < numTeachers; ++teacher) {
             for (int time = 0; time < numTimeSlots; ++time) {
-                ConstraintBuilder teacherEvenConstraint = new ConstraintBuilder(solver, "One teacher constraintEven " + teacher ,0, 1);
-                ConstraintBuilder teacherOddConstraint = new ConstraintBuilder(solver, "One teacher constraintOdd " + teacher ,0, 1);
+                ConstraintBuilder teacherEvenConstraint = new ConstraintBuilder(solver, "One teacher constraintEven " + teacher , 1);
+                ConstraintBuilder teacherOddConstraint = new ConstraintBuilder(solver, "One teacher constraintOdd " + teacher , 1);
 
                 iterateAllRoomsSubjectsGroups(teacherEvenConstraint, teacherOddConstraint, xEvenMap, xOddMap, 1,
                         teacher, time, WEEKLY);
@@ -256,8 +248,8 @@ public class ConstraintsManager {
     public void oneGroupOneClassConstraint(Map<String, MPVariable> xEvenMap, Map<String, MPVariable> xOddMap){
         for (int group = 0; group < numGroups; ++group) {
             for (int time = 0; time < numTimeSlots; ++time) {
-                ConstraintBuilder groupEvenConstraint = new ConstraintBuilder(solver, "GroupEvenConstraint_" + group, 0, 1);
-                ConstraintBuilder groupOddConstraint = new ConstraintBuilder(solver, "GroupOddConstraint_" + group, 0, 1);
+                ConstraintBuilder groupEvenConstraint = new ConstraintBuilder(solver, "GroupEvenConstraint_" + group, 1);
+                ConstraintBuilder groupOddConstraint = new ConstraintBuilder(solver, "GroupOddConstraint_" + group, 1);
 
                 iterateAllRoomsTeachersSubjects(groupEvenConstraint, groupOddConstraint, xEvenMap, xOddMap, 1, group, time, WEEKLY);
             }
@@ -273,14 +265,20 @@ public class ConstraintsManager {
             for(TeacherLoadSubject teacherLoadSubject: teacherLoad.getTeacherLoadSubjectList()){
                 String subjectName = teacherLoadSubject.getName();
                 int subjectIndex = this.subjectNames.indexOf(subjectName);
+                PlannerClassType plannerClassType = this.subjects.get(subjectIndex);
+                List<String> allGroups = groupListService.getGroupsFromGroupMapping(plannerClassType.getGroupMappings());
+
                 int maxGroups = Integer.parseInt(teacherLoadSubject.getMaxGroups());
                 List<String> groups = teacherLoadSubject.getGroups();
                 List<Integer> groupsIndices = groups.stream()
                         .map(this.groups::indexOf)
                         .toList();
-                ConstraintBuilder teacherLoadEvenConstraint = new ConstraintBuilder(solver, "teacherLoadEvenConstraint", 0, maxGroups);
-                ConstraintBuilder teacherLoadOddConstraint = new ConstraintBuilder(solver, "teacherLoadEvenConstraint", 0, maxGroups);
+
+                ConstraintBuilder teacherLoadEvenConstraint = new ConstraintBuilder(solver, "teacherLoadEvenConstraint", maxGroups);
+                ConstraintBuilder teacherLoadOddConstraint = new ConstraintBuilder(solver, "teacherLoadEvenConstraint", maxGroups);
                 for(int group: groupsIndices){
+                    if(!allGroups.contains(this.groups.get(group)))
+                        continue;
                     for(int s = 0; s < numRooms; ++s){
                         if(!classroomToSubjectTypes.get(rooms.get(s)).contains(subjectName))
                             continue;
@@ -317,13 +315,14 @@ public class ConstraintsManager {
                                                   int coefficient, int time, int room, String frequency){
         for (int p = 0; p < numSubjects; ++p) {
             String subjectId = subjects.get(p).getId();
+            List<String> allGroups = groupListService.getGroupsFromGroupMapping(subjects.get(p).getGroupMappings());
             if(!classroomToSubjectTypes.get(rooms.get(room)).contains(subjectId))
                 continue;
             for (int n = 0; n < numTeachers; ++n) {
                 if(!subjectTypeToTeachers.get(subjectId).contains(teachers.get(n)))
                     continue;
                 for (int g = 0; g < numGroups; ++g) {
-                    if(!groupToSubjectTypes.get(groups.get(g)).contains(subjectId))
+                    if(!allGroups.contains(groups.get(g)))
                         continue;
                     handleWeeks(evenConstraint, oddConstraint, xEvenMap, xOddMap, frequency, coefficient, coefficient,
                             g, room, time, p, n);
@@ -337,9 +336,11 @@ public class ConstraintsManager {
                                                  int coefficient, int group, int time, String frequency){
 
         for (int subject = 0; subject < numSubjects; ++subject){
-            String subjectId = subjects.get(subject).getId();
+            PlannerClassType plannerSubject = subjects.get(subject);
+            String subjectId = plannerSubject.getId();
+            List<String> allGroups = groupListService.getGroupsFromGroupMapping(plannerSubject.getGroupMappings());
 
-            if(!groupToSubjectTypes.get(groups.get(group)).contains(subjectId))
+            if(!allGroups.contains(groups.get(group)))
                 continue;
 
             for (int teacher = 0; teacher < numTeachers; ++teacher){
@@ -363,11 +364,13 @@ public class ConstraintsManager {
                                                Map<String, MPVariable> xEvenMap, Map<String, MPVariable> xOddMap,
                                                int coefficient, int teacher, int time, String frequency) {
         for (int subject = 0; subject < numSubjects; ++subject){
-            String subjectId = subjects.get(subject).getId();
+            PlannerClassType plannerSubject = subjects.get(subject);
+            String subjectId = plannerSubject.getId();
+            List<String> allGroups = groupListService.getGroupsFromGroupMapping(plannerSubject.getGroupMappings());
             if(!subjectTypeToTeachers.get(subjectId).contains(teachers.get(teacher)))
                 continue;
             for (int group = 0; group < numGroups; ++group){
-                if(!groupToSubjectTypes.get(groups.get(group)).contains(subjectId))
+                if(!allGroups.contains(groups.get(group)))
                     continue;
                 for (int room = 0; room < numRooms; room++){
                     if(!classroomToSubjectTypes.get(rooms.get(room)).contains(subjectId))

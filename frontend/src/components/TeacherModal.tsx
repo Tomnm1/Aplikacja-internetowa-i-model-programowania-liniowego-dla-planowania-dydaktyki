@@ -27,9 +27,12 @@ const steps = ['Dane nauczyciela', 'Preferencje godzin'];
 interface TeacherFormData {
     id: number;
     firstName: string;
+    secondName: string;
     lastName: string;
     degree: string;
     subjectTypesList: SubjectType[] | [];
+    innerId: number;
+    usosId: number;
 }
 
 const TeacherModal: React.FC<TeacherModalProps> = ({open, onClose, teacher, isAdding}) => {
@@ -40,9 +43,12 @@ const TeacherModal: React.FC<TeacherModalProps> = ({open, onClose, teacher, isAd
     const [formData, setFormData] = useState<TeacherFormData>({
         id: teacher?.id ?? 0,
         firstName: teacher?.firstName ?? '',
+        secondName: teacher?.secondName ?? '',
         lastName: teacher?.lastName ?? '',
         degree: teacher?.degree ?? 'BRAK',
         subjectTypesList: teacher?.subjectTypesList ?? [],
+        innerId: teacher?.id ?? 0,
+        usosId: teacher?.usosId ?? 0,
     });
 
     const [preferences, setPreferences] = useState<Record<number, SlotPreference>>({});
@@ -90,10 +96,13 @@ const TeacherModal: React.FC<TeacherModalProps> = ({open, onClose, teacher, isAd
         const teacherData: BackendTeacher = {
             id: isAdding ? 0 : formData.id,
             firstName: formData.firstName,
+            secondName: formData.secondName,
             lastName: formData.lastName,
             degree: formData.degree,
             preferences: serializedPreferences,
             subjectTypesList: formData.subjectTypesList,
+            innerId: formData.innerId,
+            usosId: formData.usosId,
         };
         console.log(teacherData);
 
