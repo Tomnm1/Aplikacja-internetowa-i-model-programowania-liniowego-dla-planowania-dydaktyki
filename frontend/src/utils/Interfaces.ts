@@ -68,6 +68,7 @@ export interface BackendTeacher {
     lastName: string;
     email?: string;
     degree: string;
+    isAdmin?: boolean;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
     usosId: number;
@@ -81,6 +82,7 @@ export interface Teacher {
     lastName: string;
     email?: string;
     degree: string;
+    isAdmin?: boolean;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
     usosId: number;
