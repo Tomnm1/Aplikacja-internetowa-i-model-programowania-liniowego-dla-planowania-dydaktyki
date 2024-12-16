@@ -2,7 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_ENDPOINTS } from '../urls';
 import { BackendTeacher } from '../../utils/Interfaces';
 import jwtDecode from 'jwt-decode';
-
+import { fetchWithAuth } from "../fetchWithAuth";
 
 interface AuthState {
     isAuthenticated: boolean;
@@ -32,7 +32,6 @@ const storedAuth = localStorage.getItem('auth');
 const storedToken = localStorage.getItem('access_token');
 const parsedAuth: AuthState | null = storedAuth ? JSON.parse(storedAuth) : null;
 
-
 export const loginUser = createAsyncThunk<
     { role: 'admin' | 'user'; userId: string; user?: BackendTeacher },
     string,
@@ -44,20 +43,26 @@ export const loginUser = createAsyncThunk<
             const decoded: DecodedToken = jwtDecode(accessToken);
             const userId = decoded.uid;
 
-            if (userId === 'admin') { //tu sie wpisze ID pani Paulinki i kogo tam jeszcze potrzeba
-                return { role: 'admin', userId: 'admin' };
-            } else {
-                const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${userId}`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error('Nie znaleziono użytkownika');
-                }
-                const data: BackendTeacher = await response.json();
-                return { role: 'user', userId, user: data };
+            // Fetch user data from backend
+            const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS}/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            if (response.status === 401) {
+                throw new Error('Użytkownik nie był zarejestrowany. Proszę zalogować się ponownie.');
             }
+
+            if (!response.ok) {
+                throw new Error('Nie znaleziono użytkownika');
+            }
+
+            const data: BackendTeacher = await response.json();
+
+            const role: 'admin' | 'user' = data.isAdmin ? 'admin' : 'user';
+
+            return { role, userId, user: data };
         } catch (error: any) {
             return rejectWithValue(error.message || 'Login failed');
         }
@@ -106,6 +111,8 @@ export const authSlice = createSlice({
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || 'Nieznany błąd podczas logowania';
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('auth');
             });
     },
 });
