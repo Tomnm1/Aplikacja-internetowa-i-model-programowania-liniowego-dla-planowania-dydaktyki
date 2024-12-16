@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_Teacher;
 
 import java.util.List;
 import java.util.Optional;
@@ -231,5 +230,9 @@ public class TeacherService {
             teacher = teacherRepository.findRandomTeacher();
         }
         return teacher;
+    }
+
+    public Optional<Teacher> findByEmail(String email) {
+        return teacherRepository.findByEmail(email);
     }
 }
