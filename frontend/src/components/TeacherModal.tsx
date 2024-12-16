@@ -30,6 +30,7 @@ interface TeacherFormData {
     secondName: string;
     lastName: string;
     degree: string;
+    isAdmin: boolean;
     subjectTypesList: SubjectType[] | [];
     innerId: number;
     usosId: number;
@@ -46,6 +47,7 @@ const TeacherModal: React.FC<TeacherModalProps> = ({open, onClose, teacher, isAd
         secondName: teacher?.secondName ?? '',
         lastName: teacher?.lastName ?? '',
         degree: teacher?.degree ?? 'BRAK',
+        isAdmin: teacher?.isAdmin ?? false,
         subjectTypesList: teacher?.subjectTypesList ?? [],
         innerId: teacher?.id ?? 0,
         usosId: teacher?.usosId ?? 0,
@@ -99,6 +101,7 @@ const TeacherModal: React.FC<TeacherModalProps> = ({open, onClose, teacher, isAd
             secondName: formData.secondName,
             lastName: formData.lastName,
             degree: formData.degree,
+            isAdmin: formData.isAdmin,
             preferences: serializedPreferences,
             subjectTypesList: formData.subjectTypesList,
             innerId: formData.innerId,
