@@ -90,8 +90,8 @@ public class TeacherService {
             oldteacher.secondName = teacherParams.secondName;
             oldteacher.usosId = teacherParams.usosId;
             oldteacher.innerId = teacherParams.innerId;
-            //oldteacher.eloginId = teacherParams.eloginId; // Scary!!
-            //oldteacher.isAdmin = teacherParams.isAdmin; // Maybe separate endpoint, that can only be accessed by admin?
+            oldteacher.email = teacherParams.email;
+            //oldteacher.isAdmin = teacherParams.isAdmin; // TODO Maybe on a separate endpoint, that can only be accessed by admin?
             oldteacher.subjectTypesList = teacherParams.subjectTypesList;
             return teacherRepository.save(oldteacher);
         } else {
