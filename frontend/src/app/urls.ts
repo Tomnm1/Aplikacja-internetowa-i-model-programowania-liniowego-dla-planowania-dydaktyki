@@ -18,7 +18,7 @@ export const API_ENDPOINTS = {
     GENERATED_PLAN_TEACHERS: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/teacher/${id}`,
     GENERATED_PLAN_CLASSROOM: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/classroom/${id}`,
     GENERATED_PLAN_SEMESTER: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/semester/${id}`,
-    PLANNING_PROGRESS: (id: number) => `${API_BASE}/planningProgress/${id}`,
+    PLANNING_PROGRESS: (id: string) => `${API_BASE}/planningProgress/${id}`,
 };
 
 export default API_ENDPOINTS;

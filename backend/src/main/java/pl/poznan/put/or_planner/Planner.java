@@ -206,7 +206,7 @@ public class Planner {
         xOddMap.clear();
         xEvenMap.clear();
         constraintsManager.cleanup();
-        objectiveManager.cleanup();
+//        objectiveManager.cleanup();
         solver.delete();
         return scheduleTable;
     }

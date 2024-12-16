@@ -75,6 +75,18 @@ public class TeacherController {
         return teacherService.updateteacherByID(id, teacherParams);
     }
 
+    @Operation(summary = "Update specified teacher's email from provided JSON")
+    @PutMapping("email/{id}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = Teacher.class)
+            )
+    })
+    public Teacher updateTeacherEmailByID(@PathVariable("id") Integer id, @RequestBody String email){
+        return teacherService.updateteacherEmailByID(id, email);
+    }
+
     @Operation(summary = "Delete all teachers")
     @DeleteMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {

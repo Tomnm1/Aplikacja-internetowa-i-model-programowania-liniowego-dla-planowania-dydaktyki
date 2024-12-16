@@ -52,6 +52,22 @@ export const updateTeacher = createAsyncThunk<Teacher, BackendTeacher>('teachers
     return adjustedTeacher;
 },);
 
+export const updateTeacherEmail = createAsyncThunk<Teacher, BackendTeacher>('teachers/updateTeacherEmail', async (teacherData) => {
+    const response = await fetch(`${API_ENDPOINTS.TEACHERS}/email/${teacherData.id}`, {
+        method: 'PUT', headers: {
+            'Content-Type': 'application/json',
+        }, body: teacherData.email,
+    });
+    if (!response.ok) {
+        throw new Error('Failed to update teacher email');
+    }
+    const data: BackendTeacher = await response.json();
+    const adjustedTeacher: Teacher = {
+        ...data, id: data.id!,
+    };
+    return adjustedTeacher;
+},);
+
 export const deleteTeacher = createAsyncThunk<number, number>('teachers/deleteTeacher', async (id: number) => {
     const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${id}`, {
         method: 'DELETE',
@@ -93,6 +109,13 @@ const teacherSlice = createSlice({
                 state.rows.push(action.payload);
             })
             .addCase(updateTeacher.fulfilled, (state, action) => {
+                const updatedTeacher = action.payload;
+                const index = state.rows.findIndex((row) => row.id === updatedTeacher.id);
+                if (index !== -1) {
+                    state.rows[index] = updatedTeacher;
+                }
+            })
+            .addCase(updateTeacherEmail.fulfilled, (state, action) => {
                 const updatedTeacher = action.payload;
                 const index = state.rows.findIndex((row) => row.id === updatedTeacher.id);
                 if (index !== -1) {
