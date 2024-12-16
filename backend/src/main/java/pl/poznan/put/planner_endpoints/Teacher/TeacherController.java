@@ -96,7 +96,7 @@ public class TeacherController {
             )
     })
     public Teacher updateTeacherEmailByID(@PathVariable("id") Integer id, @RequestBody String email){
-        return teacherService.updateteacherEmailByID(id, email);
+        return teacherService.updateTeacherEmailByID(id, email);
     }
 
     @Operation(summary = "Delete all teachers")

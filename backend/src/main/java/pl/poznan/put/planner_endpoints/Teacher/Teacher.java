@@ -43,9 +43,6 @@ public class Teacher {
     public String email;
     @Column(name = "is_admin")
     public Boolean isAdmin;
-
-    @Column(name = "email")
-    public String email;
     @Column(name = "degree")
     @Convert(converter = DegreeConverter.class)
     public Degree degree;
