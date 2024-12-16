@@ -16,9 +16,12 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
     Teacher findByUsosId(int usosId);
     Teacher findByInnerId(int innerId);
     Optional<Teacher> findByEloginId(String eloginId);
+    Optional<Teacher> findByEmail(String email);
     @Query(value = "SELECT * FROM teachers WHERE LENGTH(preferences::text) > 2", nativeQuery = true)
     List<Teacher> findAllTeachersWithPreferences();
 
     @Query(value = "SELECT * FROM teachers ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
     Teacher findRandomTeacher();
+
+
 }
