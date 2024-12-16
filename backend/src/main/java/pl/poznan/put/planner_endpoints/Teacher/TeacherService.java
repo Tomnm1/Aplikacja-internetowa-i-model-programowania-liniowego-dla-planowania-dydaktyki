@@ -103,6 +103,17 @@ public class TeacherService {
         }
     }
 
+    public Teacher updateteacherEmailByID(Integer id, String email){
+        Optional<Teacher> teacher = teacherRepository.findById(id);
+        if (teacher.isPresent()) {
+            Teacher oldteacher = teacher.get();
+            oldteacher.email = email;
+            return teacherRepository.save(oldteacher);
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Deletes Teacher by ID
      * @param id id
