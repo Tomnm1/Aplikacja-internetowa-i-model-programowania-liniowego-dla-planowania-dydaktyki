@@ -62,7 +62,7 @@ const Timetable = () => {
 
     const [loading, setLoading] = useState<boolean>(true);
     const [eventsLoading, setEventsLoading] = useState<boolean>(false);
-    const [isTableView, setIsTableView] = useState<boolean>(false);
+    const [isTableView, setIsTableView] = useState<boolean>(true);
 
     const contextItems = useMemo(() => ({
         teacher: teachers.map((teacher) => ({id: teacher.id, label: `${teacher.firstName} ${teacher.lastName}`})),
@@ -416,7 +416,7 @@ const Timetable = () => {
                             subjectColorMap={subjectColorMap}
                             dayMapping={dayMapping}
                             dayToIndex={dayToIndex}
-                        />) : (<div className={role === 'admin' ? 'w-[220vw]' : "w-full"}>
+                        />) : (<div className={"w-full"}>
                             <FullCalendar
                                 plugins={[timeGridPlugin]}
                                 initialView="timeGridWeek"
