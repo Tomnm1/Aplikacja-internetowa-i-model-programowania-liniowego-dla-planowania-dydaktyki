@@ -66,6 +66,7 @@ export interface BackendTeacher {
     firstName: string;
     secondName: string;
     lastName: string;
+    email?: string;
     degree: string;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
@@ -78,6 +79,7 @@ export interface Teacher {
     firstName: string;
     secondName: string;
     lastName: string;
+    email?: string;
     degree: string;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];

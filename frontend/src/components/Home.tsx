@@ -1,204 +1,182 @@
-import React, {useState} from 'react';
-import {Alert, Button, CircularProgress, Snackbar, Step, StepLabel, Stepper, Typography,} from '@mui/material';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
-    Build as BuildIcon, CheckCircle as CheckCircleIcon, Error as ErrorIcon, VerifiedUser as VerifiedUserIcon,
-} from '@mui/icons-material';
-import ActionButton from "../utils/ActionButton.tsx";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+    Button, FormControl, InputLabel, LinearProgress, MenuItem, Select, SelectChangeEvent, TextField, Typography
+} from '@mui/material';
+import {useSnackbar} from 'notistack';
+import API_ENDPOINTS from '../app/urls.ts';
 
-const steps = ['Sprawdź ograniczenia', 'Budowanie', 'Sukces lub Błąd'];
-
-const dummyProcesses = ['Weryfikacja danych', 'Obliczanie', 'Zbieranie obliczeń', 'Tworzenie planu', 'Walidacja wyników',];
-
-type SnackbarState = {
-    open: boolean; message: string; severity: 'success' | 'error' | 'info' | 'warning';
-};
+interface PlanningProgress {
+    progress: number;
+    status: 'IN_PROGRESS' | 'DONE' | 'ERROR';
+}
 
 const Home: React.FC = () => {
-    const [activeStep, setActiveStep] = useState<number>(0);
-    const [buildingStep, setBuildingStep] = useState<number>(0);
-    const [checkLoading, setCheckLoading] = useState<boolean>(false);
-    const [checkSuccess, setCheckSuccess] = useState<boolean>(false);
-    const [buildLoading, setBuildLoading] = useState<boolean>(false);
-    const [buildSuccess, setBuildSuccess] = useState<boolean>(false);
-    const [result, setResult] = useState<'success' | 'error' | null>(null);
-    const [error, setError] = useState<string>('');
-    const [snackbar, setSnackbar] = useState<SnackbarState>({
-        open: false, message: '', severity: 'success',
-    });
+    const [planName, setPlanName] = useState('');
+    const [fieldOfStudyType, setFieldOfStudyType] = useState<string>('stacjonarne');
+    const [semesterType, setSemesterType] = useState<string>('zimowy');
+    const [jobId, setJobId] = useState<string | null>(null);
+    const [progressData, setProgressData] = useState<PlanningProgress | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const {enqueueSnackbar} = useSnackbar();
 
-    const handleNext = () => {
-        setActiveStep((prev) => prev + 1);
-    };
-
-    const handleReset = () => {
-        setActiveStep(0);
-        setBuildingStep(0);
-        setCheckLoading(false);
-        setCheckSuccess(false);
-        setBuildLoading(false);
-        setBuildSuccess(false);
-        setResult(null);
-        setError('');
-    };
-
-    const checkRestrictions = async () => {
-        setCheckLoading(true);
-        setError('');
-        try {
-            //tu słać requesta, kiedyś
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            setCheckSuccess(true);
-            setSnackbar({open: true, message: 'Ograniczenia sprawdzone pomyślnie!', severity: 'success'});
-            handleNext();
-        } catch (err) {
-            setError('Wystąpił błąd podczas sprawdzania ograniczeń.');
-            setSnackbar({open: true, message: 'Błąd podczas sprawdzania ograniczeń.', severity: 'error'});
-        } finally {
-            setCheckLoading(false);
-        }
-    };
-
-    const startBuilding = async () => {
-        setBuildLoading(true);
-        setBuildSuccess(false);
-        setBuildingStep(0);
-        setError('');
-        for (let i = 0; i < dummyProcesses.length; i++) {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            setBuildingStep((prev) => prev + 1);
-        }
-        const isSuccess = Math.random() > 0.3;
-        if (isSuccess) {
-            setBuildSuccess(true);
-            setResult('success');
-            setSnackbar({open: true, message: 'Budowanie zakończone sukcesem!', severity: 'success'});
+    useEffect(() => {
+        const savedJobId = localStorage.getItem('planningJobId');
+        if (savedJobId) {
+            setJobId(savedJobId);
         } else {
-            setBuildSuccess(false);
-            setResult('error');
-            setError('Budowanie zakończyło się błędem.');
-            setSnackbar({open: true, message: 'Budowanie zakończyło się błędem.', severity: 'error'});
+            localStorage.removeItem('planningJobId');
         }
-        setBuildLoading(false);
-        handleNext();
+    }, []);
+
+    const checkProgress = useCallback(async (currentJobId: string) => {
+        try {
+            const res = await fetch(API_ENDPOINTS.PLANNING_PROGRESS(currentJobId), {
+                method: 'GET', headers: {'Content-Type': 'application/json'}
+            });
+            console.log(res);
+            if (res.ok) {
+                console.log(res.body);
+                const data = await res.json() as PlanningProgress;
+                setProgressData(data);
+
+                if (data.status === 'DONE') {
+                    enqueueSnackbar('Plan został wygenerowany!', {variant: 'success'});
+                    localStorage.removeItem('planningJobId');
+                    setJobId(null);
+                } else if (data.status === 'ERROR') {
+                    enqueueSnackbar('Wystąpił błąd podczas generowania planu.', {variant: 'error'});
+                    localStorage.removeItem('planningJobId');
+                    setJobId(null);
+                }
+            } else if (res.status === 404) {
+                console.log(res.body);
+                enqueueSnackbar('Nie odnaleziono postępu dla zadanego jobId.', {variant: 'warning'});
+                localStorage.removeItem('planningJobId');
+                setJobId(null);
+            } else {
+                enqueueSnackbar(`Błąd pobierania postępu: ${res.status}`, {variant: 'error'});
+            }
+        } catch (e: any) {
+            enqueueSnackbar(`Błąd: ${e.message}`, {variant: 'error'});
+        }
+    }, [enqueueSnackbar]);
+
+    useEffect(() => {
+        console.log(progressData, jobId)
+        if (jobId === null) return;
+        // if (progressData?.status !== 'IN_PROGRESS') return;
+        checkProgress(jobId);
+        const interval = setInterval(() => {
+            checkProgress(jobId);
+        }, 50000);
+        return () => clearInterval(interval);
+    }, [jobId, progressData, checkProgress]);
+
+
+    const startPlanning = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(API_ENDPOINTS.START_PLANNING, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({fieldOfStudyType, semesterType, planName})
+            });
+
+            setLoading(false);
+            if (res.status === 202) {
+                const data = await res.json();
+                const newJobId = data.jobId;
+                if (newJobId) {
+                    setJobId(newJobId);
+                    localStorage.setItem('planningJobId', String(newJobId));
+                    enqueueSnackbar('Rozpoczęto generowanie planu, proszę czekać.', {variant: 'info'});
+                } else {
+                    enqueueSnackbar('Nieprawidłowy jobId zwrócony z serwera.', {variant: 'error'});
+                }
+            } else {
+                enqueueSnackbar('Nie udało się rozpocząć generowania planu.', {variant: 'error'});
+            }
+
+        } catch (e: any) {
+            setLoading(false);
+            enqueueSnackbar(`Błąd podczas rozpoczynania generowania: ${e.message}`, {variant: 'error'});
+        }
     };
 
-    const getStepContent = (step: number) => {
-        switch (step) {
-            case 0:
-                return (<div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
-                        <Typography variant="h6" className="mb-4">
-                            Sprawdź Ograniczenia
-                        </Typography>
-                        <ActionButton onClick={checkRestrictions} disabled={checkLoading}
-                                      tooltipText={'Przejdź do następnego kroku'} icon={<NavigateNextIcon/>}
-                                      colorScheme={'primary'}/>
-                        {error && (<Typography color="error" className="mt-4">
-                                {error}
-                            </Typography>)}
-                    </div>);
-            case 1:
-                return (<div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
-                        <Typography variant="h6" className="mb-4">
-                            Budowanie
-                        </Typography>
-                        {!buildLoading && !buildSuccess ? (<ActionButton onClick={startBuilding} disabled={buildLoading}
-                                                                         tooltipText={'Zbuduj'}
-                                                                         icon={<NavigateNextIcon/>}
-                                                                         colorScheme={'primary'}/>) : (
-                            <div className="w-full mt-6">
-                                <div className="bg-gray-100 p-4 rounded-lg shadow-inner">
-                                    <Stepper activeStep={buildingStep} orientation="vertical">
-                                        {dummyProcesses.map((process) => (<Step key={process}>
-                                                <StepLabel>{process}</StepLabel>
-                                            </Step>))}
-                                    </Stepper>
-                                    <div className="flex justify-center mt-4">
-                                        <CircularProgress/>
-                                    </div>
-                                    <Typography variant="body2" className="mt-2 text-center">
-                                        Proces budowania...
-                                    </Typography>
-                                </div>
-                            </div>)}
-                        {error && (<Typography color="error" className="mt-4">
-                                {error}
-                            </Typography>)}
-                    </div>);
-            case 2:
-                return (<div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
-                        {result === 'success' ? (<>
-                                <CheckCircleIcon className="text-green-500" style={{fontSize: 80}}/>
-                                <Typography variant="h5" className="mt-4">
-                                    Operacja zakończona sukcesem!
-                                </Typography>
-                            </>) : (<>
-                                <ErrorIcon className="text-red-500" style={{fontSize: 80}}/>
-                                <Typography variant="h5" className="mt-4">
-                                    Wystąpił błąd podczas operacji.
-                                </Typography>
-                                {error && (<Typography color="error" className="mt-2">
-                                        {error}
-                                    </Typography>)}
-                            </>)}
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={handleReset}
-                            size="large"
-                            className="mt-6 px-6 py-3"
+    return (
+        <section className="flex flex-col justify-around items-center content-center gap-4 p-4">
+            <Typography variant="h4">Generuj nowy plan</Typography>
+
+            <div className="flex gap-4 w-full max-w-md justify-center items-center flex-col">
+                <div className="flex flex-row items-center">
+                    <FormControl className="w-[29rem]">
+                        <TextField
+                            required
+                            label="Nazwa planu"
+                            value={planName}
+                            onChange={(e) => {
+                                setPlanName(e.target.value)
+                            }}
+                        />
+                    </FormControl>
+                </div>
+                <div className="flex flex-row gap-4">
+                    <FormControl className="w-56">
+                        <InputLabel id="fieldOfStudyType-label">Typ Studiów</InputLabel>
+                        <Select
+                            labelId="fieldOfStudyType-label"
+                            value={fieldOfStudyType}
+                            label="Typ Studiów"
+                            onChange={(event: SelectChangeEvent) => setFieldOfStudyType(event.target.value)}
                         >
-                            Rozpocznij od nowa
-                        </Button>
-                    </div>);
-            default:
-                return 'Nieznany krok';
-        }
-    };
+                            <MenuItem value="niestacjonarne">Niestacjonarne</MenuItem>
+                            <MenuItem value="stacjonarne">Stacjonarne</MenuItem>
+                        </Select>
+                    </FormControl>
 
-    return (<div className="min-h-full flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-4xl">
-                <div className="bg-gradient-to-tr backdrop-blur from-10% to-90% rounded-lg shadow-lg p-6">
-                    <Stepper activeStep={activeStep} alternativeLabel>
-                        {steps.map((label, index) => (<Step key={label}>
-                                <StepLabel
-                                    StepIconComponent={() => {
-                                        if (activeStep > index) {
-                                            if (index === steps.length - 1) {
-                                                return result === 'success' ? (
-                                                    <CheckCircleIcon className="text-green-500"/>) : (
-                                                    <ErrorIcon className="text-red-500"/>);
-                                            }
-                                            return <VerifiedUserIcon className="text-blue-500"/>;
-                                        } else if (activeStep === index) {
-                                            return <BuildIcon className="text-blue-500"/>;
-                                        } else {
-                                            return <BuildIcon className="text-gray-300"/>;
-                                        }
-                                    }}
-                                >
-                                    {label}
-                                </StepLabel>
-                            </Step>))}
-                    </Stepper>
-                    <div className="mt-8">{getStepContent(activeStep)}</div>
+                    <FormControl className="w-56">
+                        <InputLabel id="semesterType-label">Semestr</InputLabel>
+                        <Select
+                            labelId="semesterType-label"
+                            value={semesterType}
+                            label="Semestr"
+                            onChange={(event: SelectChangeEvent) => setSemesterType(event.target.value)}
+                        >
+                            <MenuItem value="zimowy">Zimowy</MenuItem>
+                            <MenuItem value="letni">Letni</MenuItem>
+                        </Select>
+                    </FormControl>
                 </div>
             </div>
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={6000}
-                onClose={() => setSnackbar({...snackbar, open: false})}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-            >
-                <Alert
-                    onClose={() => setSnackbar({...snackbar, open: false})}
-                    severity={snackbar.severity}
-                    className="w-full"
-                >
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
-        </div>);
+
+            {jobId !== null && progressData && progressData.status === 'IN_PROGRESS' && (
+                <div className="w-full max-w-md">
+                    <Typography variant="body1" className="mb-2">
+                        Generowanie w toku... ({progressData.progress}%)
+                    </Typography>
+                    <LinearProgress variant="determinate" value={progressData.progress}/>
+                </div>
+            )}
+
+            {jobId !== null && progressData && progressData.status === 'DONE' && (
+                <Typography variant="body1" color="success.main">
+                    Plan został wygenerowany!
+                </Typography>
+            )}
+
+            {jobId !== null && progressData && progressData.status === 'ERROR' && (
+                <Typography variant="body1" color="error.main">
+                    Wystąpił błąd podczas generowania planu.
+                </Typography>
+            )}
+
+            {jobId === null && (
+                <Button variant="contained" color="primary" onClick={startPlanning} disabled={loading}>
+                    {loading ? 'Rozpoczynanie...' : 'Generuj Plan'}
+                </Button>
+            )}
+        </section>
+    );
 };
 
 export default Home;

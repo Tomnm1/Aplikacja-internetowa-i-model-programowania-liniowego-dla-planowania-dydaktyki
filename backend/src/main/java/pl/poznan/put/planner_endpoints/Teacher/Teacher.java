@@ -39,7 +39,8 @@ public class Teacher {
     public Integer usosId;
     @Column(name = "inner_id")
     public Integer innerId;
-
+    @Column(name = "email")
+    public String email;
     @Column(name = "degree")
     @Convert(converter = DegreeConverter.class)
     public Degree degree;
@@ -66,6 +67,7 @@ public class Teacher {
         dto.firstName = this.firstName;
         dto.secondName = this.secondName;
         dto.lastName = this.lastName;
+        dto.email = this.email;
         dto.degree = this.degree;
         dto.preferences = this.preferences;
         dto.subjectTypesList = this.subjectTypesTeacherList.stream().map(SubjectType_Teacher::getSubjetTyprId).collect(Collectors.toList());

@@ -54,8 +54,8 @@ public class InsertPlanToDbService {
     }
 
     @Transactional
-    public Plan insertSlots(List<PlannedSlot> plannedSlots){
-        Plan plan = insertPlan();
+    public Plan insertSlots(List<PlannedSlot> plannedSlots, String planName){
+        Plan plan = insertPlan(planName);
         logger.log(Level.INFO, "Schedule insert started");
         for(PlannedSlot plannedSlot: plannedSlots){
             GeneratedPlan generatedPlan = new GeneratedPlan();
@@ -72,10 +72,10 @@ public class InsertPlanToDbService {
         return plan;
     }
 
-    private Plan insertPlan(){
+    private Plan insertPlan(String planName){
         Plan plan = new Plan();
         LocalDateTime time = LocalDateTime.now();
-        plan.name = time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        plan.name = String.format("%s %s", planName, time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         plan.creationDate = time;
         plan.published = true;
         planService.createPlan(plan);

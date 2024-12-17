@@ -30,7 +30,7 @@ public class TeacherService {
      */
     @Transactional
     public List<TeacherDTO> getAllteachersDTO(){
-        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "firstName","lastName")).stream().map(Teacher::convertToDTO).toList();
+        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "lastName", "firstName")).stream().map(Teacher::convertToDTO).toList();
     }
 
     @Transactional
@@ -97,6 +97,17 @@ public class TeacherService {
             oldteacher.usosId = teacherParams.usosId;
             oldteacher.innerId = teacherParams.innerId;
 //            oldteacher.subjectTypesList = teacherParams.subjectTypesList;
+            return teacherRepository.save(oldteacher);
+        } else {
+            return null;
+        }
+    }
+
+    public Teacher updateteacherEmailByID(Integer id, String email){
+        Optional<Teacher> teacher = teacherRepository.findById(id);
+        if (teacher.isPresent()) {
+            Teacher oldteacher = teacher.get();
+            oldteacher.email = email;
             return teacherRepository.save(oldteacher);
         } else {
             return null;

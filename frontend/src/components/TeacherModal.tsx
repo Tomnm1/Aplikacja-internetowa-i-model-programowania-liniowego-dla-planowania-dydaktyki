@@ -47,7 +47,7 @@ const TeacherModal: React.FC<TeacherModalProps> = ({open, onClose, teacher, isAd
         lastName: teacher?.lastName ?? '',
         degree: teacher?.degree ?? 'BRAK',
         subjectTypesList: teacher?.subjectTypesList ?? [],
-        innerId: teacher?.id ?? 0,
+        innerId: teacher?.innerId ?? 0,
         usosId: teacher?.usosId ?? 0,
     });
 

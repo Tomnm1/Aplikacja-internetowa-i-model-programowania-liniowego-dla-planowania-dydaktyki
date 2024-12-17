@@ -10,7 +10,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import {AppDispatch, RootState} from '../app/store';
 import {plPL} from '@mui/x-data-grid/locales';
-import {deleteTeacher, fetchTeachers} from '../app/slices/teacherSlice';
+import {deleteTeacher, fetchTeachers, updateTeacherEmail} from '../app/slices/teacherSlice';
 import TeacherModal from './TeacherModal';
 import {degrees, Teacher} from '../utils/Interfaces';
 import {useSnackbar} from "notistack";
@@ -67,6 +67,24 @@ const Teachers: React.FC = () => {
         setModalOpen(true);
     };
 
+    const handleEmailEdit = (newRow:Teacher, oldRow:Teacher) => {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if(newRow.email && !emailRegex.test(newRow.email)){
+            enqueueSnackbar(`Nie poprawny adres email: ${newRow.email}`, {variant: 'error'});
+            return oldRow;
+        }
+        if(newRow.email  !== oldRow.email){
+            dispatch(updateTeacherEmail(newRow)).unwrap()
+                .then(() => {
+                    enqueueSnackbar('Mail został pomyślnie zedytowany', {variant: 'success'});
+                })
+                .catch((error) => {
+                    enqueueSnackbar(`Błąd podczas edytowania maila pracownika: ${error.message}`, {variant: 'error'});
+                });
+        }
+        return newRow;
+    };
+
     const columns: GridColDef[] = [{field: 'firstName', headerName: 'Imię', width: 150}, {
         field: 'lastName',
         headerName: 'Nazwisko',
@@ -76,7 +94,13 @@ const Teachers: React.FC = () => {
         headerName: 'Stopień',
         width: 150,
         valueFormatter: (params) => degrees[params as keyof typeof degrees] || '',
-    }, // {
+    }, {
+        field: 'email',
+        headerName: 'Mail',
+        width: 200,
+        editable: true,
+    },
+        // {
         //     field: 'subjectTypesList',
         //     headerName: 'Typy Przedmiotów',
         //     width: 250,
@@ -117,6 +141,7 @@ const Teachers: React.FC = () => {
                 loading={loading}
                 localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
                 slots={{toolbar: TopToolbar}}
+                processRowUpdate={handleEmailEdit}
             />
             <ConfirmationDialog
                 open={isDialogOpen}
