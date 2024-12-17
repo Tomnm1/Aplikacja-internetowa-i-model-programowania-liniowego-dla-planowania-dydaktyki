@@ -124,6 +124,8 @@ public class PlannerController {
                 Map<String, Set<String>> groupToSubjectTypes = plannerData.getGroupToSubjectTypes();
                 Map<String, Set<String>> classroomToSubjectTypes = plannerData.getClassroomToSubjectTypes();
                 Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
+                Set<String> teachersWithPreferences = plannerData.getTeachersWithPreferences();
+                Map<String, Degree> teacherToDegree = plannerData.getTeacherToDegree();
                 ObjectMapper objectMapper = new ObjectMapper();
                 String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(plannerData);
 
