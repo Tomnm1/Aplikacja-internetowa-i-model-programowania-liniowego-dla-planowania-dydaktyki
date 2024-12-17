@@ -6,11 +6,7 @@ import pl.poznan.put.planner_endpoints.Semester.Semester;
 import pl.poznan.put.planner_endpoints.Semester.SemesterService;
 import pl.poznan.put.planner_endpoints.Specialisation.Specialisation;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
-import static pl.poznan.put.constans.Constans.SemesterTypes.*;
+import static pl.poznan.put.constans.Constants.SemesterTypes.*;
 
 @Component
 public class SemesterHandler {

@@ -9,12 +9,9 @@ import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoadSubject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static pl.poznan.put.constans.Constans.Weeks.*;
+import static pl.poznan.put.constans.Constants.Weeks.*;
 
 @Service
 public class ConstraintsManager {
@@ -39,6 +36,7 @@ public class ConstraintsManager {
     private Map<String, Set<String>> subjectTypeToTeachers;
     private Map<String, Set<String>> groupToSubjectTypes;
     private Map<String, Set<String>> classroomToSubjectTypes;
+    private Set<String> teachersWithPreferences;
 
     @Autowired
     ConstraintsManager(
@@ -51,7 +49,8 @@ public class ConstraintsManager {
     public void initialize(MPSolver solver, List<String> groups, List<String> teachers, List<String> rooms, List<String> timeSlots,
                               List<PlannerClassType> subjects, List<TeacherLoad> teacherLoadList,
                            Map<String, Set<String>> subjectTypeToTeachers, Map<String, Set<String>> groupToSubjectTypes,
-                           Map<String, Set<String>> classroomToSubjectTypes, Map<String, Set<String>> teachersToSubjectTypes) {
+                           Map<String, Set<String>> classroomToSubjectTypes, Map<String, Set<String>> teachersToSubjectTypes,
+                           Set<String> teachersWithPreferences) {
         this.solver = solver;
         this.groups = groups;
         this.teachers = teachers;
@@ -73,6 +72,7 @@ public class ConstraintsManager {
         this.groupToSubjectTypes = groupToSubjectTypes;
         this.classroomToSubjectTypes = classroomToSubjectTypes;
         this.teachersToSubjectTypes = teachersToSubjectTypes;
+        this.teachersWithPreferences = teachersWithPreferences;
 
         for (String slot : timeSlots) {
             evenTimeSlots.add(slot + "_even");
@@ -126,7 +126,8 @@ public class ConstraintsManager {
                 List<Integer> blockedGroupsIndices = blockedGroups.stream()
                         .map(groups::indexOf)
                         .toList();
-                blockGroupsConstraint(xEvenMap, xOddMap, blockedGroupsIndices, assignedGroupIndex, p, frequency);
+                if(!blockedGroupsIndices.isEmpty())
+                    blockGroupsConstraint(xEvenMap, xOddMap, blockedGroupsIndices, assignedGroupIndex, p, frequency);
 
                 groupsMustHaveAllRequiredSubjectsConstraint(xEvenMap, xOddMap, roomIndices, teacherIndices,
                         assignedGroupIndex, p, frequency);
@@ -182,19 +183,33 @@ public class ConstraintsManager {
     private void assignSubjectToGroupConstraint(Map<String, MPVariable> xEvenMap, Map<String, MPVariable> xOddMap,
                                                 List<Integer> roomIndices, List<Integer> teacherIndices,
                                                 int assignedGroupIndex, int subject, String frequency){
+        int evenUpperBound = 1;
+        int oddUpperBound = 1;
+        if (frequency.equals(EVEN_WEEKS)) {
+            oddUpperBound = 0;
+        }
+        if (frequency.equals(ODD_WEEKS)) {
+            evenUpperBound = 0;
+        }
+
+        ConstraintBuilder assignedGroupConstraintEven = new ConstraintBuilder(solver, "Assigned group even week: " + groups.get(assignedGroupIndex) + "_subject_" + subjects.get(subject).getId(),  evenUpperBound);
+        ConstraintBuilder assignedGroupConstraintOdd = new ConstraintBuilder(solver, "Assigned group odd week: " + groups.get(assignedGroupIndex) + "_subject_" + subjects.get(subject).getId(),  oddUpperBound);
+
         for (int roomIndex : roomIndices) {
             for (int teacherIndex : teacherIndices) {
                 for (int t = 0; t < numTimeSlots; ++t) {
-                    ConstraintBuilder assignedGroupConstraintEven = new ConstraintBuilder(solver, "Assigned group even week: " + assignedGroupIndex + "_subject_" + subject,  1);
-                    ConstraintBuilder assignedGroupConstraintOdd = new ConstraintBuilder(solver, "Assigned group odd week: " + assignedGroupIndex + "_subject_" + subject,  1);
 
-                    handleWeeks(assignedGroupConstraintEven, assignedGroupConstraintOdd, xEvenMap, xOddMap, frequency,
-                            1, 1, assignedGroupIndex, roomIndex, t, subject, teacherIndex);
+                    String varNameEven = "xEven_" + assignedGroupIndex + "_" + roomIndex + "_" + t + "_" + subject + "_" + teacherIndex;
+                    String varNameOdd = "xOdd_" + assignedGroupIndex + "_" + roomIndex + "_" + t + "_" + subject + "_" + teacherIndex;
+                    MPVariable evenVar = xEvenMap.get(varNameEven);
+                    assignedGroupConstraintEven.setCoefficient(evenVar, 1);
+                    MPVariable oddVar = xOddMap.get(varNameOdd);
+                    assignedGroupConstraintOdd.setCoefficient(oddVar, 1);
 
+//                    handleWeeks(assignedGroupConstraintEven, assignedGroupConstraintOdd, xEvenMap, xOddMap, frequency,
+//                            1, 1, assignedGroupIndex, roomIndex, t, subject, teacherIndex);
 
                     if (frequency.equals(WEEKLY)){
-                        String varNameEven = "xEven_" + assignedGroupIndex + "_" + roomIndex + "_" + t + "_" + subject + "_" + teacherIndex;
-                        String varNameOdd = "xOdd_" + assignedGroupIndex + "_" + roomIndex + "_" + t + "_" + subject + "_" + teacherIndex;
                         ConstraintBuilder sameSlotConstraint = new ConstraintBuilder(solver, "Same slot constraint for both weeks " + assignedGroupIndex + "_" + t, 0, 0);
                         sameSlotConstraint.setCoefficient(xEvenMap.get(varNameEven), 1);
                         sameSlotConstraint.setCoefficient(xOddMap.get(varNameOdd), -1);
@@ -213,18 +228,23 @@ public class ConstraintsManager {
                 if(!classroomToSubjectTypes.get(rooms.get(roomIndex)).contains(subjectTypeId))
                     continue;
                 for (int teacherIndex = 0; teacherIndex < numTeachers; ++teacherIndex) {
-                    if(!teachersToSubjectTypes.get(teachers.get(teacherIndex)).contains(subjectTypeId))
+                    if(!subjects.get(subject).getTeachers().contains(teachers.get(teacherIndex)) || !teachersToSubjectTypes.get(teachers.get(teacherIndex)).contains(subjectTypeId))
                         continue;
                     for (int blockedGroupIndex : blockedGroupsIndices) {
                         if(!groupToSubjectTypes.get(groups.get(blockedGroupIndex)).contains(subjectTypeId))
                             continue;
                         String varNameEven = "xEven_" + assignedGroupIndex + "_" + roomIndex + "_" + t + "_" + subject + "_" + teacherIndex;
                         String varNameOdd = "xOdd_" + assignedGroupIndex + "_" + roomIndex + "_" + t + "_" + subject + "_" + teacherIndex;
-
-                        ConstraintBuilder blockGroupsEven = new ConstraintBuilder(solver, "Even Group " + assignedGroupIndex + " blocks groups " + blockedGroupIndex, 1);
-                        blockGroupsEven.setCoefficient(xEvenMap.get(varNameEven), 1);
-                        ConstraintBuilder blockGroupsOdd = new ConstraintBuilder(solver, "Odd Group " + assignedGroupIndex + " blocks groups " + blockedGroupIndex, 1);
-                        blockGroupsOdd.setCoefficient(xOddMap.get(varNameOdd), 1);
+                        ConstraintBuilder blockGroupsEven = null;
+                        ConstraintBuilder blockGroupsOdd = null;
+                        if(frequency.equals(WEEKLY) || frequency.equals(EVEN_WEEKS)) {
+                            blockGroupsEven = new ConstraintBuilder(solver, "Even Group " + assignedGroupIndex + " blocks groups " + blockedGroupIndex, 1);
+                            blockGroupsEven.setCoefficient(xEvenMap.get(varNameEven), 1);
+                        }
+                        if(frequency.equals(WEEKLY) || frequency.equals(ODD_WEEKS)) {
+                            blockGroupsOdd = new ConstraintBuilder(solver, "Odd Group " + assignedGroupIndex + " blocks groups " + blockedGroupIndex, 1);
+                            blockGroupsOdd.setCoefficient(xOddMap.get(varNameOdd), 1);
+                        }
 
                         iterateAllRoomsTeachersSubjects(blockGroupsEven, blockGroupsOdd, xEvenMap, xOddMap, 1, blockedGroupIndex, t, frequency);
                     }
@@ -294,6 +314,57 @@ public class ConstraintsManager {
         }
     }
 
+    public void aggregateTeacherTimeVariables(Map<String, MPVariable> xEvenMap, Map<String, MPVariable> xOddMap,
+                                              Map<String, MPVariable> teacherToTimeEvenVarsMap,
+                                              Map<String, MPVariable> teacherToTimeOddVarsMap){
+        for (int n = 0; n < numTeachers; n++) {
+            if(!teachersWithPreferences.contains(teachers.get(n)))
+                continue;
+            for (int t = 0; t < numTimeSlots; t++) {
+                MPVariable teacherTimeEven = teacherToTimeEvenVarsMap.get("teacherTimeEven_" + n + "_" + t);
+                MPVariable teacherTimeOdd = teacherToTimeEvenVarsMap.get("teacherTimeOdd_" + n + "_" + t);
+                // Dolne ograniczenia: teacherTime ≥ suma zmiennych x
+                ConstraintBuilder evenLowerBoundConstraint = new ConstraintBuilder(solver, "teacherTimeEven_LB_" + n + "_" + t, -Double.MAX_VALUE, 0);
+                ConstraintBuilder oddLowerBoundConstraint = new ConstraintBuilder(solver, "teacherTimeOdd_LB_" + n + "_" + t, -Double.MAX_VALUE, 0);
+
+                // Górne ograniczenia: teacherTime ≤ suma zmiennych x
+                ConstraintBuilder evenUpperBoundConstraint = new ConstraintBuilder(solver, "teacherTimeEven_UB_" + n + "_" + t, 0);
+                ConstraintBuilder oddUpperBoundConstraint = new ConstraintBuilder(solver, "teacherTimeOdd_UB_" + n + "_" + t, 0);
+
+                // Dodanie ograniczeń z iteracją po wszystkich kombinacjach
+                for (int p = 0; p < numSubjects; p++) {
+                    if(!subjectTypeToTeachers.get(subjects.get(p).getId()).contains(teachers.get(n)))
+                        continue;
+                    for (int g = 0; g < numGroups; g++) {
+                        if(!groupToSubjectTypes.get(groups.get(g)).contains(subjects.get(p).getId()))
+                            continue;
+                        for (int s = 0; s < numRooms; s++) {
+                            if(classroomToSubjectTypes.get(rooms.get(s)).contains(subjects.get(p).getId()))
+                                continue;
+                            // Pobierz zmienne decyzyjne
+                            MPVariable xEven = xEvenMap.get("xEven_" + g + "_" + s + "_" + t + "_" + p + "_" + n);
+                            MPVariable xOdd = xOddMap.get("xOdd_" + g + "_" + s + "_" + t + "_" + p + "_" + n);
+
+                            // Dodanie terminów xEven i xOdd do odpowiednich ograniczeń
+                            evenLowerBoundConstraint.setCoefficient(xEven, -1.0);
+                            oddLowerBoundConstraint.setCoefficient(xOdd, -1.0);
+
+                            evenUpperBoundConstraint.setCoefficient(xEven, 1.0);
+                            oddUpperBoundConstraint.setCoefficient(xOdd, 1.0);
+                        }
+                    }
+                }
+
+                // Związanie teacherTimeEven i teacherTimeOdd z sumami zmiennych x
+                evenLowerBoundConstraint.setCoefficient(teacherTimeEven, 1.0); // TeacherTime >= suma(xEven)
+                oddLowerBoundConstraint.setCoefficient(teacherTimeOdd, 1.0);
+
+                evenUpperBoundConstraint.setCoefficient(teacherTimeEven, -1.0); // TeacherTime <= suma(xEven)
+                oddUpperBoundConstraint.setCoefficient(teacherTimeOdd, -1.0);
+            }
+        }
+    }
+
     private void handleWeeks(ConstraintBuilder evenConstraint, ConstraintBuilder oddConstraint,
                              Map<String, MPVariable> xEvenMap, Map<String, MPVariable> xOddMap, String frequency,
                              int evenCoefficient, int oddCoefficient,
@@ -322,7 +393,7 @@ public class ConstraintsManager {
                 if(!subjectTypeToTeachers.get(subjectId).contains(teachers.get(n)))
                     continue;
                 for (int g = 0; g < numGroups; ++g) {
-                    if(!allGroups.contains(groups.get(g)))
+                    if(!subjects.get(p).getTeachers().contains(teachers.get(n)) || !allGroups.contains(groups.get(g)))
                         continue;
                     handleWeeks(evenConstraint, oddConstraint, xEvenMap, xOddMap, frequency, coefficient, coefficient,
                             g, room, time, p, n);
@@ -345,7 +416,8 @@ public class ConstraintsManager {
 
             for (int teacher = 0; teacher < numTeachers; ++teacher){
 
-                if(!subjectTypeToTeachers.get(subjectId).contains(teachers.get(teacher)))
+                if(!plannerSubject.getTeachers().contains(teachers.get(teacher)) ||
+                        !subjectTypeToTeachers.get(subjectId).contains(teachers.get(teacher)))
                     continue;
 
                 for (int room = 0; room < numRooms; ++room){
@@ -370,7 +442,7 @@ public class ConstraintsManager {
             if(!subjectTypeToTeachers.get(subjectId).contains(teachers.get(teacher)))
                 continue;
             for (int group = 0; group < numGroups; ++group){
-                if(!allGroups.contains(groups.get(group)))
+                if(!plannerSubject.getTeachers().contains(teachers.get(teacher)) || !allGroups.contains(groups.get(group)))
                     continue;
                 for (int room = 0; room < numRooms; room++){
                     if(!classroomToSubjectTypes.get(rooms.get(room)).contains(subjectId))

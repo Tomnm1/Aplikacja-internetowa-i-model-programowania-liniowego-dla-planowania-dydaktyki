@@ -12,7 +12,6 @@ import pl.poznan.put.planner_endpoints.Plan.Plan;
 import pl.poznan.put.planner_endpoints.Plan.PlanService;
 import pl.poznan.put.planner_endpoints.SlotsDay.SlotsDayService;
 import pl.poznan.put.planner_endpoints.Subject.SubjectService;
-import pl.poznan.put.planner_endpoints.SubjectType.ClassTypeOwn;
 import pl.poznan.put.planner_endpoints.SubjectType.SubjectTypeService;
 import pl.poznan.put.planner_endpoints.Teacher.TeacherService;
 
@@ -21,8 +20,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static pl.poznan.put.constans.Constans.ExcelToDb.ColumnNames.*;
 
 @Service
 public class InsertPlanToDbService {

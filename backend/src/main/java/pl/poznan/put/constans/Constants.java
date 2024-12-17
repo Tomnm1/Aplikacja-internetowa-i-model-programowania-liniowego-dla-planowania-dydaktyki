@@ -1,12 +1,39 @@
 package pl.poznan.put.constans;
 
 import pl.poznan.put.planner_endpoints.SlotsDay.Day;
+import pl.poznan.put.planner_endpoints.Teacher.Degree;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-public final class Constans {
-    private Constans(){}
+import static java.util.Map.entry;
+import static pl.poznan.put.planner_endpoints.Teacher.Degree.*;
+
+
+public final class Constants {
+    private Constants(){}
+
+    public static final class PreferenceWeight {
+        public static final Map<Degree, Integer> degreeToWeight = Map.ofEntries(
+            entry(BRAK, 1),
+            entry(LIC, 2),
+            entry(INZ, 3),
+            entry(MGR, 4),
+            entry(MGR_INZ, 5),
+            entry(DR, 6),
+            entry(DR_INZ, 7),
+            entry(DR_HAB, 8),
+            entry(DR_HAB_INZ, 9),
+            entry(DR_PROF_PP, 10),
+            entry(DR_INZ_PROF_PP, 11),
+            entry(DR_HAB_PROF_PP, 12),
+            entry(DR_HAB_INZ_PROF_PP, 13),
+            entry(PROF_DR_HAB, 14),
+            entry(PROF_DR_HAB_INZ, 15),
+            entry(PROF_ZW_DR_HAB_INZ, 16)
+        );
+    }
 
     public static final class Weeks {
         public static final String WEEKLY = "weekly";

@@ -15,6 +15,7 @@ import pl.poznan.put.or_planner.insert.InsertPlanToDbService;
 import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
+import pl.poznan.put.planner_endpoints.Teacher.Degree;
 import pl.poznan.put.planner_endpoints.planner.params.PlanningParams;
 import pl.poznan.put.planner_endpoints.planner.service.ClassroomAssignmentService;
 import pl.poznan.put.planner_endpoints.planner.service.PlanningDataAssemblingService;
@@ -69,9 +70,11 @@ public class PlannerController {
             Map<String, Set<String>> groupToSubjectTypes = plannerData.getGroupToSubjectTypes();
             Map<String, Set<String>> classroomToSubjectTypes = plannerData.getClassroomToSubjectTypes();
             Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
+            Set<String> teachersWithPreferences = plannerData.getTeachersWithPreferences();
+            Map<String, Degree> teacherToDegree = plannerData.getTeacherToDegree();
 
             planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences, subjectTypeToTeachers,
-                    groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
+                    groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes, teachersWithPreferences, teacherToDegree);
 
             List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
 
@@ -107,6 +110,7 @@ public class PlannerController {
             List<TeacherLoad> teachersLoad = plannerData.getTeachersLoad();
             List<TeacherPreferences> teacherPreferences = plannerData.getTeacherPreferences();
             Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
+            Set<String> teachersWithPreferences = plannerData.getTeachersWithPreferences();
 
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(plannerData);
@@ -114,9 +118,11 @@ public class PlannerController {
             Map<String, Set<String>> subjectTypeToTeachers = plannerData.getSubjectTypeToTeachers();
             Map<String, Set<String>> groupToSubjectTypes = plannerData.getGroupToSubjectTypes();
             Map<String, Set<String>> classroomToSubjectTypes = plannerData.getClassroomToSubjectTypes();
+            Map<String, Degree> teacherToDegree = plannerData.getTeacherToDegree();
 
             planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences,
-                    subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
+                    subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes,
+                    teachersWithPreferences, teacherToDegree);
 
             List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
 

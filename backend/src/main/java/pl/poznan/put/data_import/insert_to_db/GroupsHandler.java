@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static pl.poznan.put.constans.Constans.ExcelToDb.ColumnNames.LAB_LETTER;
+import static pl.poznan.put.constans.Constants.ExcelToDb.ColumnNames.LAB_LETTER;
 
 
 @Component

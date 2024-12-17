@@ -3,7 +3,9 @@ package pl.poznan.put.or_planner.data;
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
 import pl.poznan.put.or_planner.data.helpers.TeacherPreferences;
+import pl.poznan.put.planner_endpoints.Teacher.Degree;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,8 +23,26 @@ public class PlannerData {
     private Map<String, Set<String>> classroomToSubjectTypes;
     private Map<String, Set<String>> teachersToSubjectTypes;
     private Map<String, Set<String>> subjectTypeToGroup;
+    private Set<String> teachersWithPreferences;
+    private Map<String, Degree> teacherToDegree = new HashMap<>();
 
     public PlannerData() {
+    }
+
+    public void setTeachersWithPreferences(Set<String> teachersWithPreferences) {
+        this.teachersWithPreferences = teachersWithPreferences;
+    }
+
+    public Set<String> getTeachersWithPreferences() {
+        return teachersWithPreferences;
+    }
+
+    public void setTeacherToDegree(Map<String, Degree> teacherToDegree) {
+        this.teacherToDegree = teacherToDegree;
+    }
+
+    public Map<String, Degree> getTeacherToDegree() {
+        return teacherToDegree;
     }
 
     public List<TeacherPreferences> getTeacherPreferences() {
