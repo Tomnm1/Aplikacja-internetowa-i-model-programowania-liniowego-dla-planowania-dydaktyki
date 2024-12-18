@@ -29,7 +29,10 @@ const contextOptions = [{value: 'teacher', label: 'Nauczyciel'}, {
     value: 'semester',
     label: 'Semestr'
 }, {value: 'classroom', label: 'Sala'},];
-
+// todo sala/dzien-godzina
+// todo nauczyciele/dzien-godzina -opcja?
+// todo lista mozliwych pol typu file do dodania -IMPORT
+// todo wyswietlanie komunikatu zeby sprawdzic aktywny plan
 const dayToIndex: { [key in Day]: number } = {
     [Day.SUNDAY]: 0,
     [Day.MONDAY]: 1,
