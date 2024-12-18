@@ -22,6 +22,7 @@ import {
 import {useAppSelector} from "../hooks/hooks.ts";
 import {RootState} from "../app/store.ts";
 import CalendarTable from './CalendarTable.tsx';
+import { fetchWithAuth } from '../app/fetchWithAuth.ts';
 
 type ContextType = 'teacher' | 'semester' | 'classroom';
 
@@ -75,22 +76,22 @@ const Timetable = () => {
 
     useEffect(() => {
         setLoading(true);
-        Promise.all([fetch(API_ENDPOINTS.TEACHERS)
+        Promise.all([fetchWithAuth(API_ENDPOINTS.TEACHERS)
             .then((res) => res.json())
             .catch((error) => {
                 enqueueSnackbar(`Błąd podczas pobierania nauczycieli: ${error.message}`, {variant: 'error'});
                 return [];
-            }), fetch(API_ENDPOINTS.SEMESTERS)
+            }), fetchWithAuth(API_ENDPOINTS.SEMESTERS)
             .then((res) => res.json())
             .catch((error) => {
                 enqueueSnackbar(`Błąd podczas pobierania semestrow: ${error.message}`, {variant: 'error'});
                 return [];
-            }), fetch(API_ENDPOINTS.CLASSROOMS)
+            }), fetchWithAuth(API_ENDPOINTS.CLASSROOMS)
             .then((res) => res.json())
             .catch((error) => {
                 enqueueSnackbar(`Błąd podczas pobierania sal: ${error.message}`, {variant: 'error'});
                 return [];
-            }), fetch(API_ENDPOINTS.PLANS)
+            }), fetchWithAuth(API_ENDPOINTS.PLANS)
             .then((res) => res.json())
             .catch((error) => {
                 enqueueSnackbar(`Błąd podczas pobierania planów: ${error.message}`, {variant: 'error'});
@@ -160,7 +161,7 @@ const Timetable = () => {
         }
 
         if (endpoint) {
-            fetch(endpoint)
+            fetchWithAuth(endpoint)
                 .then((res) => res.json())
                 .then((data: GeneratedPlanDTO[]) => {
                     const initialGroupedData: { [key: string]: any } = {};

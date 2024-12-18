@@ -54,7 +54,7 @@ export const updateTeacher = createAsyncThunk<Teacher, BackendTeacher>('teachers
 },);
 
 export const updateTeacherEmail = createAsyncThunk<Teacher, BackendTeacher>('teachers/updateTeacherEmail', async (teacherData) => {
-    const response = await fetch(`${API_ENDPOINTS.TEACHERS}/email/${teacherData.id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS}/email/${teacherData.id}`, {
         method: 'PUT', headers: {
             'Content-Type': 'application/json',
         }, body: teacherData.email,
