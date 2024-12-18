@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static pl.poznan.put.constans.Constants.FieldsOfStudyTypes.*;
 
@@ -31,6 +33,7 @@ import static pl.poznan.put.constans.Constants.FieldsOfStudyTypes.*;
 public class PlanToExcelExportService {
     private final GeneratedPlanService generatedPlanService;
     private final SlotsDayService slotsDayService;
+    private static final Logger logger = Logger.getLogger(PlanToExcelExportService.class.getName());
 
     @Autowired
     PlanToExcelExportService(
@@ -80,7 +83,7 @@ public class PlanToExcelExportService {
 
         try (FileOutputStream fileOut = new FileOutputStream("Plan_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + ".xlsx")) {
             workbook.write(fileOut);
-            System.out.println("Plan zapisany");
+            logger.log(Level.INFO, "xlsx saved correctly");
         } finally {
             workbook.close();
         }

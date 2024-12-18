@@ -126,11 +126,13 @@ public class PlannerController {
                 Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
                 Set<String> teachersWithPreferences = plannerData.getTeachersWithPreferences();
                 Map<String, Degree> teacherToDegree = plannerData.getTeacherToDegree();
+
+                //miejsce do zapiecia debuggerem i podejrzenia co leci.
                 ObjectMapper objectMapper = new ObjectMapper();
                 String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(plannerData);
 
                 planningProgressService.setProgress(jobId, 50, PlanningStatus.IN_PROGRESS);
-            planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences,
+                planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences,
                     subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes,
                     teachersWithPreferences, teacherToDegree);
 
@@ -143,11 +145,13 @@ public class PlannerController {
 
                 Plan plan = insertPlanToDbService.insertSlots(optimizedSchedule, planningParams.getPlanName());
 
+                logger.log(Level.INFO, "export to excel started");
                 planToExcelExportService.exportPlanToExcel(plan);
+                logger.log(Level.INFO, "export to excel finished");
 
                 planningProgressService.setProgress(jobId, 100, PlanningStatus.DONE);
 
-                System.out.println("done");
+                logger.log(Level.INFO, "solving finished");
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 System.out.println(Arrays.toString(e.getStackTrace()));
