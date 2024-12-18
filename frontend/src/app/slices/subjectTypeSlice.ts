@@ -18,8 +18,8 @@ export const fetchSubjectType = createAsyncThunk<SubjectType[]>('subjectType/fet
     }));
 });
 
-export const fetchSubjectTypeBySubjectId = createAsyncThunk<SubjectType[], number>('subjectType/fetchSubjectsTypesBySubjectId', async (id) => {
-    const response = await fetch(`${API_ENDPOINTS.SUBJECT_TYPE}/subject/${id}`);
+export const fetchSubjectTypeBySubjectId = createAsyncThunk<SubjectType[], number>('subjectType/fetchWithAuthSubjectsTypesBySubjectId', async (id) => {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SUBJECT_TYPE}/subject/${id}`);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -91,7 +91,7 @@ const subjectTypeSlice = createSlice({
             })
             .addCase(fetchSubjectTypeBySubjectId.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch subjects';
+                state.error = action.error.message || 'Failed to fetchWithAuth subjects';
             })
             .addCase(addSubjectType.fulfilled, (state, action) => {
                 state.rows.push(action.payload);
