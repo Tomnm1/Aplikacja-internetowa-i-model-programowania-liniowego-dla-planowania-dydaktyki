@@ -91,7 +91,7 @@ const Home: React.FC = () => {
                     localStorage.setItem('planningJobId', String(newJobId));
                     enqueueSnackbar('Rozpoczęto generowanie planu, proszę czekać.', {variant: 'info'});
                 } else {
-                    enqueueSnackbar('Nieprawidłowy jobId zwrócony z serwera.', {variant: 'error'});
+                    enqueueSnackbar('Generowanie nie powiodło się, spróbuj ponownie.', {variant: 'error'});
                 }
             } else {
                 enqueueSnackbar('Nie udało się rozpocząć generowania planu.', {variant: 'error'});
