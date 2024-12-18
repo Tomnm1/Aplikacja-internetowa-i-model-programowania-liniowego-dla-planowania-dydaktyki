@@ -123,6 +123,7 @@ public class Planner {
         logger.log(Level.INFO, "Schedule optimization started");
         MPSolver solver = MPSolver.createSolver("SCIP");
         MPObjective objective = solver.objective();
+        solver.setNumThreads(Runtime.getRuntime().availableProcessors());
 
         // Variables - dana grupa g, w danej sali s, o danym czasie t, ma przedmiot p z nauczycielem n
 
@@ -162,7 +163,6 @@ public class Planner {
         }
 
         logger.log(Level.INFO, "zmienne przypisane");
-
         constraintsManager.initialize(solver, groups, teachers, rooms, timeSlots, subjects, teacherLoadList,
                 subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes,
                 teachersWithPreferences);
