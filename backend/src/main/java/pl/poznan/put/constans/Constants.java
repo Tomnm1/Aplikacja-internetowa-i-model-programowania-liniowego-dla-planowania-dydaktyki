@@ -14,6 +14,21 @@ import static pl.poznan.put.planner_endpoints.Teacher.Degree.*;
 public final class Constants {
     private Constants(){}
 
+    public static final class ErrorMessage{
+        public static final class Critical{
+            public static final String GROUPS_MISSING = "Nie przypisano żadnej grupy do planowanych przedmiotów!";
+            public static final String TEACHERS_MISSING = "Nie przypisano żadnego nauczyciela do planowanych przedmiotów!";
+            public static final String ROOMS_MISSING = "Nie przypisano żadnej sali do planowanych przedmiotów!";
+            public static final String SUBJECTS_MISSING = "Nie oznaczono żadnego z przedmiotów jako planowany!";
+            public static final String SLOTS_MISSING = "Nie dodano wymaganych slotów czasowych!";
+            public static final String LOAD_MISSING = "Nie zdefiniowano przydziałów czasowych do typów przedmiotów!";
+        }
+
+        public static final class Important{
+
+        }
+    }
+
     public static final class PreferenceWeight {
         public static final Map<Degree, Integer> degreeToWeight = Map.ofEntries(
             entry(BRAK, 1),

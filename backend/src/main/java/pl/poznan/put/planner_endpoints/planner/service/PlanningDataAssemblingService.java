@@ -244,6 +244,7 @@ public class PlanningDataAssemblingService {
                     }
 
                     String subjectTypeId = subjectType.subjectTypeId.toString();
+                    String name = subjectType.subject.name;
                     List<String> assignedRooms = this.getAssignedRooms(subjectType);
                     List<String> assignedTeachers = this.getAssignedTeachers(subjectType);
                     Map<String, List<String>> groupMappings = this.getGroupMappings(subjectType);
@@ -264,6 +265,7 @@ public class PlanningDataAssemblingService {
                         PlannerClassType plannerClassType =
                                 new PlannerClassType(
                                         subjectTypeId,
+                                        name,
                                         subjectType.type.toString(),
                                         frequency,
                                         assignedRooms,
@@ -343,6 +345,7 @@ public class PlanningDataAssemblingService {
             PlannerClassType plannerClassType =
                 new PlannerClassType(
                     labSubjectType.getId(),
+                    labSubjectType.getName(),
                     labSubjectType.getType(),
                     frequency,
                     labSubjectType.getRooms(),
@@ -379,6 +382,7 @@ public class PlanningDataAssemblingService {
             PlannerClassType plannerClassType =
                 new PlannerClassType(
                     exeSubjectType.getId(),
+                    exeSubjectType.getName(),
                     exeSubjectType.getType(),
                     frequency,
                     exeSubjectType.getRooms(),

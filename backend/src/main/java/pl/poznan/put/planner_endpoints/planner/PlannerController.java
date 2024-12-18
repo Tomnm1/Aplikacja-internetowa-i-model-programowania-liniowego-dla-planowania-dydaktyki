@@ -17,6 +17,8 @@ import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
 import pl.poznan.put.planner_endpoints.Teacher.Degree;
+import pl.poznan.put.planner_endpoints.planner.error_message.ErrorMessage;
+import pl.poznan.put.planner_endpoints.planner.error_message.PlanningValidationException;
 import pl.poznan.put.planner_endpoints.planner.params.PlanningParams;
 import pl.poznan.put.planner_endpoints.planner.service.ClassroomAssignmentService;
 import pl.poznan.put.planner_endpoints.planner.service.PlanningDataAssemblingService;
@@ -106,9 +108,12 @@ public class PlannerController {
             try {
                 PlannerData plannerData = planningDataAssemblingService.startAssembling(planningParams);
                 logger.log(Level.INFO,"DataAssembling finished");
-                logger.log(Level.INFO,"DataValidation started");
 
-                planningDataValidationService.executeValidations(plannerData);
+                logger.log(Level.INFO,"DataValidation started");
+                List<ErrorMessage> errorMessagesList = new ArrayList<>();
+                boolean hasCriticalError = planningDataValidationService.executeValidations(plannerData, errorMessagesList);
+                if(hasCriticalError)
+                    throw new PlanningValidationException("Planning critical error. Planning aborted", errorMessagesList);
                 logger.log(Level.INFO,"DataValidation finished");
 
                 planningProgressService.setProgress(jobId, 30, PlanningStatus.IN_PROGRESS);
@@ -152,7 +157,16 @@ public class PlannerController {
                 planningProgressService.setProgress(jobId, 100, PlanningStatus.DONE);
 
                 logger.log(Level.INFO, "solving finished");
-            } catch (Exception e) {
+
+            }
+            catch(PlanningValidationException planningValidationException){
+                System.out.println(planningValidationException.getMessage());
+                planningValidationException.getErrorMessages()
+                        .forEach(error -> System.out.println("Error: " + error));
+
+                planningProgressService.setProgress(jobId, 100, PlanningStatus.ERROR);
+            }
+            catch (Exception e) {
                 System.out.println(e.getMessage());
                 System.out.println(Arrays.toString(e.getStackTrace()));
                 planningProgressService.setProgress(jobId, 100, PlanningStatus.ERROR);
