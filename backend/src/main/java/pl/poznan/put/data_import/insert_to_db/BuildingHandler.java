@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static pl.poznan.put.constans.Constans.HelperMethods.assignIfNotNull;
+import static pl.poznan.put.constans.Constants.HelperMethods.assignIfNotNull;
 
 @Component
 public class BuildingHandler {

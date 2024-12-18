@@ -102,7 +102,7 @@ public class ClassroomService {
         }
     }
 
-    public List<Classroom> findRandomClassroomWithCapacity(int capacity){
-        return classroomRepository.findRandomClassroomWithCapacity(capacity);
+    public List<Classroom> findRandomClassroomWithCapacity(int maxCapacity, int minCapacity, int numClassrooms){
+        return classroomRepository.findRandomClassroomWithCapacity(maxCapacity, minCapacity, numClassrooms);
     }
 }

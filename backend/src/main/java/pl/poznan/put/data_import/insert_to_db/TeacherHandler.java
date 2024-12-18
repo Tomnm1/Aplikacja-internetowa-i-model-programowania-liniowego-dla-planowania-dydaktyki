@@ -2,7 +2,7 @@ package pl.poznan.put.data_import.insert_to_db;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pl.poznan.put.constans.Constans;
+import pl.poznan.put.constans.Constants;
 import pl.poznan.put.planner_endpoints.Teacher.Degree;
 import pl.poznan.put.planner_endpoints.Teacher.Teacher;
 import pl.poznan.put.planner_endpoints.Teacher.TeacherService;
@@ -28,7 +28,7 @@ public class TeacherHandler {
             teacher.lastName = worker.getSurname();
             teacher.usosId = worker.getWorkerId();
             try {
-                teacher.degree = Constans.EnumUtils.fromString(Degree.class, worker.getTitleDegree());
+                teacher.degree = Constants.EnumUtils.fromString(Degree.class, worker.getTitleDegree());
             } catch (IllegalArgumentException e) {
                 System.err.println("Unknown degree: " + worker.getTitleDegree());
                 teacher.degree = Degree.BRAK;

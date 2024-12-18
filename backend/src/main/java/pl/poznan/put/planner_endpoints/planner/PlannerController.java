@@ -16,6 +16,7 @@ import pl.poznan.put.or_planner.insert.InsertPlanToDbService;
 import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
+import pl.poznan.put.planner_endpoints.Teacher.Degree;
 import pl.poznan.put.planner_endpoints.planner.params.PlanningParams;
 import pl.poznan.put.planner_endpoints.planner.service.ClassroomAssignmentService;
 import pl.poznan.put.planner_endpoints.planner.service.PlanningDataAssemblingService;
@@ -44,7 +45,8 @@ public class PlannerController {
             PlanToExcelExportService planToExcelExportService,
             ClassroomAssignmentService classroomAssignmentService,
             PlanningDataAssemblingService planningDataAssemblingService,
-            PlanningDataValidationService planningDataValidationService, PlanningProgressService planningProgressService,
+            PlanningDataValidationService planningDataValidationService,
+            PlanningProgressService planningProgressService,
             Planner planner
     ){
         this.insertPlanToDbService = insertPlanToDbService;
@@ -70,9 +72,11 @@ public class PlannerController {
             Map<String, Set<String>> groupToSubjectTypes = plannerData.getGroupToSubjectTypes();
             Map<String, Set<String>> classroomToSubjectTypes = plannerData.getClassroomToSubjectTypes();
             Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
+            Set<String> teachersWithPreferences = plannerData.getTeachersWithPreferences();
+            Map<String, Degree> teacherToDegree = plannerData.getTeacherToDegree();
 
             planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences, subjectTypeToTeachers,
-                    groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
+                    groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes, teachersWithPreferences, teacherToDegree);
 
             List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
 
@@ -120,10 +124,15 @@ public class PlannerController {
                 Map<String, Set<String>> groupToSubjectTypes = plannerData.getGroupToSubjectTypes();
                 Map<String, Set<String>> classroomToSubjectTypes = plannerData.getClassroomToSubjectTypes();
                 Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
+                Set<String> teachersWithPreferences = plannerData.getTeachersWithPreferences();
+                Map<String, Degree> teacherToDegree = plannerData.getTeacherToDegree();
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(plannerData);
 
                 planningProgressService.setProgress(jobId, 50, PlanningStatus.IN_PROGRESS);
-                planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences, subjectTypeToTeachers,
-                        groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
+            planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences,
+                    subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes,
+                    teachersWithPreferences, teacherToDegree);
 
                 List<PlannedSlot> optimizedSchedule = planner.optimizeSchedule();
 

@@ -8,12 +8,15 @@ import org.springframework.stereotype.Service;
 import pl.poznan.put.or_planner.data.helpers.GroupListService;
 import pl.poznan.put.or_planner.data.helpers.PlannerClassType;
 import pl.poznan.put.or_planner.data.helpers.TeacherPreferences;
+import pl.poznan.put.planner_endpoints.Teacher.Degree;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static pl.poznan.put.constans.Constants.PreferenceWeight.degreeToWeight;
 
 @Service
 public class ObjectiveManager {
@@ -28,6 +31,7 @@ public class ObjectiveManager {
     private Map<String, Set<String>> groupToSubjectTypes;
     private Map<String, Set<String>> classroomToSubjectTypes;
     private final GroupListService groupListService;
+    private Map<String, Degree> teacherToDegree;
 
     @Autowired
     ObjectiveManager(
@@ -39,7 +43,7 @@ public class ObjectiveManager {
     public void initialize(List<String> teachers, List<String> timeSlots, MPObjective objective, List<String> groups,
                            List<String> rooms, List<PlannerClassType> subjects, Map<String, Set<String>> teachersToSubjectTypes,
                            Map<String, Set<String>> subjectTypeToTeachers, Map<String, Set<String>> groupToSubjectTypes,
-                           Map<String, Set<String>> classroomToSubjectTypes){
+                           Map<String, Set<String>> classroomToSubjectTypes, Map<String, Degree> teacherToDegree){
         this.objective = objective;
         this.teachers = teachers;
         this.timeSlots = timeSlots;
@@ -50,6 +54,7 @@ public class ObjectiveManager {
         this.subjectTypeToTeachers = subjectTypeToTeachers;
         this.groupToSubjectTypes = groupToSubjectTypes;
         this.classroomToSubjectTypes = classroomToSubjectTypes;
+        this.teacherToDegree = teacherToDegree;
     }
 
     public void manageTeacherPreferences(Map<String, MPVariable> xEvenMap, Map<String, MPVariable> xOddMap,
@@ -72,6 +77,8 @@ public class ObjectiveManager {
     private void setCoefficient(Map<String, MPVariable> xEvenMap, Integer teacherId, Integer slotId, int preferenceValue) {
         String regex = "(xOdd|xEven)_\\d+_\\d+_" + slotId + "_\\d+_" + teacherId;
         Pattern pattern = Pattern.compile(regex);
+        Degree degree = teacherToDegree.get(teachers.get(teacherId));
+        Integer weight = degreeToWeight.get(degree);
         for (Map.Entry<String, MPVariable> varEntry : xEvenMap.entrySet()) {
             String varName = varEntry.getKey();
             MPVariable var = varEntry.getValue();
@@ -88,8 +95,9 @@ public class ObjectiveManager {
                 if (teachersToSubjectTypes.get(teachers.get(teacherId)).contains(subjectType.getId())
                         && classroomToSubjectTypes.get(roomId).contains(subjectType.getId())
                         && groupToSubjectTypes.get(groupId).contains(subjectType.getId())
-                        && mainGroupsSet.contains(groupId)) {
-                    objective.setCoefficient(var, preferenceValue);
+                        && mainGroupsSet.contains(groupId)
+                        && subjectType.getTeachers().contains(teachers.get(teacherId))) {
+                    objective.setCoefficient(var, preferenceValue * weight);
                 }
             }
         }

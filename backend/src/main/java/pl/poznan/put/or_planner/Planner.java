@@ -11,9 +11,11 @@ import pl.poznan.put.or_planner.data.helpers.TeacherLoad;
 import pl.poznan.put.or_planner.data.helpers.TeacherPreferences;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
 import pl.poznan.put.or_planner.objective.ObjectiveManager;
+import pl.poznan.put.or_planner.variables.VariableManager;
 import pl.poznan.put.planner_endpoints.ClassroomsSubjectTypes.ClassroomSubjectTypeService;
 import pl.poznan.put.planner_endpoints.SubjectTypeGroup.SubjectTypeGroupService;
 import pl.poznan.put.planner_endpoints.SubjectTypeTeacher.SubjectTypeTeacherService;
+import pl.poznan.put.planner_endpoints.Teacher.Degree;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -35,10 +37,14 @@ public class Planner {
     GroupListService groupListService;
     final
     ClassroomSubjectTypeService classroomSubjectTypeService;
+    final
+    VariableManager variableManager;
     private Map<String, Set<String>> subjectTypeToTeachers;
     private Map<String, Set<String>> groupToSubjectTypes;
     private Map<String, Set<String>> classroomToSubjectTypes;
     private Map<String, Set<String>> teachersToSubjectTypes;
+    private Set<String> teachersWithPreferences;
+    private Map<String, Degree> teacherToDegree;
 
     private List<String> groups;
     private List<String> teachers;
@@ -66,19 +72,22 @@ public class Planner {
             ConstraintsManager constraintsManager,
             ClassroomSubjectTypeService classroomSubjectTypeService,
             ObjectiveManager objectiveManager,
-            GroupListService groupListService) {
+            GroupListService groupListService,
+            VariableManager variableManager) {
         this.subjectTypeTeacherService = subjectTypeTeacherService;
         this.subjectTypeGroupService = subjectTypeGroupService;
         this.constraintsManager = constraintsManager;
         this.classroomSubjectTypeService = classroomSubjectTypeService;
         this.objectiveManager = objectiveManager;
         this.groupListService = groupListService;
+        this.variableManager = variableManager;
     }
 
     public void initialize(List<String> groups, List<String> teachers, List<String> rooms, List<String> timeSlots,
                            List<PlannerClassType> subjects, List<TeacherLoad> teacherLoadList, List<TeacherPreferences> teacherPreferences,
                            Map<String, Set<String>> subjectTypeToTeachers, Map<String, Set<String>> groupToSubjectTypes,
-                           Map<String, Set<String>> classroomToSubjectTypes, Map<String, Set<String>> teachersToSubjectTypes){
+                           Map<String, Set<String>> classroomToSubjectTypes, Map<String, Set<String>> teachersToSubjectTypes,
+                           Set<String> teachersWithPreferences, Map<String, Degree> teacherToDegree){ //na co komu data class
         Loader.loadNativeLibraries();
         this.groups = groups;
         this.teachers = teachers;
@@ -101,6 +110,8 @@ public class Planner {
         this.groupToSubjectTypes = groupToSubjectTypes;
         this.classroomToSubjectTypes = classroomToSubjectTypes;
         this.teachersToSubjectTypes = teachersToSubjectTypes;
+        this.teachersWithPreferences = teachersWithPreferences;
+        this.teacherToDegree = teacherToDegree;
 
         for (String slot : timeSlots) {
             evenTimeSlots.add(slot + "_even");
@@ -111,20 +122,21 @@ public class Planner {
     public List<PlannedSlot> optimizeSchedule() throws FileNotFoundException {
         logger.log(Level.INFO, "Schedule optimization started");
         MPSolver solver = MPSolver.createSolver("SCIP");
-//        MPObjective objective = solver.objective();
+        MPObjective objective = solver.objective();
 
         // Variables - dana grupa g, w danej sali s, o danym czasie t, ma przedmiot p z nauczycielem n
-        logger.log(Level.INFO, "tab na zmienne");
 
         Map<String, MPVariable> xEvenMap = new HashMap<>();
         Map<String, MPVariable> xOddMap = new HashMap<>();
+//        Map<String, MPVariable> teacherToTimeEvenVarsMap = new HashMap<>();
+//        Map<String, MPVariable> teacherToTimeOddVarsMap = new HashMap<>();
 
         logger.log(Level.INFO, "zmienne");
         for (int p = 0; p < numSubjects; ++p) {
             String subjectId = subjects.get(p).getId();
             List<String> allGroups = groupListService.getGroupsFromGroupMapping(subjects.get(p).getGroupMappings());
             for (int n = 0; n < numTeachers; ++n) {
-                if(!subjectTypeToTeachers.get(subjectId).contains(teachers.get(n)))
+                if(!subjects.get(p).getTeachers().contains(teachers.get(n)) || !subjectTypeToTeachers.get(subjectId).contains(teachers.get(n)))
                     continue;
                 for (int g = 0; g < numGroups; ++g) {
                     if(!allGroups.contains(groups.get(g)))
@@ -133,6 +145,11 @@ public class Planner {
                         if(!classroomToSubjectTypes.get(rooms.get(s)).contains(subjectId))
                             continue;
                         for (int t = 0; t < evenTimeSlots.size(); ++t) {
+//                            String varTeacherToTimeEven = "teacherTimeEven_" + n + "_" + t;
+//                            teacherToTimeEvenVarsMap.put(varTeacherToTimeEven, solver.makeBoolVar(varTeacherToTimeEven));
+//                            String varTeacherToTimeOdd = "teacherTimeOdd_" + n + "_" + t;
+//                            teacherToTimeEvenVarsMap.put(varTeacherToTimeOdd, solver.makeBoolVar(varTeacherToTimeOdd));
+
                             String varNameEven = "xEven_" + g + "_" + s + "_" + t + "_" + p + "_" + n;
                             String varNameOdd = "xOdd_" + g + "_" + s + "_" + t + "_" + p + "_" + n;
 
@@ -147,7 +164,8 @@ public class Planner {
         logger.log(Level.INFO, "zmienne przypisane");
 
         constraintsManager.initialize(solver, groups, teachers, rooms, timeSlots, subjects, teacherLoadList,
-                subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes);
+                subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes,
+                teachersWithPreferences);
 
         logger.log(Level.INFO, " ograniczenie 1");
         constraintsManager.addRoomOccupationConstraint(xEvenMap, xOddMap);
@@ -161,23 +179,26 @@ public class Planner {
         logger.log(Level.INFO, " ograniczenie 4");
         constraintsManager.oneGroupOneClassConstraint(xEvenMap, xOddMap);
 
-        logger.log(Level.INFO, " ograniczenie 5");
-        constraintsManager.teachersLoadConstraint(xEvenMap, xOddMap);
+//        logger.log(Level.INFO, " ograniczenie 5");
+//        constraintsManager.teachersLoadConstraint(xEvenMap, xOddMap);
 
-//        logger.log(Level.INFO, "Przypisanie funkcji celu");
-//        objectiveManager.initialize(teachers, timeSlots, objective, groups, rooms, subjects, teachersToSubjectTypes,
-//                subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes);
-//        objectiveManager.manageTeacherPreferences(xEvenMap, xOddMap, teacherPreferences);
-//        logger.log(Level.INFO, "Funkcja celu przypisana");
+//        logger.log(Level.INFO, " agregacja nauczycieli i czasu");
+//        constraintsManager.aggregateTeacherTimeVariables(xEvenMap, xOddMap, teacherToTimeEvenVarsMap, teacherToTimeOddVarsMap);
+
+        logger.log(Level.INFO, "Przypisanie funkcji celu");
+        objectiveManager.initialize(teachers, timeSlots, objective, groups, rooms, subjects, teachersToSubjectTypes,
+                subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teacherToDegree);
+        objectiveManager.manageTeacherPreferences(xEvenMap, xOddMap, teacherPreferences);
+        logger.log(Level.INFO, "Funkcja celu przypisana");
 
         logger.log(Level.INFO, " solver start");
         solver.enableOutput();
 
-//        try (PrintWriter out = new PrintWriter("filename.txt")) {
-//            out.println(solver.exportModelAsLpFormat());
-//        }
+        try (PrintWriter out = new PrintWriter("filename.txt")) {
+            out.println(solver.exportModelAsLpFormat());
+        }
 
-//        objective.setMaximization();
+        objective.setMaximization();
         MPSolverParameters solverParameters = new MPSolverParameters();
 
 //            solver.setTimeLimit(120*1000);
@@ -185,7 +206,7 @@ public class Planner {
         logger.log(Level.INFO, " solver stop");
         if (status == MPSolver.ResultStatus.OPTIMAL || status == MPSolver.ResultStatus.FEASIBLE) {
             logger.log(Level.INFO, "Found a " + status + " solution!");
-//            logger.log(Level.INFO, "Objective value = " + objective.value());
+            logger.log(Level.INFO, "Objective value = " + objective.value());
         } else {
             logger.log(Level.INFO, "No feasible solution found");
         }

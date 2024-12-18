@@ -21,11 +21,11 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static pl.poznan.put.constans.Constans.ExcelToDb.ColumnNames.*;
-import static pl.poznan.put.constans.Constans.ExcelToDb.HeaderHelper.*;
-import static pl.poznan.put.constans.Constans.ExcelToDb.HeaderHelper.Prefixes.*;
-import static pl.poznan.put.constans.Constans.ExcelToDb.subjectTypeStudentQuantity.*;
-import static pl.poznan.put.constans.Constans.HelperMethods.assignIfNotNull;
+import static pl.poznan.put.constans.Constants.ExcelToDb.ColumnNames.*;
+import static pl.poznan.put.constans.Constants.ExcelToDb.HeaderHelper.*;
+import static pl.poznan.put.constans.Constants.ExcelToDb.HeaderHelper.Prefixes.*;
+import static pl.poznan.put.constans.Constants.ExcelToDb.subjectTypeStudentQuantity.*;
+import static pl.poznan.put.constans.Constants.HelperMethods.assignIfNotNull;
 
 @Service
 public class ExcelToDbService {

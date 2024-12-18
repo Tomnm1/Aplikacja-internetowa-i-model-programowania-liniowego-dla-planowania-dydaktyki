@@ -7,8 +7,8 @@ import pl.poznan.put.planner_endpoints.FieldOfStudy.FieldOfStudyService;
 
 import java.util.Objects;
 
-import static pl.poznan.put.constans.Constans.FieldsOfStudyTypes.FULL_TIME;
-import static pl.poznan.put.constans.Constans.FieldsOfStudyTypes.PART_TIME;
+import static pl.poznan.put.constans.Constants.FieldsOfStudyTypes.FULL_TIME;
+import static pl.poznan.put.constans.Constants.FieldsOfStudyTypes.PART_TIME;
 
 @Component
 public class FieldOfStudyHandler {

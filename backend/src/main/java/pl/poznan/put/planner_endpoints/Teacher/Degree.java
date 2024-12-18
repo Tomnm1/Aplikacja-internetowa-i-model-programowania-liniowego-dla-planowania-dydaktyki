@@ -1,8 +1,8 @@
 package pl.poznan.put.planner_endpoints.Teacher;
 
-import pl.poznan.put.constans.Constans;
+import pl.poznan.put.constans.Constants;
 
-public enum Degree implements Constans.EnumUtils.DisplayName {
+public enum Degree implements Constants.EnumUtils.DisplayName {
     BRAK(""),
     LIC("lic."),
     INZ("inż."),

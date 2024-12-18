@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static pl.poznan.put.constans.Constans.FieldsOfStudyTypes.*;
+import static pl.poznan.put.constans.Constants.FieldsOfStudyTypes.*;
 
 @Service
 public class PlanToExcelExportService {

@@ -2,6 +2,7 @@ package pl.poznan.put.planner_endpoints.planner.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.poznan.put.planner_endpoints.Classroom.Classroom;
 import pl.poznan.put.planner_endpoints.Classroom.ClassroomService;
 import pl.poznan.put.planner_endpoints.ClassroomsSubjectTypes.ClassroomSubjectType;
@@ -28,12 +29,18 @@ public class ClassroomAssignmentService {
         this.classroomService = classroomService;
     }
 
+    @Transactional
     public void assignClassroomsBasedOnCapacity(){
         List<SubjectType> subjectTypeList = subjectTypeService.getAllsubjectType();
-        for(SubjectType subjectType: subjectTypeList){
-            List<Classroom> classrooms = classroomService.findRandomClassroomWithCapacity(subjectType.maxStudentsPerGroup);
-            for(Classroom classroom: classrooms)
-                createClassroomSubjectType(classroom, subjectType);
+        List<Classroom> classrooms = classroomService.getAllClassrooms();
+        int index = 0;
+
+        for (SubjectType subjectType : subjectTypeList) {
+            Classroom classroom = classrooms.get(index);
+
+            createClassroomSubjectType(classroom, subjectType);
+
+            index = (index + 1) % classrooms.size();
         }
     }
 
