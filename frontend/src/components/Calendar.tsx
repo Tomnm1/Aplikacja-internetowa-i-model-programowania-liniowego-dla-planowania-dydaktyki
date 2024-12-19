@@ -21,18 +21,19 @@ import {
 } from '../utils/Interfaces.ts';
 import {useAppSelector} from "../hooks/hooks.ts";
 import {RootState} from "../app/store.ts";
-import CalendarTable from './CalendarTable.tsx';
+import CalendarSemester from './CalendarSemester.tsx';
+import ClassroomTable from "./CalendarClassroom.tsx";
 
 type ContextType = 'teacher' | 'semester' | 'classroom';
 
 const contextOptions = [{value: 'teacher', label: 'Nauczyciel'}, {
-    value: 'semester',
-    label: 'Semestr'
+    value: 'semester', label: 'Semestr'
 }, {value: 'classroom', label: 'Sala'},];
-// todo sala/dzien-godzina
-// todo nauczyciele/dzien-godzina -opcja?
+// todo split po tygodniach parz/nparz nie działa w CalendarClassroom!
+// todo nauczyciele/dzien-godzina - opcja?
 // todo lista mozliwych pol typu file do dodania -IMPORT
 // todo wyswietlanie komunikatu zeby sprawdzic aktywny plan
+// todo obsluga drugiego imienia
 const dayToIndex: { [key in Day]: number } = {
     [Day.SUNDAY]: 0,
     [Day.MONDAY]: 1,
@@ -43,7 +44,7 @@ const dayToIndex: { [key in Day]: number } = {
     [Day.SATURDAY]: 6,
 };
 
-const colorPalette = ["#fbb4ae", "#b3cde3", "#ccebc5", "#decbe4", "#fed9a6", "#ffe9a8", "#b9d7ea", "#fddaec", "#e2f0d9", "#f6eac2", "#d5e8d4", "#d5a6bd", "#c2c2f0", "#f2c2f0", "#c2f0f2", "#f2f0c2", "#f0f2c2", "#c2f0c2", "#f0c2c2", "#c2c2f0"];
+const colorPalette = ["#fbb4ae", "#b3cde3", "#ccebc5", "#decbe4", "#fed9a6", "#ffe9a8", "#fddaec", "#e2f0d9", "#f6eac2", "#d5e8d4", "#d5a6bd", "#c2c2f0", "#f2c2f0", "#c2f0f2", "#f2f0c2", "#f0f2c2", "#c2f0c2", "#f0c2c2", "#c2c2f0"];
 
 const Timetable = () => {
     const [context, setContext] = useState<ContextType>('teacher');
@@ -65,15 +66,16 @@ const Timetable = () => {
 
     const [loading, setLoading] = useState<boolean>(true);
     const [eventsLoading, setEventsLoading] = useState<boolean>(false);
-    const [isTableView, setIsTableView] = useState<boolean>(true);
+    const [isTableView, setIsTableView] = useState<boolean>(false);
 
     const contextItems = useMemo(() => ({
-        teacher: teachers.map((teacher) => ({id: teacher.id, label: `${teacher.firstName} ${teacher.lastName}`})),
-        semester: semesters.map((semester) => ({
+        teacher: teachers.map((teacher) => ({
+            id: teacher.id, label: `${teacher.firstName} ${teacher.lastName}`,
+        })), semester: semesters.map((semester) => ({
             id: semester.semesterId,
-            label: `${semester.number} - (${semester.specialisation.name} - ${semester.specialisation.fieldOfStudy?.name} - ${cycleMapping[semester.specialisation.cycle]})`
-        })),
-        classroom: classrooms.map((classroom) => ({id: classroom.classroomID, label: classroom.code})),
+            label: `${semester.number} - (${semester.specialisation.name} - ${semester.specialisation.fieldOfStudy?.name} - ${cycleMapping[semester.specialisation.cycle]})`,
+        })), classroom: [{id: 0, label: 'Wszystkie sale'},
+            ...classrooms.map((classroom) => ({id: classroom.classroomID, label: classroom.code})),],
     }), [teachers, semesters, classrooms]);
 
     useEffect(() => {
@@ -137,6 +139,18 @@ const Timetable = () => {
         }
     }, [context, contextItems, role, userId, plans, selectedPlan]);
 
+    useEffect(() => {
+        if (context === "classroom" && selectedItem!.id === 0){
+            setIsTableView(true);
+        }
+        if (context === "classroom" && selectedItem!.id !== 0){
+            setIsTableView(false);
+        }
+        if(context === "semester"){
+            setIsTableView(true);
+        }
+    }, [contextItems, selectedItem, plans, context, selectedPlan]);
+
     const formatSlotTime = (timeStr: string) => {
         return timeStr.slice(0, 5);
     };
@@ -156,7 +170,11 @@ const Timetable = () => {
                 endpoint = API_ENDPOINTS.GENERATED_PLAN_SEMESTER(selectedItem.id!, selectedPlan);
                 break;
             case 'classroom':
-                endpoint = API_ENDPOINTS.GENERATED_PLAN_CLASSROOM(selectedItem.id!, selectedPlan);
+                if (selectedItem.id === 0) {
+                    endpoint = API_ENDPOINTS.GENERATED_PLAN_ALL;
+                } else {
+                    endpoint = API_ENDPOINTS.GENERATED_PLAN_CLASSROOM(selectedItem.id!, selectedPlan);
+                }
                 break;
             default:
                 break;
@@ -228,12 +246,14 @@ const Timetable = () => {
                             timeRange: string;
                             subjectName: string;
                             teacher: string;
-                            classroom: string;
+                            classroom: number;
+                            classroomName: string;
+                            buildingName: string;
                             isEvenWeek: boolean | null;
                             subjectType: string;
                         };
 
-                        const clusterMap: Map<string, { key: ClusterKey, groupCodes: string[] }> = new Map();
+                        const clusterMap: Map<string, { key: ClusterKey; groupCodes: string[] }> = new Map();
                         const allGroupsSet = new Set<string>();
 
                         Object.values(finalGroupedData).forEach((item: any) => {
@@ -243,18 +263,13 @@ const Timetable = () => {
                             const timeRange = `${startTime}-${endTime}`;
                             const subjectName = item.subjectName;
                             const teacher = `${item.teacherFirstName.charAt(0)}. ${item.teacherLastName}`;
-                            const classroom = item.classroomCode;
+                            const classroom = item.classroomId;
+                            const classroomName = item.classroomCode;
+                            const buildingName = item.buildingName;
                             const isBothWeeks = item.isEvenWeeks.length > 1 ? null : item.isEvenWeeks[0];
                             const subjectType = typeMapping[item.classTypeOwn as keyof typeof typeMapping];
-
                             const cKey: ClusterKey = {
-                                day,
-                                timeRange,
-                                subjectName,
-                                teacher,
-                                classroom,
-                                isEvenWeek: isBothWeeks,
-                                subjectType
+                                day, timeRange, subjectName, teacher, classroom,classroomName, buildingName, isEvenWeek: isBothWeeks, subjectType,
                             };
                             const mapKey = JSON.stringify(cKey);
 
@@ -280,8 +295,7 @@ const Timetable = () => {
                             return aStart.localeCompare(bStart);
                         });
 
-                        setAllGroupCodes(allGroupCodesArray);
-                        const subjects = Array.from(new Set(clusterArray.map(c => c.key.subjectName)));
+                        const subjects = Array.from(new Set(clusterArray.map((c) => c.key.subjectName)));
                         const newSubjectColorMap: { [subj: string]: string } = {};
                         subjects.forEach((subj, index) => {
                             newSubjectColorMap[subj] = colorPalette[index % colorPalette.length];
@@ -289,6 +303,68 @@ const Timetable = () => {
                         setSubjectColorMap(newSubjectColorMap);
 
                         setClusters(clusterArray);
+                        setAllGroupCodes(allGroupCodesArray);
+                    } else if (context === 'classroom') {
+                        type ClusterKey = {
+                            day: Day;
+                            timeRange: string;
+                            subjectName: string;
+                            teacher: string;
+                            classroom: number;
+                            isEvenWeek: boolean | null;
+                            subjectType: string;
+                        };
+
+                        const clusterMap: Map<string, { key: ClusterKey; groupCodes: string[] }> = new Map();
+                        const allClassroomsSet = new Set<string>();
+
+                        Object.values(finalGroupedData).forEach((item: any) => {
+                            const day = item.slotsDay.day;
+                            const startTime = formatSlotTime(item.slotsDay.slot.startTime);
+                            const endTime = formatSlotTime(item.slotsDay.slot.endTime);
+                            const timeRange = `${startTime}-${endTime}`;
+                            const subjectName = item.subjectName;
+                            const teacher = `${item.teacherFirstName.charAt(0)}. ${item.teacherLastName}`;
+                            const classroom = item.classroomId;
+                            const isBothWeeks = item.isEvenWeeks.length > 1 ? null : item.isEvenWeeks[0];
+                            const subjectType = typeMapping[item.classTypeOwn as keyof typeof typeMapping];
+
+                            const cKey: ClusterKey = {
+                                day, timeRange, subjectName, teacher, classroom, isEvenWeek: isBothWeeks, subjectType,
+                            };
+                            const mapKey = JSON.stringify(cKey);
+
+                            const groups = item.groupCodes;
+                            groups.forEach((g: string) => allClassroomsSet.add(g));
+                            if (!clusterMap.has(mapKey)) {
+                                clusterMap.set(mapKey, {key: cKey, groupCodes: groups});
+                            } else {
+                                const oldVal = clusterMap.get(mapKey)!;
+                                oldVal.groupCodes = Array.from(new Set([...oldVal.groupCodes, ...groups]));
+                            }
+                        });
+
+                        const allClassroomsArray = Array.from(allClassroomsSet);
+                        allClassroomsArray.sort();
+
+                        const clusterArray = Array.from(clusterMap.values());
+                        clusterArray.sort((a, b) => {
+                            const dayDiff = dayToIndex[a.key.day] - dayToIndex[b.key.day];
+                            if (dayDiff !== 0) return dayDiff;
+                            const [aStart] = a.key.timeRange.split('-');
+                            const [bStart] = b.key.timeRange.split('-');
+                            return aStart.localeCompare(bStart);
+                        });
+
+                        const subjects = Array.from(new Set(clusterArray.map((c) => c.key.subjectName)));
+                        const newSubjectColorMap: { [subj: string]: string } = {};
+                        subjects.forEach((subj, index) => {
+                            newSubjectColorMap[subj] = colorPalette[index % colorPalette.length];
+                        });
+                        setSubjectColorMap(newSubjectColorMap);
+
+                        setClusters(clusterArray);
+                        setAllGroupCodes([]);
                     } else {
                         setClusters([]);
                         setAllGroupCodes([]);
@@ -332,151 +408,167 @@ const Timetable = () => {
     };
 
     const renderEventContent = (eventInfo: EventContentArg) => {
-        return (<div className="flex flex-col items-center justify-center h-full min-w-8"
-                     style={{padding: '2px', lineHeight: 1}}>
-                <b style={{fontSize: '0.9em'}}>{eventInfo.timeText}</b>
-                <div style={{fontWeight: 'bold', fontSize: '0.9em'}}>{eventInfo.event.title}</div>
-                <div style={{fontSize: '0.8em'}}>{eventInfo.event.extendedProps.subjectType}</div>
-                <div style={{fontSize: '0.8em'}}>{eventInfo.event.extendedProps.teacher}</div>
-                {eventInfo.event.extendedProps.isEvenWeek !== null && (<div style={{fontSize: '0.8em'}}>
-                        {eventInfo.event.extendedProps.isEvenWeek ? 'Tydzień parzysty' : 'Tydzień nieparzysty'}
-                    </div>)}
-                <div style={{fontWeight: 'bold', fontSize: '0.85em', marginTop: '2px'}}>
-                    {eventInfo.event.extendedProps.classroom}
-                </div>
-            </div>);
+        return (<div
+            className="flex flex-col items-center justify-center h-full min-w-8"
+            style={{padding: '1px', lineHeight: 1}}
+        >
+            <b style={{fontSize: '0.6em', marginBottom: '1px'}}>{eventInfo.timeText}</b>
+            <div style={{fontWeight: 'bold', fontSize: '0.7em'}}>{eventInfo.event.title}</div>
+            <div style={{fontSize: '0.6em'}}>{eventInfo.event.extendedProps.subjectType}</div>
+            <div style={{fontSize: '0.6em'}}>{eventInfo.event.extendedProps.teacher}</div>
+            {eventInfo.event.extendedProps.isEvenWeek !== null && (<div style={{fontSize: '0.6em'}}>
+                {eventInfo.event.extendedProps.isEvenWeek ? 'Tydzień parzysty' : 'Tydzień nieparzysty'}
+            </div>)}
+            <div style={{fontWeight: 'bold', fontSize: '0.7em', marginTop: '1px'}}>
+                {eventInfo.event.extendedProps.classroom}
+            </div>
+        </div>);
     };
 
     if (loading) {
         return (<div className="flex items-center justify-center p-5">
-                <CircularProgress/>
-            </div>);
+            <CircularProgress/>
+        </div>);
     }
 
+
     return (<div className={'py-8 px-2 w-full overflow-auto'}>
-            {role === 'admin' && (<div className={'flex gap-2 w-full items-center'}>
-                    <FormControl sx={{width: 300}} disabled={loading}>
-                        <InputLabel id="plan-label">Plan</InputLabel>
-                        <Select
-                            autoWidth
-                            labelId="plan-label"
-                            value={selectedPlan}
-                            onChange={(event) => {
-                                setSelectedPlan(event.target.value as number);
-                            }}
-                            label="Plan"
-                            variant="outlined"
-                        >
-                            {Object.values(plans).map((plan) => (<MenuItem key={plan.planId} value={plan.planId}>
-                                    {`${plan.name} ${new Date(plan.creationDate).toLocaleString()}`}
-                                </MenuItem>))}
-                        </Select>
-                    </FormControl>
-                    <Autocomplete
-                        key={context}
-                        sx={{width: 300}}
-                        options={contextOptions}
-                        getOptionLabel={(option) => option.label}
-                        value={contextOptions.find((option) => option.value === context) || null}
-                        onChange={(_event, newValue) => {
-                            if (newValue) {
-                                const newContext = newValue.value as ContextType;
-                                setContext(newContext);
-                            }
-                        }}
-                        renderInput={(params) => <TextField {...params} label="Kontekst" variant="outlined" fullWidth/>}
-                    />
-                    <Autocomplete
-                        key={selectedItem ? selectedItem.id : 'select'}
-                        sx={{width: 300}}
-                        options={contextItems[context]}
-                        getOptionLabel={(option) => option.label}
-                        value={selectedItem}
-                        onChange={(_event, newValue) => {
-                            setSelectedItem(newValue);
-                        }}
-                        renderOption={(props, option) => (<li {...props} key={option.id}>
-                                {option.label}
-                            </li>)}
-                        renderInput={(params) => <TextField {...params}
-                                                            label={contextOptions.find((option) => option.value === context)?.label || ''}
-                                                            variant="outlined"
-                                                            fullWidth/>}
-                    />
-                    {context === 'semester' && (<div className="flex items-center">
-                            <Typography>Widok kalendarza</Typography>
-                            <Switch checked={isTableView} onChange={(e) => setIsTableView(e.target.checked)}/>
-                            <Typography>Widok tabeli</Typography>
-                        </div>)}
-                </div>)}
+        {role === 'admin' && (<div className={'flex gap-2 w-full items-center'}>
+            <FormControl sx={{width: 300}} disabled={loading}>
+                <InputLabel id="plan-label">Plan</InputLabel>
+                <Select
+                    autoWidth
+                    labelId="plan-label"
+                    value={selectedPlan}
+                    onChange={(event) => {
+                        setSelectedPlan(event.target.value as number);
+                    }}
+                    label="Plan"
+                    variant="outlined"
+                >
+                    {Object.values(plans).map((plan) => (<MenuItem key={plan.planId} value={plan.planId}>
+                        {`${plan.name} ${new Date(plan.creationDate).toLocaleString()}`}
+                    </MenuItem>))}
+                </Select>
+            </FormControl>
+            <Autocomplete
+                key={context}
+                sx={{width: 300}}
+                options={contextOptions}
+                getOptionLabel={(option) => option.label}
+                value={contextOptions.find((option) => option.value === context) || null}
+                onChange={(_event, newValue) => {
+                    if (newValue) {
+                        const newContext = newValue.value as ContextType;
+                        setContext(newContext);
+                    }
+                }}
+                renderInput={(params) => (<TextField {...params} label="Kontekst" variant="outlined" fullWidth/>)}
+            />
+            <Autocomplete
+                key={selectedItem ? selectedItem.id : 'select'}
+                sx={{width: 300}}
+                options={contextItems[context]}
+                getOptionLabel={(option) => option.label}
+                value={selectedItem}
+                onChange={(_event, newValue) => {
+                    newValue === null ? setSelectedItem(contextItems[context][0]) : setSelectedItem(newValue);
+                }}
+                renderOption={(props, option) => (<li {...props} key={option.id}>
+                    {option.label}
+                </li>)}
+                renderInput={(params) => (<TextField
+                    {...params}
+                    label={contextOptions.find((option) => option.value === context)?.label || ''}
+                    variant="outlined"
+                    fullWidth
+                />)}
+            />
+            {(context === 'semester') &&
+                (<div className="flex items-center">
+                <Typography>Widok kalendarza</Typography>
+                <Switch
+                    checked={isTableView}
+                    onChange={(e) => setIsTableView(e.target.checked)}
+                />
+                <Typography>Widok tabeli</Typography>
+            </div>)}
+        </div>)}
 
-            {eventsLoading ? (<div className="flex items-center justify-center p-5 ">
-                    <CircularProgress/>
-                </div>) : (<>
-                    {context === 'semester' && isTableView && clusters.length > 0 ? (<CalendarTable
-                            clusters={clusters}
-                            allGroupCodes={allGroupCodes}
-                            subjectColorMap={subjectColorMap}
-                            dayMapping={dayMapping}
-                            dayToIndex={dayToIndex}
-                        />) : (<div className={"w-full"}>
-                            <FullCalendar
-                                plugins={[timeGridPlugin]}
-                                initialView="timeGridWeek"
-                                locale="pl"
-                                headerToolbar={{
-                                    left: '', center: '', right: '',
-                                }}
-                                firstDay={1}
-                                initialDate={new Date()}
-                                events={events}
-                                allDaySlot={false}
-                                slotMinTime="08:00:00"
-                                slotMaxTime="20:00:00"
-                                expandRows={true}
-                                slotLabelFormat={{
-                                    hour: '2-digit', minute: '2-digit', omitZeroMinute: false,
-                                }}
-                                slotLabelInterval="01:30:00"
-                                dayHeaderFormat={{weekday: 'long'}}
-                                eventContent={renderEventContent}
-                                eventClick={handleEventClick}
-                                eventOverlap={false}
-                                slotEventOverlap={false}
-                            />
-                        </div>)}
+        {eventsLoading ? (<div className="flex items-center justify-center p-5 ">
+            <CircularProgress/>
+        </div>) : (<>
+            {context === 'semester' && isTableView && clusters.length > 0 ? (<CalendarSemester
+                clusters={clusters}
+                allGroupCodes={allGroupCodes}
+                subjectColorMap={subjectColorMap}
+                dayMapping={dayMapping}
+                dayToIndex={dayToIndex}
+            />) : context === 'classroom' && isTableView ? (<ClassroomTable
+                clusters={clusters}
+                allClassrooms={classrooms}
+                subjectColorMap={subjectColorMap}
+                dayMapping={dayMapping}
+                dayToIndex={dayToIndex}
+            />) : (<div className={'w-full'}>
+                <FullCalendar
+                    plugins={[timeGridPlugin]}
+                    initialView="timeGridWeek"
+                    locale="pl"
+                    headerToolbar={{
+                        left: '', center: '', right: '',
+                    }}
+                    firstDay={1}
+                    initialDate={new Date()}
+                    events={events}
+                    allDaySlot={false}
+                    slotMinTime="08:00:00"
+                    slotMaxTime="20:00:00"
+                    expandRows={true}
+                    slotLabelFormat={{
+                        hour: '2-digit', minute: '2-digit', omitZeroMinute: false,
+                    }}
+                    slotLabelInterval="01:30:00"
+                    dayHeaderFormat={{weekday: 'long'}}
+                    eventContent={renderEventContent}
+                    eventClick={handleEventClick}
+                    eventOverlap={false}
+                    slotEventOverlap={false}
+                />
+            </div>)}
+        </>)}
+
+        <Popover
+            open={openPopover}
+            anchorEl={anchorEl}
+            onClose={handlePopoverClose}
+            anchorOrigin={{
+                vertical: 'top', horizontal: 'left',
+            }}
+            transformOrigin={{
+                vertical: 'top', horizontal: 'right',
+            }}
+        >
+            <Typography sx={{p: 2}}>
+                <strong>{selectedEvent?.title}</strong>
+                <br/>
+                {selectedEvent?.extendedProps.semester}
+                <br/>
+                <strong>Nauczyciel:</strong> {selectedEvent?.extendedProps?.teacher}
+                <br/>
+                <strong>Grupa:</strong> {selectedEvent?.extendedProps?.group}
+                <br/>
+                <strong>Sala:</strong> {selectedEvent?.extendedProps?.classroom}
+                <br/>
+                <strong>Czas:</strong> {formatTime(selectedEvent?.start)} - {formatTime(selectedEvent?.end)}
+                {selectedEvent?.extendedProps?.isEvenWeek !== null && (<>
+                    <br/>
+                    <strong>Tydzień:</strong>{' '}
+                    {selectedEvent?.extendedProps?.isEvenWeek ? 'Parzysty' : 'Nieparzysty'}
                 </>)}
-
-            <Popover
-                open={openPopover}
-                anchorEl={anchorEl}
-                onClose={handlePopoverClose}
-                anchorOrigin={{
-                    vertical: 'top', horizontal: 'left',
-                }}
-                transformOrigin={{
-                    vertical: 'top', horizontal: 'right',
-                }}
-            >
-                <Typography sx={{p: 2}}>
-                    <strong>{selectedEvent?.title}</strong>
-                    <br/>
-                    {selectedEvent?.extendedProps.semester}
-                    <br/>
-                    <strong>Nauczyciel:</strong> {selectedEvent?.extendedProps?.teacher}
-                    <br/>
-                    <strong>Grupa:</strong> {selectedEvent?.extendedProps?.group}
-                    <br/>
-                    <strong>Sala:</strong> {selectedEvent?.extendedProps?.classroom}
-                    <br/>
-                    <strong>Czas:</strong> {formatTime(selectedEvent?.start)} - {formatTime(selectedEvent?.end)}
-                    {selectedEvent?.extendedProps?.isEvenWeek !== null && (<>
-                            <br/>
-                            <strong>Tydzień:</strong>{' '}
-                            {selectedEvent?.extendedProps?.isEvenWeek ? 'Parzysty' : 'Nieparzysty'}
-                        </>)}
-                </Typography>
-            </Popover>
-        </div>);
+            </Typography>
+        </Popover>
+    </div>);
 };
+
 export default Timetable;
