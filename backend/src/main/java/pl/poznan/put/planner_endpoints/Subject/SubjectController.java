@@ -34,6 +34,18 @@ public class SubjectController {
         return subjectService.getAllSubject();
     }
 
+    @Operation(summary = "Return all Subjects")
+    @GetMapping("/checks")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = Subject.class))
+            )
+    })
+    public List<SubjectDTO> getAllSubjectsWithChecks() {
+        return subjectService.getAllSubjectsWithChecks();
+    }
+
     @Operation(summary = "Return Subject by id")
     @GetMapping("/{id}")
     @ApiResponse(responseCode = "200", description = "OK", content = {

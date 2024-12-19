@@ -12,6 +12,8 @@ public class SubjectTypeTeacherDTO {
 
     public String teacherFirstName;
 
+    public String teacherSecondName;
+
     public String teacherLastName;
 
     public Integer subjectTypeId;

@@ -37,6 +37,7 @@ public class SubjectType_Teacher {
         dto.id = id;
         dto.teacherId = teacher.id;
         dto.teacherFirstName = teacher.firstName;
+        dto.teacherSecondName = teacher.secondName != null ? teacher.secondName : "";
         dto.teacherLastName = teacher.lastName;
         dto.subjectTypeId = subjectType.subjectTypeId;
         dto.numHours = this.numHours;

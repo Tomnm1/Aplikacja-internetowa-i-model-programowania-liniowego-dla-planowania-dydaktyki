@@ -65,7 +65,7 @@ public class Teacher {
         TeacherDTO dto = new TeacherDTO();
         dto.id = this.id;
         dto.firstName = this.firstName;
-        dto.secondName = this.secondName;
+        dto.secondName =  this.secondName != null ? this.secondName : "";
         dto.lastName = this.lastName;
         dto.email = this.email;
         dto.degree = this.degree;

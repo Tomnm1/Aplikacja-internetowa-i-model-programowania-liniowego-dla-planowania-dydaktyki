@@ -5,7 +5,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.poznan.put.planner_endpoints.Semester.Semester;
+import pl.poznan.put.planner_endpoints.Semester.SemesterDTO;
+import pl.poznan.put.planner_endpoints.Semester.SemesterRepository;
+import pl.poznan.put.planner_endpoints.Specialisation.Specialisation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,12 +25,39 @@ public class SubjectService {
     @Autowired
     private SubjectRepository subjectRepository;
 
+    @Autowired
+    private SemesterRepository semesterRepository;
+
     /**
      * Returns all Subjects
      * @return list of Subject
      */
     public List<Subject> getAllSubject(){
         return subjectRepository.findAll();
+    }
+
+    public List<SubjectDTO> getAllSubjectsWithChecks(){
+        List<Object[]> results = subjectRepository.getAllWithChecks();
+        List<SubjectDTO> subjectDTOS = new ArrayList<>();
+
+        for (Object[] result : results) {
+            Integer subjectId = (Integer) result[0];
+            Semester semester = semesterRepository.findById((Integer) result[1]).get();
+            String name = (String) result[2];
+            Boolean exam = (Boolean) result[3];
+            Boolean mandatory = (Boolean) result[4];
+            Boolean planned = (Boolean) result[5];
+            Language language = Language.valueOf((String) result[6]);
+            Boolean checkClassrooms = (Boolean) result[7];
+            Boolean checkGroups = (Boolean) result[8];
+            Boolean checkTeachers = (Boolean) result[9];
+
+            SubjectDTO dto = new SubjectDTO(subjectId, semester, name, exam, mandatory, planned, language, checkClassrooms, checkGroups, checkTeachers);
+            subjectDTOS.add(dto);
+        }
+
+
+        return subjectDTOS;
     }
 
     /**
