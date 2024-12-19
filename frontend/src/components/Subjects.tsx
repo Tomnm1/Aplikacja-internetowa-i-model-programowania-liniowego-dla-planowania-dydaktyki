@@ -3,17 +3,25 @@ import {useDispatch, useSelector} from 'react-redux';
 import {
     DataGrid, GridActionsCellItem, GridColDef, GridRowParams, GridToolbar, GridToolbarContainer,
 } from '@mui/x-data-grid';
-import {Button} from '@mui/material';
+import {Button, Tooltip} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import {AppDispatch, RootState} from '../app/store';
-import {BackendSemester, Cycle, cycleMapping, Language, languageMapping, Subject} from '../utils/Interfaces';
+import {
+    BackendSemester,
+    Cycle,
+    cycleMapping,
+    Language,
+    languageMapping,
+    Subject
+} from '../utils/Interfaces';
 import {plPL} from '@mui/x-data-grid/locales';
 import {deleteSubject, fetchSubject} from "../app/slices/subjectSlice.ts";
 import SubjectModal from "./SubjectModal.tsx";
 import {useSnackbar} from "notistack";
+import ErrorIcon from '@mui/icons-material/Error';
 
 const Subjects: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -69,7 +77,23 @@ const Subjects: React.FC = () => {
         setModalOpen(true);
     };
 
-    const columns: GridColDef[] = [{
+    const errorMsg = (c:boolean, g:boolean, t:boolean) => {
+        if(!c) return 'Brak przypisanych SAL'
+        if(!g) return 'Brak przypisanych GRUP'
+        if(!t) return 'Błędne przypisanie PROWADZĄCYCH'
+    }
+
+    const columns: GridColDef[] = [{ field: '', headerName: '', width: 50, renderCell: (params) => {
+            return ((!params.row.checkClassrooms || !params.row.checkGroups || !params.row.checkTeachers) &&
+                <Tooltip title={errorMsg(params.row.checkClassrooms,params.row.checkGroups,params.row.checkTeachers)}>
+                    <ErrorIcon color="error"/>
+                </Tooltip>
+            );
+        }, valueGetter: (_value, row) => {{
+            return (!row.checkClassrooms || !row.checkGroups || !row.checkTeachers) ? 'a' : 'b';
+        }},
+        filterable: false
+        }, {
         field: 'name', headerName: 'Nazwa', width: 300, valueGetter: (_value, row) => row?.name || "NIE MA",
     }, {
         field: 'semester', headerName: 'Semestr', width: 100, valueGetter: (value: BackendSemester) => value.number,
@@ -126,28 +150,31 @@ const Subjects: React.FC = () => {
         </GridToolbarContainer>);
 
     return (<>
-            <DataGrid
-                rows={subjects}
-                columns={columns}
-                loading={loading}
-                localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
-                slots={{toolbar: TopToolbar}}
-                getRowId={(row) => row.SubjectId}
-            />
-            <ConfirmationDialog
-                open={isDialogOpen}
-                onClose={handleDialogClose}
-                title="Potwierdzenie"
-                content="Czy na pewno chcesz usunąć ten przedmiot?"
-                action="Potwierdź"
-            />
-            {isModalOpen && (<SubjectModal
-                    open={isModalOpen}
-                    onClose={() => setModalOpen(false)}
-                    subject={selectedSubject}
-                    isAdding={isAdding}
-                />)}
-        </>);
+        <DataGrid
+            rows={subjects}
+            columns={columns}
+            loading={loading}
+            localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
+            slots={{toolbar: TopToolbar}}
+            getRowId={(row) => row.SubjectId}
+            getRowClassName={params => {
+                return (!params.row.checkClassrooms || !params.row.checkGroups || !params.row.checkTeachers) ? 'highlight-row' : '';
+            }}
+        />
+        <ConfirmationDialog
+            open={isDialogOpen}
+            onClose={handleDialogClose}
+            title="Potwierdzenie"
+            content="Czy na pewno chcesz usunąć ten przedmiot?"
+            action="Potwierdź"
+        />
+        {isModalOpen && (<SubjectModal
+            open={isModalOpen}
+            onClose={() => setModalOpen(false)}
+            subject={selectedSubject}
+            isAdding={isAdding}
+        />)}
+    </>);
 };
 
 export default Subjects;

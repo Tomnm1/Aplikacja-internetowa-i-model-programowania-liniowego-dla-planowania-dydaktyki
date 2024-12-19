@@ -33,6 +33,7 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({
         numHours: typeData?.numHours || 0,
         subjectTypeId: typeData?.subjectTypeId || subjectType?.subjectTypeId || 0,
         teacherFirstName: typeData?.teacherFirstName || '',
+        teacherSecondName: typeData?.teacherSecondName || '',
         teacherLastName: typeData?.teacherLastName || '',
         frontId: typeData?.frontId || subjectType?.frontId || '',
     });
@@ -63,6 +64,7 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({
             ...formData,
             teacherId: Number(selectedTeacherId),
             teacherFirstName: selectedTeacher?.firstName || '',
+            teacherSecondName: selectedTeacher?.secondName || '',
             teacherLastName: selectedTeacher?.lastName || '',
         });
     };
@@ -82,14 +84,14 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({
             <DialogContent>
                 {!typeData ? (
                         <Autocomplete
-                            value={teachers.find(teacher => teacher.id === formData.teacherId)}
                             onChange={(_event, newValue) => {
                                 if (newValue) {
                                     handleTeacherChange(newValue.id!);
                                 }
                             }}
                             options={Object.values(teachers)}
-                            getOptionLabel={(option) => `${option.firstName} ${option.lastName}`}
+                            getOptionLabel={(option) => `${option.firstName}${option.secondName ? ` ${option.secondName}` : ''} ${option.lastName}`}
+                            getOptionKey={(option) => option.id!}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
@@ -101,7 +103,7 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({
                         />) : (<TextField
                         margin="normal"
                         label="Prowadzący"
-                        value={`${formData.teacherFirstName} ${formData.teacherLastName}`}
+                        value={`${formData.teacherFirstName} ${formData.teacherSecondName} ${formData.teacherLastName}`}
                         fullWidth
                         disabled
                     />)}

@@ -53,3 +53,15 @@
 .fc .fc-timegrid-col {
     width: auto !important;
 }
+
+.highlight-row {
+    background-color: #f4aeae;
+}
+
+.highlight-row:hover {
+    background-color: #d28c8c !important;
+}
+
+.highlight-row.MuiDataGrid-row.Mui-selected {
+    background-color: #b06a6a !important;
+}

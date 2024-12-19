@@ -266,6 +266,9 @@ export interface Subject {
     mandatory: boolean;
     planned: boolean;
     semester: BackendSemester | { semesterId: number | string, specialisation?: BackendSpecialisation };
+    checkClassrooms?: boolean;
+    checkGroups?: boolean;
+    checkTeachers?: boolean;
 }
 
 export interface BackendSubject {
@@ -276,6 +279,9 @@ export interface BackendSubject {
     mandatory: boolean;
     planned: boolean;
     semester: BackendSemester | { semesterId: number };
+    checkClassrooms?: boolean;
+    checkGroups?: boolean;
+    checkTeachers?: boolean;
 }
 
 export interface SubjectState {
@@ -300,6 +306,7 @@ export interface teacherListDTO {
     id: number;
     teacherId: number;
     teacherFirstName: string;
+    teacherSecondName: string;
     teacherLastName: string;
     subjectTypeId: number;
     numHours: number;

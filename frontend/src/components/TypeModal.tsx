@@ -47,8 +47,9 @@ const TypeModal: React.FC<TypeModalProps> = ({open, onClose, typeData, onSave}) 
 
     const handleChange = (event: SelectChangeEvent<Type> | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const {name, value} = event.target;
+
         setFormData((prev) => ({
-            ...prev, [name as string]: value,
+            ...prev, [name as string]: value
         }));
     };
 
@@ -58,6 +59,11 @@ const TypeModal: React.FC<TypeModalProps> = ({open, onClose, typeData, onSave}) 
             return;
         }
         const typeToSave = {...formData};
+        if(typeData?.maxStudentsPerGroup && formData.maxStudentsPerGroup > typeData?.maxStudentsPerGroup) {
+            typeToSave.classroomList = typeToSave.classroomList.filter(c => c.capacity >= formData.maxStudentsPerGroup);
+            enqueueSnackbar('Sale niespełniające nowego limitu zostaną odznaczone!', {variant: 'warning'});
+        }
+        console.log(typeToSave);
         onSave(typeToSave, false);
     };
 

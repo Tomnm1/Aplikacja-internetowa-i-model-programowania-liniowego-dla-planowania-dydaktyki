@@ -27,7 +27,12 @@ const SubjectTypesClassroomsModal: React.FC<SubjectTypesClassroomsModalProps> = 
     useEffect(() => {
         fetch(`${API_ENDPOINTS.BUILDINGS}/classrooms`)
             .then(res => res.json())
-            .then((data: BuildingDTO[]) => setBuildings(data))
+            .then((data: BuildingDTO[]) => setBuildings(
+                data.map(b => {return {
+                    ...b,
+                    classroomList: b.classroomList.filter(c => c.capacity >= typeData!.maxStudentsPerGroup)
+                }}
+            )))
             .catch(err => {
                 enqueueSnackbar(`Wystąpił błąd przy pobieraniu budynków: ${err}`, { variant: 'error' });
             });

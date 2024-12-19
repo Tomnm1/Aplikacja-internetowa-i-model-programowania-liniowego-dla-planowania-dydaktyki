@@ -45,7 +45,7 @@ const SubjectTypesTeachersList: React.FC<SubjectTypesTeachersListProps> = ({
 
     const handleDelete = async (typeData: teacherListDTO) => {
         setSubjectTypes(prev => prev.map(st => {
-            if (st.subjectTypeId === typeData.subjectTypeId || st.frontId === typeData.frontId) {
+            if (st.subjectTypeId === typeData.subjectTypeId || (st.frontId && st.frontId === typeData.frontId)) {
                 return {...st, teachersList: st.teachersList.filter(t => t.teacherId !== typeData.teacherId)}
             } else {
                 return st;
@@ -102,7 +102,7 @@ const SubjectTypesTeachersList: React.FC<SubjectTypesTeachersListProps> = ({
                             </TableHead>
                             <TableBody>
                                 {teachersList.map((type) => (<TableRow key={type.id}>
-                                        <TableCell>{type.teacherFirstName}</TableCell>
+                                        <TableCell>{`${type.teacherFirstName} ${type.teacherSecondName}`}</TableCell>
                                         <TableCell>{type.teacherLastName}</TableCell>
                                         <TableCell>{type.numHours}</TableCell>
                                         <TableCell>

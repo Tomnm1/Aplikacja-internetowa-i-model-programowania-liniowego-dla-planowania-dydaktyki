@@ -7,14 +7,14 @@ const initialState: SubjectState = {
 };
 
 export const fetchSubject = createAsyncThunk<Subject[]>('subject/fetchSubjects', async () => {
-    const response = await fetch(API_ENDPOINTS.SUBJECT);
+    const response = await fetch(`${API_ENDPOINTS.SUBJECT}/checks`);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
     const data: BackendSubject[] = await response.json();
     return data.map((subject) => ({
         ...subject, SubjectId: subject.SubjectId!,
-    }));
+    })).sort( (a,b) => (!b.checkClassrooms || !b.checkGroups || !b.checkTeachers) - (!a.checkClassrooms || !a.checkGroups || !a.checkTeachers) );
 });
 
 export const addSubject = createAsyncThunk<Subject, BackendSubject>('subject/addSubject', async (subjectData) => {

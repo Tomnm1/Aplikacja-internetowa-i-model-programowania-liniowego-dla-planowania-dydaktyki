@@ -1,7 +1,14 @@
-import React from 'react';
+import React, {Dispatch, SetStateAction} from 'react';
 import {Box, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField} from '@mui/material';
 import {SelectChangeEvent} from '@mui/material/Select';
-import {BackendSemester, cycleMapping, Language, languageMapping, Subject} from '../utils/Interfaces';
+import {
+    BackendSemester,
+    BackendSubjectType,
+    cycleMapping,
+    Language,
+    languageMapping,
+    Subject
+} from '../utils/Interfaces';
 
 interface SubjectDetailsProps {
     formData: {
@@ -16,9 +23,10 @@ interface SubjectDetailsProps {
     setFormData: React.Dispatch<React.SetStateAction<Subject>>;
     semesters: BackendSemester[];
     loading: boolean;
+    setSubjectTypes: Dispatch<SetStateAction<BackendSubjectType[]>>;
 }
 
-const SubjectDetails: React.FC<SubjectDetailsProps> = ({formData, setFormData, semesters, loading}) => {
+const SubjectDetails: React.FC<SubjectDetailsProps> = ({formData, setFormData, semesters, loading,setSubjectTypes}) => {
     const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFormData((prev) => ({...prev, name: event.target.value}));
     };
@@ -32,6 +40,10 @@ const SubjectDetails: React.FC<SubjectDetailsProps> = ({formData, setFormData, s
         setFormData((prev) => ({
             ...prev, semester: {semesterId: event.target.value}
         }));
+        setSubjectTypes(prev => prev.map(st => ({
+            ...st,
+            groupsList: []
+        })));
     };
 
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {

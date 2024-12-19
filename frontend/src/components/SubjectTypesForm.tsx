@@ -56,11 +56,16 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
         setOpenClassroomsModal(true);
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (subjectType:BackendSubjectType) => {
         try {
-            await dispatch(deleteSubjectType(id)).unwrap();
+            if(!subjectType.subjectTypeId){
+                setSubjectTypes(prev => prev.filter(st => st.frontId !== subjectType.frontId));
+                enqueueSnackbar(`Typ przedmiotu usunięty!`, {variant: 'success'});
+                return;
+            }
+            await dispatch(deleteSubjectType(subjectType.subjectTypeId!)).unwrap();
             enqueueSnackbar('Typ przedmiotu usunięty!', {variant: 'success'});
-            setSubjectTypes(prev => prev.filter(st => st.subjectTypeId !== id));
+            setSubjectTypes(prev => prev.filter(st => st.subjectTypeId !== subjectType.subjectTypeId));
         } catch (error) {
             enqueueSnackbar(`Wystąpił błąd przy usuwaniu typu przedmiotu: ${error}`, {variant: 'error'});
         }
@@ -138,7 +143,7 @@ const SubjectTypesForm: React.FC<SubjectTypesFormProps> = ({subjectTypes, setSub
                                             </IconButton>
                                             {/*TODO dodać zabezpieczenie pytające czy chcesz usunąć rekord <ConfirmationDialog>*/}
                                             {/*TODO Dodać możliwość usuwania rekordków które nie są jeszcze dodane - tj takie których jeszcze nie ma w bazie, bo główny przedmiot nie został dodany*/}
-                                            <IconButton onClick={() => handleDelete(type.subjectTypeId!)}
+                                            <IconButton onClick={() => handleDelete(type)}
                                                         disabled={loading}>
                                                 <Delete/>
                                             </IconButton>

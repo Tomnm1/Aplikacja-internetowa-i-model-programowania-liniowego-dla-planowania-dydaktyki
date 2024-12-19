@@ -142,6 +142,9 @@ const Teachers: React.FC = () => {
                 localeText={plPL.components.MuiDataGrid.defaultProps.localeText}
                 slots={{toolbar: TopToolbar}}
                 processRowUpdate={handleEmailEdit}
+                getRowClassName={params => {
+                    return !params.row.email ? 'highlight-row' : '';
+                }}
             />
             <ConfirmationDialog
                 open={isDialogOpen}
