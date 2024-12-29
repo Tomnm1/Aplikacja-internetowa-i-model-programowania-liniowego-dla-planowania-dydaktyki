@@ -33,6 +33,18 @@ public class GeneratedPlanController {
         return GeneratedPlanService.getAllGeneratedPlansDTO();
     }
 
+    @Operation(summary = "Return all GeneratedPlans by plan ID")
+    @GetMapping("/plans/{planId}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = GeneratedPlanDTO.class))
+            )
+    })
+    public List<GeneratedPlanDTO> getAllGeneratedPlans(@PathVariable("planId") Integer planId) {
+        return GeneratedPlanService.getAllGeneratedPlansById(planId);
+    }
+
     @Operation(summary = "Return GeneratedPlans filtered by Teacher ID")
     @GetMapping("{planId}/teacher/{teacherId}")
     @ApiResponse(responseCode = "200", description = "OK", content = {
