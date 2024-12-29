@@ -29,7 +29,6 @@ type ContextType = 'teacher' | 'semester' | 'classroom';
 const contextOptions = [{value: 'teacher', label: 'Nauczyciel'}, {
     value: 'semester', label: 'Semestr'
 }, {value: 'classroom', label: 'Sala'},];
-// todo split po tygodniach parz/nparz nie działa w CalendarClassroom!
 // todo nauczyciele/dzien-godzina - opcja?
 // todo lista mozliwych pol typu file do dodania -IMPORT
 // todo wyswietlanie komunikatu zeby sprawdzic aktywny plan
@@ -171,7 +170,7 @@ const Timetable = () => {
                 break;
             case 'classroom':
                 if (selectedItem.id === 0) {
-                    endpoint = API_ENDPOINTS.GENERATED_PLAN_ALL;
+                    endpoint = API_ENDPOINTS.GENERATED_PLAN_ALL(selectedPlan);
                 } else {
                     endpoint = API_ENDPOINTS.GENERATED_PLAN_CLASSROOM(selectedItem.id!, selectedPlan);
                 }
@@ -355,7 +354,6 @@ const Timetable = () => {
                             const [bStart] = b.key.timeRange.split('-');
                             return aStart.localeCompare(bStart);
                         });
-
                         const subjects = Array.from(new Set(clusterArray.map((c) => c.key.subjectName)));
                         const newSubjectColorMap: { [subj: string]: string } = {};
                         subjects.forEach((subj, index) => {
@@ -416,9 +414,10 @@ const Timetable = () => {
             <div style={{fontWeight: 'bold', fontSize: '0.7em'}}>{eventInfo.event.title}</div>
             <div style={{fontSize: '0.6em'}}>{eventInfo.event.extendedProps.subjectType}</div>
             <div style={{fontSize: '0.6em'}}>{eventInfo.event.extendedProps.teacher}</div>
-            {eventInfo.event.extendedProps.isEvenWeek !== null && (<div style={{fontSize: '0.6em'}}>
+            {eventInfo.event.extendedProps.isEvenWeek !== null && (
+                <div style={{fontSize: '0.6em'}}>
                 {eventInfo.event.extendedProps.isEvenWeek ? 'Tydzień parzysty' : 'Tydzień nieparzysty'}
-            </div>)}
+                </div>)}
             <div style={{fontWeight: 'bold', fontSize: '0.7em', marginTop: '1px'}}>
                 {eventInfo.event.extendedProps.classroom}
             </div>
@@ -432,7 +431,7 @@ const Timetable = () => {
     }
 
 
-    return (<div className={'py-8 px-2 w-full overflow-auto'}>
+    return (<div className={'py-8 px-2 w-full h-full'}>
         {role === 'admin' && (<div className={'flex gap-2 w-full items-center'}>
             <FormControl sx={{width: 300}} disabled={loading}>
                 <InputLabel id="plan-label">Plan</InputLabel>
