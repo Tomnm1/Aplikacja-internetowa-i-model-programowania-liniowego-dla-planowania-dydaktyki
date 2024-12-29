@@ -23,16 +23,14 @@ import {useAppSelector} from "../hooks/hooks.ts";
 import {RootState} from "../app/store.ts";
 import CalendarSemester from './CalendarSemester.tsx';
 import ClassroomTable from "./CalendarClassroom.tsx";
+import CalendarTeacher from "./CalendarTeacher.tsx";
 
 type ContextType = 'teacher' | 'semester' | 'classroom';
 
 const contextOptions = [{value: 'teacher', label: 'Nauczyciel'}, {
-    value: 'semester', label: 'Semestr'
-}, {value: 'classroom', label: 'Sala'},];
-// todo nauczyciele/dzien-godzina - opcja?
-// todo lista mozliwych pol typu file do dodania -IMPORT
-// todo wyswietlanie komunikatu zeby sprawdzic aktywny plan
-// todo obsluga drugiego imienia
+    value: 'semester',
+    label: 'Semestr'
+}, {value: 'classroom', label: 'Sala'}];
 const dayToIndex: { [key in Day]: number } = {
     [Day.SUNDAY]: 0,
     [Day.MONDAY]: 1,
@@ -48,7 +46,10 @@ const colorPalette = ["#fbb4ae", "#b3cde3", "#ccebc5", "#decbe4", "#fed9a6", "#f
 const Timetable = () => {
     const [context, setContext] = useState<ContextType>('teacher');
     const {userId, role} = useAppSelector((state: RootState) => state.auth);
-    const [selectedItem, setSelectedItem] = useState<{ id: number | undefined; label: string } | null>(null);
+    const [selectedItem, setSelectedItem] = useState<{ id: number | undefined; label: string } | null>({
+        id: undefined,
+        label: ""
+    });
     const [selectedEvent, setSelectedEvent] = useState<EventApi | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<number>(0);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -62,19 +63,20 @@ const Timetable = () => {
     const [clusters, setClusters] = useState<any[]>([]);
     const [allGroupCodes, setAllGroupCodes] = useState<string[]>([]);
     const [subjectColorMap, setSubjectColorMap] = useState<{ [subject: string]: string }>({});
-
     const [loading, setLoading] = useState<boolean>(true);
     const [eventsLoading, setEventsLoading] = useState<boolean>(false);
     const [isTableView, setIsTableView] = useState<boolean>(false);
 
     const contextItems = useMemo(() => ({
-        teacher: teachers.map((teacher) => ({
-            id: teacher.id, label: `${teacher.firstName} ${teacher.lastName}`,
-        })), semester: semesters.map((semester) => ({
+        teacher: [{id: 0, label: 'Wszyscy nauczyciele'}, ...teachers.map((teacher) => ({
+            id: teacher.id,
+            label: `${teacher.firstName} ${teacher.secondName ? teacher.secondName : ''} ${teacher.lastName}`,
+        })),], semester: semesters.map((semester) => ({
             id: semester.semesterId,
             label: `${semester.number} - (${semester.specialisation.name} - ${semester.specialisation.fieldOfStudy?.name} - ${cycleMapping[semester.specialisation.cycle]})`,
-        })), classroom: [{id: 0, label: 'Wszystkie sale'},
-            ...classrooms.map((classroom) => ({id: classroom.classroomID, label: classroom.code})),],
+        })), classroom: [{id: 0, label: 'Wszystkie sale'}, ...classrooms.map((classroom) => ({
+            id: classroom.classroomID, label: `${classroom.code} (${classroom.building.code})`
+        })),],
     }), [teachers, semesters, classrooms]);
 
     useEffect(() => {
@@ -127,6 +129,7 @@ const Timetable = () => {
 
     useEffect(() => {
         if (role === 'admin') {
+            console.log(selectedItem)
             if (contextItems[context] && contextItems[context].length > 0) {
                 setSelectedItem(contextItems[context][0]);
             }
@@ -136,19 +139,27 @@ const Timetable = () => {
 
             setEvents([]);
         }
-    }, [context, contextItems, role, userId, plans, selectedPlan]);
+    }, [context, contextItems, role, userId, plans, selectedPlan, selectedEvent]);
 
     useEffect(() => {
-        if (context === "classroom" && selectedItem!.id === 0){
+        console.log(selectedItem)
+
+        if (context === "classroom" && selectedItem!.id === 0) {
             setIsTableView(true);
         }
-        if (context === "classroom" && selectedItem!.id !== 0){
+        if (context === "classroom" && selectedItem!.id !== 0) {
             setIsTableView(false);
         }
-        if(context === "semester"){
+        if (context === "teacher" && selectedItem!.id === 0) {
             setIsTableView(true);
         }
-    }, [contextItems, selectedItem, plans, context, selectedPlan]);
+        if (context === "teacher" && selectedItem!.id !== 0) {
+            setIsTableView(false);
+        }
+        if (context === "semester") {
+            setIsTableView(true);
+        }
+    }, [contextItems, selectedItem, plans, context, selectedPlan, context]);
 
     const formatSlotTime = (timeStr: string) => {
         return timeStr.slice(0, 5);
@@ -163,7 +174,11 @@ const Timetable = () => {
 
         switch (context) {
             case 'teacher':
-                endpoint = API_ENDPOINTS.GENERATED_PLAN_TEACHERS(selectedItem.id!, selectedPlan);
+                if (selectedItem!.id === 0) {
+                    endpoint = API_ENDPOINTS.GENERATED_PLAN_ALL(selectedPlan);
+                } else {
+                    endpoint = API_ENDPOINTS.GENERATED_PLAN_TEACHERS(selectedItem.id!, selectedPlan);
+                }
                 break;
             case 'semester':
                 endpoint = API_ENDPOINTS.GENERATED_PLAN_SEMESTER(selectedItem.id!, selectedPlan);
@@ -268,7 +283,15 @@ const Timetable = () => {
                             const isBothWeeks = item.isEvenWeeks.length > 1 ? null : item.isEvenWeeks[0];
                             const subjectType = typeMapping[item.classTypeOwn as keyof typeof typeMapping];
                             const cKey: ClusterKey = {
-                                day, timeRange, subjectName, teacher, classroom,classroomName, buildingName, isEvenWeek: isBothWeeks, subjectType,
+                                day,
+                                timeRange,
+                                subjectName,
+                                teacher,
+                                classroom,
+                                classroomName,
+                                buildingName,
+                                isEvenWeek: isBothWeeks,
+                                subjectType,
                             };
                             const mapKey = JSON.stringify(cKey);
 
@@ -363,6 +386,68 @@ const Timetable = () => {
 
                         setClusters(clusterArray);
                         setAllGroupCodes([]);
+                    }
+                    else if (context === 'teacher') {
+                        type ClusterKey = {
+                            day: Day;
+                            timeRange: string;
+                            subjectName: string;
+                            classroom: string;
+                            isEvenWeek: boolean | null;
+                            subjectType: string;
+                            teacherId: number;
+                        };
+
+                        const clusterMap: Map<string, { key: ClusterKey; groupCodes: string[] }> = new Map();
+                        const allGroupsSet = new Set<string>();
+
+                        Object.values(finalGroupedData).forEach((item: any) => {
+                            const day = item.slotsDay.day;
+                            const startTime = formatSlotTime(item.slotsDay.slot.startTime);
+                            const endTime = formatSlotTime(item.slotsDay.slot.endTime);
+                            const timeRange = `${startTime}-${endTime}`;
+                            const subjectName = item.subjectName;
+                            const classroom = item.classroomCode;
+                            const isBothWeeks = item.isEvenWeeks.length > 1 ? null : item.isEvenWeeks[0];
+                            const subjectType = typeMapping[item.classTypeOwn as keyof typeof typeMapping];
+                            const teacherId = item.teacherId;
+
+                            const cKey: ClusterKey = {
+                                day, timeRange, subjectName, classroom, isEvenWeek: isBothWeeks, subjectType, teacherId
+                            };
+                            const mapKey = JSON.stringify(cKey);
+
+                            const groups = item.groupCodes;
+                            groups.forEach((g: string) => allGroupsSet.add(g));
+                            if (!clusterMap.has(mapKey)) {
+                                clusterMap.set(mapKey, {key: cKey, groupCodes: groups});
+                            } else {
+                                const oldVal = clusterMap.get(mapKey)!;
+                                oldVal.groupCodes = Array.from(new Set([...oldVal.groupCodes, ...groups]));
+                            }
+                        });
+
+                        const allGroupCodesArray = Array.from(allGroupsSet);
+                        allGroupCodesArray.sort();
+
+                        const clusterArray = Array.from(clusterMap.values());
+                        clusterArray.sort((a, b) => {
+                            const dayDiff = dayToIndex[a.key.day] - dayToIndex[b.key.day];
+                            if (dayDiff !== 0) return dayDiff;
+                            const [aStart] = a.key.timeRange.split('-');
+                            const [bStart] = b.key.timeRange.split('-');
+                            return aStart.localeCompare(bStart);
+                        });
+
+                        const subjects = Array.from(new Set(clusterArray.map((c) => c.key.subjectName)));
+                        const newSubjectColorMap: { [subj: string]: string } = {};
+                        subjects.forEach((subj, index) => {
+                            newSubjectColorMap[subj] = colorPalette[index % colorPalette.length];
+                        });
+                        setSubjectColorMap(newSubjectColorMap);
+
+                        setClusters(clusterArray);
+                        setAllGroupCodes(allGroupCodesArray);
                     } else {
                         setClusters([]);
                         setAllGroupCodes([]);
@@ -414,10 +499,9 @@ const Timetable = () => {
             <div style={{fontWeight: 'bold', fontSize: '0.7em'}}>{eventInfo.event.title}</div>
             <div style={{fontSize: '0.6em'}}>{eventInfo.event.extendedProps.subjectType}</div>
             <div style={{fontSize: '0.6em'}}>{eventInfo.event.extendedProps.teacher}</div>
-            {eventInfo.event.extendedProps.isEvenWeek !== null && (
-                <div style={{fontSize: '0.6em'}}>
+            {eventInfo.event.extendedProps.isEvenWeek !== null && (<div style={{fontSize: '0.6em'}}>
                 {eventInfo.event.extendedProps.isEvenWeek ? 'Tydzień parzysty' : 'Tydzień nieparzysty'}
-                </div>)}
+            </div>)}
             <div style={{fontWeight: 'bold', fontSize: '0.7em', marginTop: '1px'}}>
                 {eventInfo.event.extendedProps.classroom}
             </div>
@@ -483,8 +567,7 @@ const Timetable = () => {
                     fullWidth
                 />)}
             />
-            {(context === 'semester') &&
-                (<div className="flex items-center">
+            {(context === 'semester') && (<div className="flex items-center">
                 <Typography>Widok kalendarza</Typography>
                 <Switch
                     checked={isTableView}
@@ -497,7 +580,7 @@ const Timetable = () => {
         {eventsLoading ? (<div className="flex items-center justify-center p-5 ">
             <CircularProgress/>
         </div>) : (<>
-            {context === 'semester' && isTableView && clusters.length > 0 ? (<CalendarSemester
+            {context === 'semester' && isTableView ? (<CalendarSemester
                 clusters={clusters}
                 allGroupCodes={allGroupCodes}
                 subjectColorMap={subjectColorMap}
@@ -506,6 +589,12 @@ const Timetable = () => {
             />) : context === 'classroom' && isTableView ? (<ClassroomTable
                 clusters={clusters}
                 allClassrooms={classrooms}
+                subjectColorMap={subjectColorMap}
+                dayMapping={dayMapping}
+                dayToIndex={dayToIndex}
+            />) : context === 'teacher' && isTableView ? (<CalendarTeacher
+                clusters={clusters}
+                allTeachers={teachers}
                 subjectColorMap={subjectColorMap}
                 dayMapping={dayMapping}
                 dayToIndex={dayToIndex}

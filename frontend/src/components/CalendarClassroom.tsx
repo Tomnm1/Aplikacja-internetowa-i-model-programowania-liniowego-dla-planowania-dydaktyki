@@ -187,7 +187,7 @@ const ClassroomTable: FC<ClassroomTableProps> = ({
                                                 {clustersForClassroom.map((cluster, index) => (
                                                     <div
                                                         key={`cluster-${day}-${timeRange}-${classroom.classroomID}-week-${cluster.key.isEvenWeek}-${index}`}
-                                                        className="flex flex-col h-full justify-center items-center text-center text-xs p-1"
+                                                        className="flex flex-col h-full justify-center items-center text-center text-xs p-0"
 
                                                     >
                                                         <div className="font-bold text-xs">
