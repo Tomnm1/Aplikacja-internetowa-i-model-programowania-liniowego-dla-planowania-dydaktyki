@@ -75,9 +75,9 @@ public class InsertPlanToDbService {
     private Plan insertPlan(String planName){
         Plan plan = new Plan();
         LocalDateTime time = LocalDateTime.now();
-        plan.name = String.format("%s %s", planName, time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        plan.name = planName;
         plan.creationDate = time;
-        plan.published = true;
+        plan.published = false;
         planService.createPlan(plan);
         return plan;
     }

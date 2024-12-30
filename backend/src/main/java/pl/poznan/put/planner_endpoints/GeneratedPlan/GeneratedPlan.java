@@ -62,6 +62,7 @@ public class GeneratedPlan {
         dto.specializationSemester = this.group.semester.number;
         dto.specializationId = this.group.semester.semesterId;
         dto.fieldOfStudyName = this.group.semester.specialisation.fieldOfStudy.name;
+        dto.buildingName = this.classroom.building.code;
         return dto;
     }
 }

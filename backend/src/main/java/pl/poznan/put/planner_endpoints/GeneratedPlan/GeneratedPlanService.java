@@ -29,6 +29,14 @@ public class GeneratedPlanService {
     }
 
     @Transactional
+    public List<GeneratedPlanDTO> getAllGeneratedPlansById(Integer planId) {
+        return generatedPlanRepository.findAllByPlan_PlanId(planId)
+                .stream()
+                .map(GeneratedPlan::convertToDTO)
+                .toList();
+    }
+
+    @Transactional
     public List<GeneratedPlanDTO> getGeneratedPlansByTeacherId(Integer teacherId, Integer planId) {
         return generatedPlanRepository.findAllByTeacherIdAndPlan_PlanId(teacherId, planId)
                 .stream()

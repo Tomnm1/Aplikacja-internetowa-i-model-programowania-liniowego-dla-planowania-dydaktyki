@@ -1,6 +1,19 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
-    Button, FormControl, InputLabel, LinearProgress, MenuItem, Select, SelectChangeEvent, TextField, Typography
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    FormControl,
+    InputLabel,
+    LinearProgress,
+    MenuItem,
+    Select,
+    SelectChangeEvent,
+    TextField,
+    Typography
 } from '@mui/material';
 import {useSnackbar} from 'notistack';
 import API_ENDPOINTS from '../app/urls.ts';
@@ -18,6 +31,8 @@ const Home: React.FC = () => {
     const [progressData, setProgressData] = useState<PlanningProgress | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const {enqueueSnackbar} = useSnackbar();
+    const [openDialog, setOpenDialog] = useState<boolean>(false);
+
 
     useEffect(() => {
         const savedJobId = localStorage.getItem('planningJobId');
@@ -27,6 +42,10 @@ const Home: React.FC = () => {
             localStorage.removeItem('planningJobId');
         }
     }, []);
+
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+    };
 
     const checkProgress = useCallback(async (currentJobId: string) => {
         try {
@@ -43,6 +62,7 @@ const Home: React.FC = () => {
                     enqueueSnackbar('Plan został wygenerowany!', {variant: 'success'});
                     localStorage.removeItem('planningJobId');
                     setJobId(null);
+                    setOpenDialog(true);
                 } else if (data.status === 'ERROR') {
                     enqueueSnackbar('Wystąpił błąd podczas generowania planu.', {variant: 'error'});
                     localStorage.removeItem('planningJobId');
@@ -91,7 +111,7 @@ const Home: React.FC = () => {
                     localStorage.setItem('planningJobId', String(newJobId));
                     enqueueSnackbar('Rozpoczęto generowanie planu, proszę czekać.', {variant: 'info'});
                 } else {
-                    enqueueSnackbar('Nieprawidłowy jobId zwrócony z serwera.', {variant: 'error'});
+                    enqueueSnackbar('Generowanie nie powiodło się, spróbuj ponownie.', {variant: 'error'});
                 }
             } else {
                 enqueueSnackbar('Nie udało się rozpocząć generowania planu.', {variant: 'error'});
@@ -103,8 +123,7 @@ const Home: React.FC = () => {
         }
     };
 
-    return (
-        <section className="flex flex-col justify-around items-center content-center gap-4 p-4">
+    return (<section className="flex flex-col justify-around items-center content-center gap-4 p-4">
             <Typography variant="h4">Generuj nowy plan</Typography>
 
             <div className="flex gap-4 w-full max-w-md justify-center items-center flex-col">
@@ -155,28 +174,42 @@ const Home: React.FC = () => {
                         Generowanie w toku... ({progressData.progress}%)
                     </Typography>
                     <LinearProgress variant="determinate" value={progressData.progress}/>
-                </div>
-            )}
+                </div>)}
 
             {jobId !== null && progressData && progressData.status === 'DONE' && (
                 <Typography variant="body1" color="success.main">
                     Plan został wygenerowany!
-                </Typography>
-            )}
+                </Typography>)}
 
             {jobId !== null && progressData && progressData.status === 'ERROR' && (
                 <Typography variant="body1" color="error.main">
                     Wystąpił błąd podczas generowania planu.
-                </Typography>
-            )}
+                </Typography>)}
 
-            {jobId === null && (
-                <Button variant="contained" color="primary" onClick={startPlanning} disabled={loading}>
+            {jobId === null && (<Button variant="contained" color="primary" onClick={startPlanning} disabled={loading}>
                     {loading ? 'Rozpoczynanie...' : 'Generuj Plan'}
-                </Button>
-            )}
-        </section>
-    );
+                </Button>)}
+
+            <Dialog
+                open={openDialog}
+                onClose={handleCloseDialog}
+                aria-labelledby="plan-generated-dialog-title"
+                aria-describedby="plan-generated-dialog-description"
+            >
+                <DialogTitle id="plan-generated-dialog-title">Plan Gotowy!</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="plan-generated-dialog-description">
+                        Twój plan został pomyślnie wygenerowany. Pamiętaj że domyślnie nie jest on aktywny.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Potwierdź
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+        </section>);
 };
 
 export default Home;
