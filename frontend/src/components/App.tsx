@@ -18,7 +18,7 @@ import Semesters from "./Semesters.tsx";
 import Subjects from "./Subjects.tsx";
 import UserPlan from "./UserPlan.tsx";
 import Plans from "./Plans.tsx";
-import Imports from "./Imports.tsx";
+import Import from "./Import.tsx";
 
 const App: React.FC = () => {
     return (
@@ -29,7 +29,7 @@ const App: React.FC = () => {
                     <Route element={<Layout />}>
                         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
                             <Route path="/" element={<Home />} />
-                            <Route path="/import" element={<Imports />} />
+                            <Route path="/import" element={<Import />} />
                             <Route path="/employees" element={<Employees />} />
                             <Route path="/classrooms" element={<Classrooms />} />
                             <Route path="/calendar" element={<Calendar/>} />
