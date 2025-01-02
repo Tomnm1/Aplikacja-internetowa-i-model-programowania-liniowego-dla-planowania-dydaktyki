@@ -235,4 +235,5 @@ public class TeacherService {
     public Optional<Teacher> findByEmail(String email) {
         return teacherRepository.findByEmail(email);
     }
+
 }

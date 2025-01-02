@@ -180,7 +180,7 @@ public class PlanningDataAssemblingService {
 
     private List<TeacherLoad> getTeachersLoad(String fieldOfStudyType, String semesterType,
                                               Map<String, String> teacherToSubjectTypeMaxGroups){
-        List<Teacher> teachers = teacherService.getAllteachers();
+        List<Teacher> teachers = teacherService.getAllTeachers();
         List<TeacherLoad> result = new ArrayList<>();
         for(Teacher teacher: teachers){
             List<TeacherLoadSubject> teacherLoadSubjectList = new ArrayList<>();

@@ -43,7 +43,6 @@ export const loginUser = createAsyncThunk<
             const decoded: DecodedToken = jwtDecode(accessToken);
             const userId = decoded.uid;
 
-            // Fetch user data from backend
             const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS}/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
