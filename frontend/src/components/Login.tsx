@@ -1,57 +1,37 @@
-import React, {useState} from 'react';
-import {useAppDispatch, useAppSelector} from '../hooks/hooks';
-import {loginUser} from '../app/slices/authSlice';
-import {useNavigate} from 'react-router-dom';
-import {Alert, Box, Button, CircularProgress, Container, TextField} from '@mui/material';
+import React from 'react';
+import {useLocation} from 'react-router-dom';
 
 const Login: React.FC = () => {
-    const [username, setUsername] = useState('');
-    const dispatch = useAppDispatch();
-    const navigate = useNavigate();
-    const {loading, error} = useAppSelector((state) => state.auth);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (username.trim()) {
-            const resultAction = await dispatch(loginUser(username.trim()));
-            if (loginUser.fulfilled.match(resultAction)) {
-                if (resultAction.payload.role === 'admin') {
-                    navigate('/');
-                } else if (resultAction.payload.role === 'user') {
-                    navigate('/user');
-                }
-            }
+
+    const location = useLocation();
+
+    const queryParams = new URLSearchParams(location.search);
+
+    const accessToken = queryParams.get('access_token');
+    const state = queryParams.get('state');
+
+    React.useEffect(() => {
+        console.log(queryParams);
+        if (accessToken) {
+            console.log('Access Token:', accessToken);
         }
-    };
+        if (state) {
+            console.log('State:', state);
+        }
+    }, [accessToken, state]);
 
-    const handleLogin = () => {
-        const systemId = 'TU-ID';
-        window.location.href = `https://elogin.put.poznan.pl/?do=Authorize&system=${systemId}`;
-    };
 
-    return (<Container maxWidth="sm">
-        <Box mt={10} p={4} boxShadow={3} borderRadius={2}>
-            {error && <Alert severity="error">{error}</Alert>}
-            <form onSubmit={handleSubmit}>
-                <TextField
-                    label="Username (admin or userId)"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    margin="normal"
-                />
-                <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
-                    {loading ? <CircularProgress size={24}/> : 'Zaloguj się'}
-                </Button>
-            </form>
-
-            <button onClick={handleLogin}>
-                Zaloguj się przez eKonto
-            </button>
-        </Box>
-    </Container>);
-};
-
+    return (
+        <div>
+            <h1>SSO Callback</h1>
+            {accessToken ? (
+                <p>Odebrano access_token: {accessToken}</p>
+            ) : (
+                <p>Brak tokenu w URL</p>
+            )}
+            {state && <p>Dodatkowe dane (state): {state}</p>}
+        </div>
+    );
+}
 export default Login;

@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+import {BrowserRouter as Router, Navigate, Route, Routes, useLocation} from 'react-router-dom';
 import Home from './Home';
 import Employees from './Teachers.tsx';
 import Layout from "./Layout.tsx";
@@ -12,7 +12,6 @@ import Specialisations from "./Specialisations.tsx";
 import Slots from "./Slots.tsx";
 import UserHome from "./UserHome.tsx";
 import ProtectedRoute from "./ProtectedRoute.tsx";
-import Login from "./Login.tsx";
 import SlotsDays from "./SlotsDays.tsx";
 import Semesters from "./Semesters.tsx";
 import Subjects from "./Subjects.tsx";
@@ -24,24 +23,33 @@ import Plans from "./Plans.tsx";
 
 const App: React.FC = () => {
     const dispatch = useDispatch();
-
     useEffect(() => {
-        const hash = window.location.hash;
+        const hash = location.hash;
+        console.log(location)
+        console.log('location.hash:', hash);
         if (hash.includes('access_token')) {
             const params = new URLSearchParams(hash.substring(1));
             const accessToken = params.get('access_token');
-            const state = params.get('state');
+
+            console.log('Extracted accessToken:', accessToken);
 
             if (accessToken) {
                 localStorage.setItem('access_token', accessToken);
                 dispatch(loginUser(accessToken));
                 window.history.replaceState(null, '', window.location.pathname);
+                console.log('Access token processed and stored.');
             }
         } else {
             const storedToken = localStorage.getItem('access_token');
-            if (!storedToken) {
-                const systemId = 'TU-WPISZ-ID';
+            console.log('Stored accessToken:', storedToken);
+
+            if (storedToken) {
+                dispatch(loginUser(storedToken));
+                console.log('Initialized Redux state from stored token.');
+            } else {
+                const systemId = 'planner-dev.esys.put.poznan.pl';
                 window.location.href = `https://elogin.put.poznan.pl/?do=Authorize&system=${systemId}`;
+                console.log('Redirecting to authorization.');
             }
         }
     }, [dispatch]);
@@ -49,7 +57,6 @@ const App: React.FC = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/login" element={<Login />} />
                 <Route element={<ProtectedRoute allowedRoles={['admin', 'user']} />}>
                     <Route element={<Layout />}>
                         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
@@ -73,7 +80,7 @@ const App: React.FC = () => {
                         </Route>
                     </Route>
                 </Route>
-                <Route path="*" element={<Navigate to="/login" />} />
+                <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </Router>
     );

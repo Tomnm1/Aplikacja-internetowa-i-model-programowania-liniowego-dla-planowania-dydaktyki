@@ -49,18 +49,6 @@ public class TeacherController {
         return teacherService.getTeacherDTOByID(id);
     }
 
-    @Operation(summary = "Check if user has admin privileges")
-    @GetMapping("/testPrivileges/{id}")
-    @ApiResponse(responseCode = "200", description = "OK", content = {
-            @Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Boolean.class)
-            )
-    })
-    @Transactional
-    public Boolean getTeacherByEloginID(@PathVariable("id") String id) {
-        return teacherService.checkIfAdminByEloginId(id);
-    }
 
     @Operation(summary = "Create teachers from provided JSON")
     @PostMapping

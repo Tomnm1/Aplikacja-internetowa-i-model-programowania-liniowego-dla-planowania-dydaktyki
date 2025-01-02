@@ -31,6 +31,7 @@ export const addTeacher = createAsyncThunk<Teacher, BackendTeacher>('teachers/ad
         throw new Error('Failed to add teacher');
     }
     const data: BackendTeacher = await response.json();
+
     const adjustedTeacher: Teacher = {
         ...data, id: teacher.id!,
     };
@@ -64,6 +65,7 @@ export const updateTeacherEmail = createAsyncThunk<Teacher, BackendTeacher>('tea
     }
     const data: BackendTeacher = await response.json();
     const adjustedTeacher: Teacher = {
+
         ...data, id: data.id!,
     };
     return adjustedTeacher;

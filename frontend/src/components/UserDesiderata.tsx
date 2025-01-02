@@ -87,13 +87,14 @@ const UserDesiderata: React.FC = () => {
         const serializedPreferences: { [key: string]: string } = {
             slots: JSON.stringify(preferences),
         };
+        //todo sprawdzic
         const teacherData: BackendTeacher = {
             id: formData.id,
             firstName: formData.firstName,
             lastName: formData.lastName,
             degree: formData.degree,
             preferences: serializedPreferences,
-            subjectTypesList: formData.subjectTypesList,
+            subjectTypesList: formData.subjectTypesList
         };
 
         try {

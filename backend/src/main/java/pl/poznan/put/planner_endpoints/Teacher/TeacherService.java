@@ -191,24 +191,6 @@ public class TeacherService {
         return teacherRepository.findByUsosId(usosId);
     }
 
-    /**
-     * Finds Teacher by EloginId
-     * @param eloginId Elogin ID
-     * @return Optional containing Teacher if found
-     */
-    public Optional<Teacher> findByEloginId(String eloginId) {
-        return teacherRepository.findByEloginId(eloginId);
-    }
-
-    /**
-     * Checks if user with given EloginId has admin privileges
-     * @param eloginId Elogin ID
-     * @return Boolean indicating admin status
-     */
-    public Boolean checkIfAdminByEloginId(String eloginId) {
-        Optional<Teacher> teacherOpt = teacherRepository.findByEloginId(eloginId);
-        return teacherOpt.map(teacher -> teacher.isAdmin != null && teacher.isAdmin).orElse(false);
-    }
 
     /**
      * Finds a random Teacher

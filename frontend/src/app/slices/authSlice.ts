@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_ENDPOINTS } from '../urls';
 import { BackendTeacher } from '../../utils/Interfaces';
-import jwtDecode from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 import { fetchWithAuth } from "../fetchWithAuth";
 
 interface AuthState {

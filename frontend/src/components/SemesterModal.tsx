@@ -108,6 +108,8 @@ const SemesterModal: React.FC<SemesterModalProps> = ({open, onClose, semester, i
         try {
             console.log(semesterData);
             const action = isAdding ? addSemester : updateSemester;
+            //todo : naprawić error
+            // @ts-ignore
             await dispatch(action(semesterData)).unwrap();
             await dispatch(fetchSemesters());
             setSuccess(true);
