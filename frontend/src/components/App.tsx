@@ -19,40 +19,11 @@ import UserPlan from "./UserPlan.tsx";
 import {useDispatch} from "react-redux";
 import {loginUser} from "../app/slices/authSlice.ts";
 import Plans from "./Plans.tsx";
+import Login from "./Login.tsx";
 
 
 const App: React.FC = () => {
-    const dispatch = useDispatch();
-    useEffect(() => {
-        const hash = location.hash;
-        console.log(location)
-        console.log('location.hash:', hash);
-        if (hash.includes('access_token')) {
-            const params = new URLSearchParams(hash.substring(1));
-            const accessToken = params.get('access_token');
 
-            console.log('Extracted accessToken:', accessToken);
-
-            if (accessToken) {
-                localStorage.setItem('access_token', accessToken);
-                dispatch(loginUser(accessToken));
-                window.history.replaceState(null, '', window.location.pathname);
-                console.log('Access token processed and stored.');
-            }
-        } else {
-            const storedToken = localStorage.getItem('access_token');
-            console.log('Stored accessToken:', storedToken);
-
-            if (storedToken) {
-                dispatch(loginUser(storedToken));
-                console.log('Initialized Redux state from stored token.');
-            } else {
-                const systemId = 'planner-dev.esys.put.poznan.pl';
-                window.location.href = `https://elogin.put.poznan.pl/?do=Authorize&system=${systemId}`;
-                console.log('Redirecting to authorization.');
-            }
-        }
-    }, [dispatch]);
 
     return (
         <Router>
@@ -80,6 +51,7 @@ const App: React.FC = () => {
                         </Route>
                     </Route>
                 </Route>
+                <Route path="/login" element={<Login />} />
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </Router>

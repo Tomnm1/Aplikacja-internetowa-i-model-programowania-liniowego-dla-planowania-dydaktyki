@@ -87,6 +87,16 @@ public class TeacherService {
         }
     }
 
+    @Transactional
+    public TeacherDTO getTeacherDTOByEmail(String email) {
+        Optional<Teacher> teacherOpt = teacherRepository.findByEmail(email);
+        if (teacherOpt.isPresent()) {
+            return teacherOpt.get().convertToDTO();
+        } else {
+            throw new RuntimeException("Teacher not found");
+        }
+    }
+
     /**
      * Creates a Teacher
      * @param teacher object to be inserted into DB

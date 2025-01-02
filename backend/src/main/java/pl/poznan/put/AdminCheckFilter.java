@@ -33,13 +33,14 @@ public class AdminCheckFilter extends OncePerRequestFilter {
         String requestPath = request.getRequestURI ();
 
         var authentication = SecurityContextHolder.getContext ().getAuthentication ();
+        logger.info("Authorities: {}", authentication.getAuthorities());
 
         if (authentication != null && authentication.getPrincipal () instanceof Jwt jwt) {
             String email = jwt.getClaimAsString ("sub");
             logger.info("User with uid {} is attempting to access {}", email, requestPath);
 
             Optional<Teacher> teacher = userService.findByEmail (email);
-
+            logger.info ("User with uid {}", teacher);
             if (teacher.isPresent ()) {
                 if (adminEndpoints.contains (requestPath)) {
                     Teacher user = teacher.get ();

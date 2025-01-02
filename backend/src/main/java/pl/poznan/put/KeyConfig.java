@@ -78,7 +78,7 @@ public class KeyConfig {
     @Bean
     public JwtVerifierFilter jwtVerifierFilter(RSAPublicKey publicKey) {
         logger.info("Tworzenie beana JwtVerifierFilter z issuer 'https://elogin.put.poznan.pl'.");
-        JwtVerifierFilter filter = new JwtVerifierFilter(publicKey, "https://elogin.put.poznan.pl");
+        JwtVerifierFilter filter = new JwtVerifierFilter(publicKey, "elogin.put.poznan.pl");
         logger.debug("Bean JwtVerifierFilter został utworzony.");
         return filter;
     }

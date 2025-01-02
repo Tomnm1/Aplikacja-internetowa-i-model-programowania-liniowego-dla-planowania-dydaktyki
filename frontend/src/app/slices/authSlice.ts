@@ -26,6 +26,7 @@ interface DecodedToken {
     uid: string;
     gnm: string;
     snm: string;
+    sub: string;
 }
 
 const storedAuth = localStorage.getItem('auth');
@@ -40,15 +41,16 @@ export const loginUser = createAsyncThunk<
     'auth/loginUser',
     async (accessToken: string, { rejectWithValue }) => {
         try {
+            console.log(accessToken);
             const decoded: DecodedToken = jwtDecode(accessToken);
-            const userId = decoded.uid;
+            const userEmail = decoded.sub;
 
-            const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS}/${userId}`, {
+            const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS_EMAIL(userEmail)}`, {
                 headers: {
-                    Authorization: `Bearer ${accessToken}`,
+                    Authorization: `Bearer ${storedToken}`,
                 },
             });
-
+            console.log(response);
             if (response.status === 401) {
                 throw new Error('Użytkownik nie był zarejestrowany. Proszę zalogować się ponownie.');
             }
@@ -61,7 +63,7 @@ export const loginUser = createAsyncThunk<
 
             const role: 'admin' | 'user' = data.isAdmin ? 'admin' : 'user';
 
-            return { role, userId, user: data };
+            return { role, userEmail, user: data };
         } catch (error: any) {
             return rejectWithValue(error.message || 'Login failed');
         }

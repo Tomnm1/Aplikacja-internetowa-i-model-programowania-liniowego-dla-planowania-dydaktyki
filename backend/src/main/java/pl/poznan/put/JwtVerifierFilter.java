@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.filter.OncePerRequestFilter;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
@@ -50,11 +52,15 @@ public class JwtVerifierFilter extends OncePerRequestFilter {
 
             try {
                 logger.debug("Attempting to verify JWT token.");
+                DecodedJWT decodedHeaderOnly = JWT.decode(token);
+                logger.debug("Token claims issuer: {}", decodedHeaderOnly.getIssuer());
+                logger.debug("Expected issuer: {}", issuer);
 
                 Algorithm algorithm = Algorithm.RSA256(publicKey, null);
 
                 var verifier = JWT.require(algorithm)
                         .withIssuer(issuer)
+                        .acceptLeeway (7200)
                         .build();
 
                 DecodedJWT decoded = verifier.verify(token);
@@ -95,7 +101,12 @@ public class JwtVerifierFilter extends OncePerRequestFilter {
      */
     private Jwt convertDecodedJWTToSpringJwt(DecodedJWT decoded) throws IOException {
         String headerJson = new String(Base64.getUrlDecoder().decode(decoded.getHeader()));
-        Map<String, Object> headers = new HashMap<>();
+
+        Map<String, Object> headers = new ObjectMapper ().readValue(
+                headerJson,
+                new TypeReference<> () {
+                }
+        );
 
         logger.debug("JWT Headers: {}", headerJson);
 

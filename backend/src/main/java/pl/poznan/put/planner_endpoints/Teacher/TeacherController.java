@@ -50,6 +50,18 @@ public class TeacherController {
     }
 
 
+    @Operation(summary = "Return teachers by email")
+    @GetMapping("/email/{email}")
+    @ApiResponse(responseCode = "200", description = "OK", content = {
+            @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = Teacher.class)
+            )
+    })
+    public TeacherDTO getTeacherByEmail(@PathVariable("email") String email) {
+        return teacherService.getTeacherDTOByEmail(email);
+    }
+
     @Operation(summary = "Create teachers from provided JSON")
     @PostMapping
     @ApiResponse(responseCode = "200", description = "OK", content = {

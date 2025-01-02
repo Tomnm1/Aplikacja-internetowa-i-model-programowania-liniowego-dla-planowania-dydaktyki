@@ -1,36 +1,77 @@
-import React from 'react';
-import {useLocation} from 'react-router-dom';
+import React, {useEffect} from 'react';
+import {useLocation, useSearchParams} from 'react-router-dom';
+import {useDispatch} from "react-redux";
+import {loginUser} from "../app/slices/authSlice.ts";
 
 const Login: React.FC = () => {
 
 
-    const location = useLocation();
+    // const location = useLocation();
+    //
+    // const queryParams = new URLSearchParams(location.search);
+    //
+    // const accessToken = queryParams.get('access_token');
+    // const state = queryParams.get('state');
+    //
+    // React.useEffect(() => {
+    //     console.log("AAA")
+    //     console.log(queryParams);
+    //     if (accessToken) {
+    //         console.log('Access Token:', accessToken);
+    //     }
+    //     if (state) {
+    //         console.log('State:', state);
+    //     }
+    // }, [accessToken, state]);
 
-    const queryParams = new URLSearchParams(location.search);
+    const dispatch = useDispatch();
+    const [searchParams, setSearchParams] = useSearchParams();
+    useEffect(() => {
+        const token = searchParams.get("access_token");
+        console.log('location.hash:', token);
+        if (token) {
+            console.log('Extracted accessToken:', token);
+                localStorage.setItem('access_token', token);
+                dispatch(loginUser(token));
+                //window.history.replaceState(null, '', window.location.pathname);
+                console.log('Access token processed and stored.');
 
-    const accessToken = queryParams.get('access_token');
-    const state = queryParams.get('state');
+        } else {
+            const storedToken = localStorage.getItem('access_token');
+            console.log('Stored accessToken:', storedToken);
 
-    React.useEffect(() => {
-        console.log(queryParams);
-        if (accessToken) {
-            console.log('Access Token:', accessToken);
+            if (storedToken) {
+                dispatch(loginUser(storedToken));
+                console.log('Initialized Redux state from stored token.');
+            } else {
+                const systemId = 'planner-dev.esys.put.poznan.pl';
+                window.location.href = `https://elogin.put.poznan.pl/?do=OAuth&response_type=token&client_id=${systemId}`
+                console.log('Redirecting to authorization.');
+            }
         }
-        if (state) {
-            console.log('State:', state);
-        }
-    }, [accessToken, state]);
+    }, [dispatch]);
 
+//     const systemId = 'planner-dev.esys.put.poznan.pl';
+//     window.location.href = `https://elogin.put.poznan.pl/?do=OAuth
+// &response_type=token&do=Authorize&client_id=${systemId}&scope=ekonto.user`;
+//     console.log('Redirecting to authorization.');
 
+    const handleLogin = () => {
+        const systemId = 'planner-dev.esys.put.poznan.pl';
+        window.location.href = `https://elogin.put.poznan.pl/?do=Authorize&system=${systemId}`;
+    };
     return (
         <div>
-            <h1>SSO Callback</h1>
-            {accessToken ? (
-                <p>Odebrano access_token: {accessToken}</p>
-            ) : (
-                <p>Brak tokenu w URL</p>
-            )}
-            {state && <p>Dodatkowe dane (state): {state}</p>}
+            <button onClick={handleLogin}>
+                Zaloguj się przez eKonto
+            </button>
+            {/*    <h1>SSO Callback</h1>*/}
+            {/*    {accessToken ? (*/}
+            {/*        <p>Odebrano access_token: {accessToken}</p>*/}
+            {/*    ) : (*/}
+            {/*        <p>Brak tokenu w URL</p>*/}
+            {/*    )}*/}
+            {/*    {state && <p>Dodatkowe dane (state): {state}</p>}*/}
         </div>
     );
 }
