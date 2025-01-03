@@ -21,6 +21,11 @@ const Import: React.FC = () => {
         try {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-expect-error
+            if (!file) return; //to rozwiązuje (1) dlaczego - ewentualnie jakaś obsluga błędu / toast
+            
+            let url: string; //wstawiamy tu i powinno to naprawić problem z (3) dlaczego
+
+            
             const fileExtension: string = file.name.substring(file.name.lastIndexOf('.')).toLocaleLowerCase();
             const isSupported: boolean = acceptedTypes.includes(fileExtension);
 
@@ -28,7 +33,7 @@ const Import: React.FC = () => {
                 throw new Error("Niepoprawny typ pliku!");
             }
 
-            let url: string;
+            //let url: string; -> to usuwamy
 
             switch (importType) {
                 case 'XML':
@@ -43,6 +48,7 @@ const Import: React.FC = () => {
                 default:
                     console.error('Import type not implemented');
                     enqueueSnackbar('Niepoprawny typ importu!', {variant: 'error'});
+                    return; //to naprawia (2) dlaczego
             }
 
             const formData = new FormData();
