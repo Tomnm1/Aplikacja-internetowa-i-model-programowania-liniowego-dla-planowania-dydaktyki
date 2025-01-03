@@ -28,9 +28,9 @@ const App: React.FC = () => {
     return (
         <Router>
             <Routes>
-                <Route element={<ProtectedRoute allowedRoles={['admin', 'user']} />}>
+                <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN', 'ROLE_TEACHER']} />}>
                     <Route element={<Layout />}>
-                        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                        <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
                             <Route path="/" element={<Home />} />
                             <Route path="/employees" element={<Employees />} />
                             <Route path="/classrooms" element={<Classrooms />} />
@@ -44,7 +44,7 @@ const App: React.FC = () => {
                             <Route path="/semesters" element={<Semesters />} />
                             <Route path="/subjects" element={<Subjects />} />
                         </Route>
-                        <Route element={<ProtectedRoute allowedRoles={['user']} />}>
+                        <Route element={<ProtectedRoute allowedRoles={['ROLE_TEACHER']} />}>
                             <Route path="/user" element={<UserHome />} />
                             <Route path="/user-calendar" element={<UserPlan />} />
                             <Route path="/user-desiderata" element={<UserDesiderata />} />
@@ -52,7 +52,7 @@ const App: React.FC = () => {
                     </Route>
                 </Route>
                 <Route path="/login" element={<Login />} />
-                <Route path="*" element={<Navigate to="/" />} />
+                <Route path="/" element={<Navigate to="/" />} />
             </Routes>
         </Router>
     );

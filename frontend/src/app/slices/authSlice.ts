@@ -7,7 +7,7 @@ import { fetchWithAuth } from "../fetchWithAuth";
 interface AuthState {
     isAuthenticated: boolean;
     userId: string | null;
-    role: 'admin' | 'user' | null;
+    role: 'ROLE_ADMIN' | 'ROLE_TEACHER' | null;
     user: BackendTeacher | null;
     loading: boolean;
     error: string | null;
@@ -34,7 +34,7 @@ const storedToken = localStorage.getItem('access_token');
 const parsedAuth: AuthState | null = storedAuth ? JSON.parse(storedAuth) : null;
 
 export const loginUser = createAsyncThunk<
-    { role: 'admin' | 'user'; userId: string; user?: BackendTeacher },
+    { role: 'ROLE_ADMIN' | 'ROLE_TEACHER'; userId: string; user?: BackendTeacher },
     string,
     { rejectValue: string }
 >(
@@ -61,7 +61,7 @@ export const loginUser = createAsyncThunk<
 
             const data: BackendTeacher = await response.json();
 
-            const role: 'admin' | 'user' = data.isAdmin ? 'admin' : 'user';
+            const role: 'ROLE_ADMIN' | 'ROLE_TEACHER' = data.isAdmin ? 'ROLE_ADMIN' : 'ROLE_TEACHER';
 
             return { role, userEmail, user: data };
         } catch (error: any) {
@@ -96,7 +96,7 @@ export const authSlice = createSlice({
                 (
                     state,
                     action: PayloadAction<{
-                        role: 'admin' | 'user';
+                        role: 'ROLE_ADMIN' | 'ROLE_TEACHER';
                         userId: string;
                         user?: BackendTeacher;
                     }>

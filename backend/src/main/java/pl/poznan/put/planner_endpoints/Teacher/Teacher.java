@@ -39,7 +39,7 @@ public class Teacher {
     public Integer usosId;
     @Column(name = "inner_id")
     public Integer innerId;
-    @Column(name = "elogin_id")
+    @Column(name = "email")
     public String email;
     @Column(name = "is_admin")
     public Boolean isAdmin;

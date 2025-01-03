@@ -11,6 +11,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+
 public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
@@ -30,15 +31,30 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
+                        // Endpointy, które mają być dostępne tylko dla "ROLE_TEACHER"
+                        //.requestMatchers("/teachers/**").hasRole("TEACHER")
+                        // Endpointy, które mają być dostępne tylko dla "ROLE_ADMIN"
+                        .requestMatchers("/**").hasRole("ADMIN")
+                        // Albo jakaś inna reguła
                         .anyRequest().authenticated()
                 )
-
                 .addFilterBefore(jwtVerifierFilter, UsernamePasswordAuthenticationFilter.class)
-
                 .addFilterAfter(adminCheckFilter, JwtVerifierFilter.class);
 
-        logger.debug("Dodano JwtVerifierFilter przed UsernamePasswordAuthenticationFilter i AdminCheckFilter po JwtVerifierFilter.");
+        logger.debug("Dodano JwtVerifierFilter przed UsernamePasswordAuthenticationFilter " +
+                "i AdminCheckFilter po JwtVerifierFilter.");
 
         return http.build();
     }
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .authorizeHttpRequests(authorize -> authorize
+//                        .anyRequest().permitAll() // Pozwala na dostęp do wszystkich endpointów
+//                )
+//                .csrf().disable(); // Wyłącza ochronę CSRF
+//        return http.build();
+//    }
+
 }
+
+

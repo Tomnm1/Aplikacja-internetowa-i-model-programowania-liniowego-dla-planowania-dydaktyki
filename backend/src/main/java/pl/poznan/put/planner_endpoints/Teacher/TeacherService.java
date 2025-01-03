@@ -88,8 +88,13 @@ public class TeacherService {
     }
 
     @Transactional
+    public Optional<Teacher> findByEmail(String email) {
+        return teacherRepository.findTeacherByEmail(email);
+    }
+
+    @Transactional
     public TeacherDTO getTeacherDTOByEmail(String email) {
-        Optional<Teacher> teacherOpt = teacherRepository.findByEmail(email);
+        Optional<Teacher> teacherOpt = teacherRepository.findTeacherByEmail(email);
         if (teacherOpt.isPresent()) {
             return teacherOpt.get().convertToDTO();
         } else {
@@ -223,9 +228,4 @@ public class TeacherService {
         }
         return teacher;
     }
-
-    public Optional<Teacher> findByEmail(String email) {
-        return teacherRepository.findByEmail(email);
-    }
-
 }

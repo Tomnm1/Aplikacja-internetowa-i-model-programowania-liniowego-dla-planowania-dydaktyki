@@ -1,9 +1,11 @@
 import React, {useEffect} from 'react';
-import {useLocation, useSearchParams} from 'react-router-dom';
+import {useLocation, useNavigate, useSearchParams} from 'react-router-dom';
 import {useDispatch} from "react-redux";
 import {loginUser} from "../app/slices/authSlice.ts";
+import {useAppSelector} from "../hooks/hooks.ts";
 
 const Login: React.FC = () => {
+    const { isAuthenticated, role, user } = useAppSelector((state) => state.auth);
 
 
     // const location = useLocation();
@@ -22,8 +24,10 @@ const Login: React.FC = () => {
     //     if (state) {
     //         console.log('State:', state);
     //     }
+
     // }, [accessToken, state]);
 
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const [searchParams, setSearchParams] = useSearchParams();
     useEffect(() => {
@@ -33,7 +37,23 @@ const Login: React.FC = () => {
             console.log('Extracted accessToken:', token);
                 localStorage.setItem('access_token', token);
                 dispatch(loginUser(token));
-                //window.history.replaceState(null, '', window.location.pathname);
+            if (!isAuthenticated) {
+                console.log("not authed")
+                navigate("/login");
+            }
+
+            if (role === 'ROLE_ADMIN') {
+                navigate("/");
+            }
+
+            if (role === 'ROLE_TEACHER') {
+                navigate("/user");
+            }
+
+            if (!user) {
+                console.log("no user")
+                return <div>Ładowanie danych użytkownika...</div>;
+            }
                 console.log('Access token processed and stored.');
 
         } else {
@@ -50,6 +70,7 @@ const Login: React.FC = () => {
             }
         }
     }, [dispatch]);
+
 
 //     const systemId = 'planner-dev.esys.put.poznan.pl';
 //     window.location.href = `https://elogin.put.poznan.pl/?do=OAuth

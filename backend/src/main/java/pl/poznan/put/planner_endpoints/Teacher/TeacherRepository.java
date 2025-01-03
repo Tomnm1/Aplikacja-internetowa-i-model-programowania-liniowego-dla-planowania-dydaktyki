@@ -16,7 +16,9 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
     Teacher findByFirstNameAndLastName(String firstName, String lastName);
     Teacher findByUsosId(int usosId);
     Teacher findByInnerId(int innerId);
-    Optional<Teacher> findByEmail(String email);
+
+    Optional<Teacher> findTeacherByEmail(String email);
+
     @Query(value = "SELECT * FROM teachers WHERE LENGTH(preferences::text) > 2", nativeQuery = true)
     List<Teacher> findAllTeachersWithPreferences();
 
