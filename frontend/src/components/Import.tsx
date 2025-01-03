@@ -10,7 +10,7 @@ import CloseIcon from '@mui/icons-material/Close';
 const Import: React.FC = () => {
     const {enqueueSnackbar} = useSnackbar();
     const [importType, setImportType] = useState<string>('XML');
-    const [file, setFile] = React.useState<File | null>(null)
+    const [file, setFile] = useState<File | null>(null)
     const acceptedTypes = ['.xml', '.xlsx']
 
     const handleChange = (newFile: File | null) => {
@@ -19,21 +19,21 @@ const Import: React.FC = () => {
 
     const uploadFile = async () => {
         try {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            if (!file) return; //to rozwiązuje (1) dlaczego - ewentualnie jakaś obsluga błędu / toast
+            if (!file){
+                enqueueSnackbar('Najpierw załącz plik.', {variant: 'error'});
+                return;
+            }
             
-            let url: string; //wstawiamy tu i powinno to naprawić problem z (3) dlaczego
+            let url: string;
 
-            
             const fileExtension: string = file.name.substring(file.name.lastIndexOf('.')).toLocaleLowerCase();
             const isSupported: boolean = acceptedTypes.includes(fileExtension);
 
             if (!isSupported) {
-                throw new Error("Niepoprawny typ pliku!");
+                console.error(`File type ${fileExtension} not supported`);
+                enqueueSnackbar('Niepoprawny typ pliku!', {variant: 'error'});
+                return;
             }
-
-            //let url: string; -> to usuwamy
 
             switch (importType) {
                 case 'XML':
@@ -48,16 +48,13 @@ const Import: React.FC = () => {
                 default:
                     console.error('Import type not implemented');
                     enqueueSnackbar('Niepoprawny typ importu!', {variant: 'error'});
-                    return; //to naprawia (2) dlaczego
+                    return;
             }
 
             const formData = new FormData();
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
             formData.append('file', file);
 
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+            enqueueSnackbar('Rozpoczęto import pliku.', {variant: 'info'});
             const res = await fetch(url, {
                 method: 'POST', body: formData,
             });
@@ -66,7 +63,9 @@ const Import: React.FC = () => {
             if (res.status === 200) {
                 enqueueSnackbar('Import udany.', {variant: 'success'});
             } else {
+                console.error(`Response status was ${res.status}`);
                 enqueueSnackbar('Nie udało się zaimportować pliku.', {variant: 'error'});
+                return;
             }
 
         } catch (e: any) {
