@@ -65,7 +65,6 @@ export const updateTeacherEmail = createAsyncThunk<Teacher, BackendTeacher>('tea
     }
     const data: BackendTeacher = await response.json();
     const adjustedTeacher: Teacher = {
-
         ...data, id: data.id!,
     };
     return adjustedTeacher;

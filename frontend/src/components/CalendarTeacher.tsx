@@ -56,7 +56,7 @@ const CalendarTeacher: FC<CalendarTeacherProps> = ({
 
     return (<Paper className="pt-2">
             <TableContainer
-                className="overflow-y-auto overflow-x-scroll"
+                className="overflow-scroll"
                 style={{maxHeight: '85vh'}}
             >
                 <Table stickyHeader className="table-fixed">

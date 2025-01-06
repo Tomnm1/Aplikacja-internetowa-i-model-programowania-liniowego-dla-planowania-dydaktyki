@@ -14,7 +14,8 @@ const Topper = () => {
 
     const handleLogout = () => {
         dispatch(logout());
-        navigate('/login');
+        const systemId = 'planner-dev.esys.put.poznan.pl';
+        navigate(`https://elogin.put.poznan.pl/?do=Logout&system=${systemId}`);
     };
     return (
         <div className={"sticky top-0 w-full flex flex-nowrap flex-row justify-between bg-put-dark items-center p-4"}>
@@ -35,11 +36,10 @@ const Topper = () => {
             <div className={"hidden flex-row items-center gap-5 sm:flex"}>
                 <div className={"flex flex-col"}>
                     <h2 className={"text-xl text-white"}>
-                        {/*//todo zmienic na username jak powstanie*/}
-                        {role === "user" ? `${user!.firstName} ${user!.lastName}` :  "Administrator"}
+                        {role === "ROLE_TEACHER" ? `${user!.firstName.toLocaleLowerCase()}.${user!.lastName.toLocaleLowerCase()}` :  "Administrator"}
                     </h2>
                     <h3 className={"text-md text-gray-400"}>
-                        {role === "user" && "@put.poznan.pl"}
+                        {role === "ROLE_TEACHER" && "@put.poznan.pl"}
                     </h3>
 
                 </div>

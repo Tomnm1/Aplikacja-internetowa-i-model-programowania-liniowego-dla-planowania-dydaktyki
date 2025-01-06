@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -28,14 +29,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         logger.info("Konfiguracja łańcucha filtrów bezpieczeństwa.");
-
+        http.csrf(AbstractHttpConfigurer::disable);
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Endpointy, które mają być dostępne tylko dla "ROLE_TEACHER"
-                        //.requestMatchers("/teachers/**").hasRole("TEACHER")
-                        // Endpointy, które mają być dostępne tylko dla "ROLE_ADMIN"
-                        .requestMatchers("/**").hasRole("ADMIN")
-                        // Albo jakaś inna reguła
+
+                        .requestMatchers ("/**").hasAnyRole("ADMIN", "TEACHER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtVerifierFilter, UsernamePasswordAuthenticationFilter.class)

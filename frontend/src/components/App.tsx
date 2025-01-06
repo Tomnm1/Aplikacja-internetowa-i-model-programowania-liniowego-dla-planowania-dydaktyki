@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {BrowserRouter as Router, Navigate, Route, Routes, useLocation} from 'react-router-dom';
+import React from 'react';
+import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
 import Home from './Home';
 import Employees from './Teachers.tsx';
 import Layout from "./Layout.tsx";
@@ -16,14 +16,10 @@ import SlotsDays from "./SlotsDays.tsx";
 import Semesters from "./Semesters.tsx";
 import Subjects from "./Subjects.tsx";
 import UserPlan from "./UserPlan.tsx";
-import {useDispatch} from "react-redux";
-import {loginUser} from "../app/slices/authSlice.ts";
 import Plans from "./Plans.tsx";
 import Login from "./Login.tsx";
 
-
 const App: React.FC = () => {
-
 
     return (
         <Router>

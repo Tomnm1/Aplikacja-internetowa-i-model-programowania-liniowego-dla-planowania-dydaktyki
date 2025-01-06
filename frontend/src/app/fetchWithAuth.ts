@@ -26,7 +26,7 @@ export const fetchWithAuth = async (
     if (response.status === 401) {
         localStorage.removeItem('access_token');
         localStorage.removeItem('auth');
-        window.location.href = '/';
+        window.location.href = '/login';
     }
 
     return response;

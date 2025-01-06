@@ -71,21 +71,21 @@ export interface BackendTeacher {
     isAdmin?: boolean;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
-    usosId?: number;
+    usosId?: number | undefined;
     innerId?: number;
 }
 
 export interface Teacher {
     id: number;
     firstName: string;
-    secondName: string;
+    secondName?: string;
     lastName: string;
     email?: string;
     degree: string;
     isAdmin?: boolean;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
-    usosId: number;
+    usosId: number | undefined;
     innerId: number;
 }
 

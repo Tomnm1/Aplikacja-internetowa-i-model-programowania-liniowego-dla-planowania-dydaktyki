@@ -41,7 +41,6 @@ export const loginUser = createAsyncThunk<
     'auth/loginUser',
     async (accessToken: string, { rejectWithValue }) => {
         try {
-            console.log(accessToken);
             const decoded: DecodedToken = jwtDecode(accessToken);
             const userEmail = decoded.sub;
 
@@ -50,7 +49,6 @@ export const loginUser = createAsyncThunk<
                     Authorization: `Bearer ${storedToken}`,
                 },
             });
-            console.log(response);
             if (response.status === 401) {
                 throw new Error('Użytkownik nie był zarejestrowany. Proszę zalogować się ponownie.');
             }
