@@ -20,6 +20,9 @@ export const API_ENDPOINTS = {
     GENERATED_PLAN_CLASSROOM: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/classroom/${id}`,
     GENERATED_PLAN_SEMESTER: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/semester/${id}`,
     PLANNING_PROGRESS: (id: string) => `${API_BASE}/planningProgress/${id}`,
+    IMPORT_XML: `${API_BASE}/api/xml/importXml`,
+    IMPORT_INNER_ID: `${API_BASE}/api/excelToDb/importTeachersInnerId`,
+    IMPORT_LOAD_SHEET: `${API_BASE}/api/excelToDb/importLoadSheet`,
 };
 
 export default API_ENDPOINTS;
