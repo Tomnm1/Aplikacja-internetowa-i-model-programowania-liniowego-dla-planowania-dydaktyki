@@ -23,6 +23,8 @@ interface RouteItem {
 const routes: RouteItem[] = [{
     name: "Strona główna", link: "/", icon: <HomeIcon/>, roles: ['admin'],
 }, {
+    name: "Import danych", link: "/import", icon: <AddToPhotosIcon/>, roles: ['admin'],
+}, {
     name: "Pracownicy", link: "/employees", icon: <BadgeIcon/>, roles: ['admin'],
 }, {
     name: "Sale", link: "/classrooms", icon: <RoomPreferencesIcon/>, roles: ['admin'],
