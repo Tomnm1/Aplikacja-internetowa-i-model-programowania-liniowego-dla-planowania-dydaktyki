@@ -44,7 +44,7 @@ public class ClassroomController {
             )
     })
     @ApiResponse(responseCode = "500", description = "Internal server error")
-    public Optional<Classroom> getRoomByID(@PathVariable("number") Integer id) {
+    public Optional<Classroom> getRoomByID(@PathVariable("id") Integer id) {
         return classroomservice.getRoomByID(id);
     }
 
