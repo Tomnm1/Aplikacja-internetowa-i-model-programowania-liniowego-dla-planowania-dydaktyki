@@ -71,7 +71,7 @@ export interface BackendTeacher {
     isAdmin?: boolean;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
-    usosId?: number | undefined;
+    usosId?: number;
     innerId?: number;
 }
 
@@ -85,8 +85,8 @@ export interface Teacher {
     isAdmin?: boolean;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
-    usosId: number | undefined;
-    innerId: number;
+    usosId?: number;
+    innerId?: number;
 }
 
 export interface TeachersState {

@@ -19,7 +19,6 @@ const Login: React.FC = () => {
             if(!isAuthenticated){
                 console.log("not authed, dispatching")
                 dispatch(loginUser(token));
-                r
             }
             else {
                 console.log("user", user);

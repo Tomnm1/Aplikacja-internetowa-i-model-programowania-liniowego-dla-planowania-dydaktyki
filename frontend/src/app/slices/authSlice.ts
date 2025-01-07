@@ -43,7 +43,6 @@ export const loginUser = createAsyncThunk<
         try {
             const decoded: DecodedToken = jwtDecode(accessToken);
             const userEmail = decoded.sub;
-
             const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS_EMAIL(userEmail)}`, {
                 headers: {
                     Authorization: `Bearer ${storedToken}`,

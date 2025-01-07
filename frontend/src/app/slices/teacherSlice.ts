@@ -58,7 +58,7 @@ export const updateTeacherEmail = createAsyncThunk<Teacher, BackendTeacher>('tea
     const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS}/email/${teacherData.id}`, {
         method: 'PUT', headers: {
             'Content-Type': 'application/json',
-        }, body: teacherData.email,
+        }, body: teacherData.email || 'BRAK',
     });
     if (!response.ok) {
         throw new Error('Failed to update teacher email');
