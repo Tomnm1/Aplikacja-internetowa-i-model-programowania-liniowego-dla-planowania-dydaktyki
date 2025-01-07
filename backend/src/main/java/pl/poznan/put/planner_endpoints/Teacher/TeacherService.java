@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -148,7 +149,7 @@ public class TeacherService {
         Optional<Teacher> teacherOpt = teacherRepository.findById(id);
         if (teacherOpt.isPresent()) {
             Teacher teacher = teacherOpt.get();
-            teacher.email = email;
+            teacher.email = (Objects.equals(email, "BRAK")) ?  "" : email;
             return teacherRepository.save(teacher);
         } else {
             throw new RuntimeException("Teacher not found");
