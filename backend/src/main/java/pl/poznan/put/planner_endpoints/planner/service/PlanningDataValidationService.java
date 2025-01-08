@@ -38,6 +38,7 @@ public class PlanningDataValidationService {
     }
 
     public boolean executeValidations(PlannerData plannerData,  List<ErrorMessage> errorMessagesList){
+        hasCriticalError = false;
         this.validateBasicLists(plannerData, errorMessagesList);
         this.validateSubjects(plannerData, errorMessagesList);
         this.validateTeachersLoad(plannerData, errorMessagesList);
