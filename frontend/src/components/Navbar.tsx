@@ -25,6 +25,8 @@ const routes: RouteItem[] = [{
 }, {
     name: "Pracownicy", link: "/employees", icon: <BadgeIcon/>, roles: ['ROLE_ADMIN'],
 }, {
+    name: "Import danych", link: "/import", icon: <AddToPhotosIcon/>, roles: ['ROLE_ADMIN'],
+}, {
     name: "Sale", link: "/classrooms", icon: <RoomPreferencesIcon/>, roles: ['ROLE_ADMIN'],
 }, {
     name: "Kalendarz", link: "/calendar", icon: <CalendarMonth/>, roles: ['ROLE_ADMIN'],
