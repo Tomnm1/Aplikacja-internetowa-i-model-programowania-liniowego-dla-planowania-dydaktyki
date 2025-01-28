@@ -117,7 +117,7 @@ public class ExcelToDbService {
         }
         this.semester = newSemester;
 //        this.semester = assignIfNotNull(semesterHandler.insertSemester(semesterNumber, specialisation), this.semester);
-        this.subject = assignIfNotNull(subjectHandler.insertSubject(subjectName, exam, false, false, Language.polski, semester), this.subject);
+        this.subject = assignIfNotNull(subjectHandler.insertSubject(subjectName, exam, false, true, Language.polski, semester), this.subject);
         if(!subjectTypes.isEmpty())
             subjectTypeHandler.insertSubjectTypes(this.subjectTypes, this.subject);
 

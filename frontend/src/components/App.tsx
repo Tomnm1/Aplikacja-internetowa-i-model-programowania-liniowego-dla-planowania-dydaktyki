@@ -28,6 +28,7 @@ const App: React.FC = () => {
                     <Route element={<Layout />}>
                         <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
                             <Route path="/" element={<Home />} />
+                            <Route path="/import" element={<Import />} />
                             <Route path="/employees" element={<Employees />} />
                             <Route path="/classrooms" element={<Classrooms />} />
                             <Route path="/calendar" element={<Calendar/>} />

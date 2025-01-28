@@ -112,8 +112,12 @@ public class PlannerController {
                 logger.log(Level.INFO,"DataValidation started");
                 List<ErrorMessage> errorMessagesList = new ArrayList<>();
                 boolean hasCriticalError = planningDataValidationService.executeValidations(plannerData, errorMessagesList);
-                if(hasCriticalError)
+                if(hasCriticalError) {
+                    errorMessagesList.forEach(errorMessage -> {
+                        System.out.println(errorMessage.getErrorType() + " " + errorMessage.getMessage());
+                    });
                     throw new PlanningValidationException("Planning critical error. Planning aborted", errorMessagesList);
+                }
                 logger.log(Level.INFO,"DataValidation finished");
 
                 planningProgressService.setProgress(jobId, 30, PlanningStatus.IN_PROGRESS);
