@@ -4,18 +4,16 @@ import put_logo_text from "../assets/put_logo_text.png"
 import put_logo from "../assets/put_logo.png"
 import {logout} from "../app/slices/authSlice.ts";
 import {useAppDispatch, useAppSelector} from "../hooks/hooks.ts";
-import {useNavigate} from "react-router-dom";
 
 const Topper = () => {
     const dispatch = useAppDispatch();
-    const navigate = useNavigate();
     const {user, role} = useAppSelector((state) => state.auth);
 
 
     const handleLogout = () => {
         dispatch(logout());
         const systemId = 'planner-dev.esys.put.poznan.pl';
-        navigate(`https://elogin.put.poznan.pl/?do=Logout&system=${systemId}`);
+        window.location.href = `https://elogin.put.poznan.pl/?do=Logout&system=${systemId}`;
     };
     return (
         <div className={"sticky top-0 w-full flex flex-nowrap flex-row justify-between bg-put-dark items-center p-4"}>

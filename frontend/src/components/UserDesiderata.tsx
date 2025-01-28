@@ -20,7 +20,7 @@ interface TeacherFormData {
 const UserDesiderata: React.FC = () => {
     const dispatch = useAppDispatch();
     const {enqueueSnackbar} = useSnackbar();
-    const {userId, isAuthenticated, role} = useAppSelector((state: RootState) => state.auth);
+    const {userId, isAuthenticated, role, user} = useAppSelector((state: RootState) => state.auth);
     const teacher = useAppSelector((state: RootState) => state.teachers.singleTeacher);
     const teacherLoading = useAppSelector((state: RootState) => state.teachers.loading);
     const teacherError = useAppSelector((state: RootState) => state.teachers.error);
@@ -31,7 +31,7 @@ const UserDesiderata: React.FC = () => {
     });
     const [loading, setLoading] = useState<boolean>(false);
     useEffect(() => {
-        if (isAuthenticated && role === 'user' && userId) {
+        if (isAuthenticated && role === 'ROLE_TEACHER' && user.id) {
             const parsedUserId = parseInt(userId, 10);
             if (!isNaN(parsedUserId)) {
                 dispatch(getTeacher(parsedUserId))
@@ -43,7 +43,7 @@ const UserDesiderata: React.FC = () => {
                 enqueueSnackbar('Nieprawidłowe ID użytkownika.', {variant: 'error'});
             }
         }
-    }, [dispatch, isAuthenticated, role, userId, enqueueSnackbar]);
+    }, [dispatch, isAuthenticated, role, user, enqueueSnackbar]);
 
     useEffect(() => {
         if (teacher) {

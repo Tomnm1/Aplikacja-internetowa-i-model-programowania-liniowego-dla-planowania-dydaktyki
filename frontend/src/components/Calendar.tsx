@@ -178,7 +178,7 @@ const Timetable = () => {
                 if (selectedItem!.id === 0) {
                     endpoint = API_ENDPOINTS.GENERATED_PLAN_ALL(selectedPlan);
                 } else {
-                    endpoint = API_ENDPOINTS.GENERATED_PLAN_TEACHERS(selectedItem.id!, selectedPlan);
+                    endpoint = API_ENDPOINTS.GENERATED_PLAN_TEACHERS(role === "ROLE_ADMIN" ?  selectedItem.id! : user!.id!, selectedPlan);
                 }
                 break;
             case 'semester':

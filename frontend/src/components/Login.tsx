@@ -21,7 +21,7 @@ const Login: React.FC = () => {
                 dispatch(loginUser(token));
             }
             else {
-                console.log("user", user);
+                console.log("user-from-login", user);
                 if (!user) {
                     console.log("no user")
                     return <div>Ładowanie danych użytkownika...</div>;
@@ -72,6 +72,7 @@ const Login: React.FC = () => {
             }
         }
     }, [dispatch, user, role]);
+
 
     return (
         <div className={"flex items-center justify-center h-screen"}>

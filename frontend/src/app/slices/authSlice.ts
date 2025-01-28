@@ -101,7 +101,7 @@ export const authSlice = createSlice({
                     state.loading = false;
                     state.isAuthenticated = true;
                     state.role = action.payload.role;
-                    state.userId = action.payload.userId;
+                    state.userId = action.payload.user!.id!.toString();
                     state.user = action.payload.user || null;
                     localStorage.setItem('auth', JSON.stringify(state));
                 }

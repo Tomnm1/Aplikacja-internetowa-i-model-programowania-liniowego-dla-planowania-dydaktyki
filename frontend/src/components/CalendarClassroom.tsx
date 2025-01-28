@@ -62,7 +62,7 @@ const ClassroomTable: FC<ClassroomTableProps> = ({
     return (
         <Paper className="pt-2">
             <TableContainer
-                className="overflow-scroll"
+                className="overflow-scroll custom-scrollbar"
                 style={{ maxHeight: '85vh' }}
             >
                 <Table stickyHeader className="table-fixed">
