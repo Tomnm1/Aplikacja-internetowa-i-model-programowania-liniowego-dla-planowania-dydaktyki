@@ -1,11 +1,13 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_ENDPOINTS } from '../urls';
 import { BackendTeacher } from '../../utils/Interfaces';
+import {jwtDecode} from 'jwt-decode';
+import { fetchWithAuth } from "../fetchWithAuth";
 
 interface AuthState {
     isAuthenticated: boolean;
     userId: string | null;
-    role: 'admin' | 'user' | null;
+    role: 'ROLE_ADMIN' | 'ROLE_TEACHER' | null;
     user: BackendTeacher | null;
     loading: boolean;
     error: string | null;
@@ -20,35 +22,52 @@ const initialState: AuthState = {
     error: null,
 };
 
+interface DecodedToken {
+    uid: string;
+    gnm: string;
+    snm: string;
+    sub: string;
+}
+
 const storedAuth = localStorage.getItem('auth');
+const storedToken = localStorage.getItem('access_token');
 const parsedAuth: AuthState | null = storedAuth ? JSON.parse(storedAuth) : null;
 
 export const loginUser = createAsyncThunk<
-    { role: 'admin' | 'user'; userId: string; user?: BackendTeacher },
+    { role: 'ROLE_ADMIN' | 'ROLE_TEACHER'; userId: string; user?: BackendTeacher },
     string,
     { rejectValue: string }
 >(
     'auth/loginUser',
-    async (username: string, { rejectWithValue }) => {
+    async (accessToken: string, { rejectWithValue }) => {
         try {
-            if (username === 'admin') {
-                return { role: 'admin', userId: 'admin' };
-            } else {
-                const userId = username.trim();
-                const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${userId}`);
-                if (!response.ok) {
-                    throw new Error('Nie znaleziono użytkownika');
-                }
-                const data: BackendTeacher = await response.json();
-                return { role: 'user', userId, user: data };
+            const decoded: DecodedToken = jwtDecode(accessToken);
+            const userEmail = decoded.sub;
+            const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS_EMAIL(userEmail)}`, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}`,
+                },
+            });
+            if (response.status === 401) {
+                throw new Error('Użytkownik nie był zarejestrowany. Proszę zalogować się ponownie.');
             }
+
+            if (!response.ok) {
+                throw new Error('Nie znaleziono użytkownika');
+            }
+
+            const data: BackendTeacher = await response.json();
+
+            const role: 'ROLE_ADMIN' | 'ROLE_TEACHER' = data.isAdmin ? 'ROLE_ADMIN' : 'ROLE_TEACHER';
+
+            return { role, userEmail, user: data };
         } catch (error: any) {
             return rejectWithValue(error.message || 'Login failed');
         }
     }
 );
 
-const authSlice = createSlice({
+export const authSlice = createSlice({
     name: 'auth',
     initialState: parsedAuth || initialState,
     reducers: {
@@ -60,6 +79,7 @@ const authSlice = createSlice({
             state.loading = false;
             state.error = null;
             localStorage.removeItem('auth');
+            localStorage.removeItem('access_token');
         },
     },
     extraReducers: (builder) => {
@@ -73,7 +93,7 @@ const authSlice = createSlice({
                 (
                     state,
                     action: PayloadAction<{
-                        role: 'admin' | 'user';
+                        role: 'ROLE_ADMIN' | 'ROLE_TEACHER';
                         userId: string;
                         user?: BackendTeacher;
                     }>
@@ -81,7 +101,7 @@ const authSlice = createSlice({
                     state.loading = false;
                     state.isAuthenticated = true;
                     state.role = action.payload.role;
-                    state.userId = action.payload.userId;
+                    state.userId = action.payload.user!.id!.toString();
                     state.user = action.payload.user || null;
                     localStorage.setItem('auth', JSON.stringify(state));
                 }
@@ -89,6 +109,8 @@ const authSlice = createSlice({
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || 'Nieznany błąd podczas logowania';
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('auth');
             });
     },
 });

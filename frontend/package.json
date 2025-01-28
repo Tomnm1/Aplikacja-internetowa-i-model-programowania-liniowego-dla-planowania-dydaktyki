@@ -3,9 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": ".",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "force-build": "vite build",
     "lint": "eslint frontend --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -28,6 +30,7 @@
     "date-fns": "^4.1.0",
     "fullcalendar": "^6.1.15",
     "install": "^0.13.0",
+    "mui-file-input": "^6.0.0",
     "notistack": "^3.0.1",
     "pivottable": "^2.23.0",
     "react": "^18.2.0",

@@ -17,39 +17,41 @@ interface RouteItem {
     name: string;
     link: string;
     icon: JSX.Element;
-    roles?: ('admin' | 'user')[];
+    roles?: ('ROLE_ADMIN' | 'ROLE_TEACHER')[];
 }
 
 const routes: RouteItem[] = [{
-    name: "Strona główna", link: "/", icon: <HomeIcon/>, roles: ['admin'],
+    name: "Strona główna", link: "/", icon: <HomeIcon/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Pracownicy", link: "/employees", icon: <BadgeIcon/>, roles: ['admin'],
+    name: "Pracownicy", link: "/employees", icon: <BadgeIcon/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Sale", link: "/classrooms", icon: <RoomPreferencesIcon/>, roles: ['admin'],
+    name: "Import danych", link: "/import", icon: <AddToPhotosIcon/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Kalendarz", link: "/calendar", icon: <CalendarMonth/>, roles: ['admin'],
+    name: "Sale", link: "/classrooms", icon: <RoomPreferencesIcon/>, roles: ['ROLE_ADMIN'],
+}, {
+    name: "Kalendarz", link: "/calendar", icon: <CalendarMonth/>, roles: ['ROLE_ADMIN'],
 },{
-    name: "Plany", link: "/plans", icon: <CalendarMonth/>, roles: ['admin'],
+    name: "Plany", link: "/plans", icon: <CalendarMonth/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Budynki", link: "/buildings", icon: <BusinessIcon/>, roles: ['admin'],
+    name: "Budynki", link: "/buildings", icon: <BusinessIcon/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Kierunki studiów", link: "/fieldofstudies", icon: <WindowIcon/>, roles: ['admin'],
+    name: "Kierunki studiów", link: "/fieldofstudies", icon: <WindowIcon/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Specjalności", link: "/specialisations", icon: <AppsOutageIcon/>, roles: ['admin'],
+    name: "Specjalności", link: "/specialisations", icon: <AppsOutageIcon/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Sloty", link: "/slots", icon: <AddToPhotosIcon/>, roles: ['admin'],
+    name: "Sloty", link: "/slots", icon: <AddToPhotosIcon/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Sloty dnia", link: "/SlotsDays", icon: <AddToPhotosIcon/>, roles: ['admin'],
+    name: "Sloty dnia", link: "/SlotsDays", icon: <AddToPhotosIcon/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Semestry", link: "/semesters", icon: <AddToPhotosIcon/>, roles: ['admin'],
+    name: "Semestry", link: "/semesters", icon: <AddToPhotosIcon/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Przedmioty", link: "/subjects", icon: <AddToPhotosIcon/>, roles: ['admin'],
+    name: "Przedmioty", link: "/subjects", icon: <AddToPhotosIcon/>, roles: ['ROLE_ADMIN'],
 }, {
-    name: "Strona główna", link: "/user", icon: <BadgeIcon/>, roles: ['user'],
+    name: "Strona główna", link: "/user", icon: <BadgeIcon/>, roles: ['ROLE_TEACHER'],
 }, {
-    name: "Mój plan", link: "/user-calendar", icon: <CalendarTodayIcon/>, roles: ['user'],
+    name: "Mój plan", link: "/user-calendar", icon: <CalendarTodayIcon/>, roles: ['ROLE_TEACHER'],
 }, {
-    name: "Dezyderaty", link: "/user-desiderata", icon: <DesignServices/>, roles: ['user'],
+    name: "Dezyderaty", link: "/user-desiderata", icon: <DesignServices/>, roles: ['ROLE_TEACHER'],
 },];
 
 const Navbar: React.FC = () => {

@@ -9,6 +9,7 @@ import ActionButton from "../utils/ActionButton.tsx";
 import SaveIcon from "@mui/icons-material/Save";
 import ClearIcon from "@mui/icons-material/Clear";
 import API_ENDPOINTS from "../app/urls.ts";
+import {fetchWithAuth} from "../app/fetchWithAuth.ts";
 
 interface SubjectTypesTeachersModalProps {
     open: boolean;
@@ -41,7 +42,7 @@ const SubjectTypesTeachersModal: React.FC<SubjectTypesTeachersModalProps> = ({
     useEffect(() => {
         if (!typeData) {
             const usedTeacher = subjectType?.teachersList.map(t => t.teacherId) || [];
-            fetch(API_ENDPOINTS.TEACHERS)
+            fetchWithAuth(API_ENDPOINTS.TEACHERS)
                 .then(res => res.json())
                 .then((data: BackendTeacher[]) => setTeachers(data.filter(t => !usedTeacher.includes(t.id!))))
                 .catch(err => {

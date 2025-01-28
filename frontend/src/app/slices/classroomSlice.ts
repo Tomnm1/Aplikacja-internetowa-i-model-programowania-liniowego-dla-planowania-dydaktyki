@@ -1,15 +1,16 @@
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {BackendClassroom, Classroom, ClassroomsState} from '../../utils/Interfaces';
 import {API_ENDPOINTS} from '../urls';
+import {fetchWithAuth} from "../fetchWithAuth.ts";
 
 const initialState: ClassroomsState = {
     rows: [], loading: false, error: null,
 };
 
-export const fetchClassrooms = createAsyncThunk<Classroom[]>('classrooms/fetchClassrooms', async () => {
-    const response = await fetch(API_ENDPOINTS.CLASSROOMS);
+export const fetchClassrooms = createAsyncThunk<Classroom[]>('classrooms/fetchWithAuthClassrooms', async () => {
+    const response = await fetchWithAuth(API_ENDPOINTS.CLASSROOMS);
     if (!response.ok) {
-        throw new Error('Failed to fetch classrooms');
+        throw new Error('Failed to fetchWithAuth classrooms');
     }
     const data: BackendClassroom[] = await response.json();
 
@@ -29,7 +30,7 @@ export const fetchClassrooms = createAsyncThunk<Classroom[]>('classrooms/fetchCl
 });
 
 export const addClassroom = createAsyncThunk<Classroom, BackendClassroom>('classrooms/addClassroom', async (classroomData) => {
-    const response = await fetch(API_ENDPOINTS.CLASSROOMS, {
+    const response = await fetchWithAuth(API_ENDPOINTS.CLASSROOMS, {
         method: 'POST', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(classroomData),
@@ -60,7 +61,7 @@ export const updateClassroom = createAsyncThunk<Classroom, BackendClassroom>('cl
     if (classroomData.classroomID == null) {
         throw new Error('classroomId is required for updating');
     }
-    const response = await fetch(`${API_ENDPOINTS.CLASSROOMS}/${classroomData.classroomID}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.CLASSROOMS}/${classroomData.classroomID}`, {
         method: 'PUT', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(classroomData),
@@ -87,7 +88,7 @@ export const updateClassroom = createAsyncThunk<Classroom, BackendClassroom>('cl
     return adjustedClassroom;
 });
 export const deleteClassroom = createAsyncThunk<number, number>('classrooms/deleteClassroom', async (id) => {
-    const response = await fetch(`${API_ENDPOINTS.CLASSROOMS}/${id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.CLASSROOMS}/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
@@ -109,7 +110,7 @@ const classroomsSlice = createSlice({
             })
             .addCase(fetchClassrooms.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch classrooms';
+                state.error = action.error.message || 'Failed to fetchWithAuth classrooms';
             })
             .addCase(addClassroom.fulfilled, (state, action: PayloadAction<Classroom>) => {
                 state.rows.push(action.payload);

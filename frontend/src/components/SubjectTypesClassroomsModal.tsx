@@ -11,6 +11,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import API_ENDPOINTS from "../app/urls.ts";
 import Grid from '@mui/material/Grid2';
 import TabPanel from "./TabPanel.tsx";
+import { fetchWithAuth } from '../app/fetchWithAuth.ts';
 
 interface SubjectTypesClassroomsModalProps {
     open: boolean;
@@ -25,7 +26,7 @@ const SubjectTypesClassroomsModal: React.FC<SubjectTypesClassroomsModalProps> = 
     const [formData, setFormData] = useState<BackendClassroom[]>(typeData?.classroomList || []);
 
     useEffect(() => {
-        fetch(`${API_ENDPOINTS.BUILDINGS}/classrooms`)
+        fetchWithAuth(`${API_ENDPOINTS.BUILDINGS}/classrooms`)
             .then(res => res.json())
             .then((data: BuildingDTO[]) => setBuildings(
                 data.map(b => {return {

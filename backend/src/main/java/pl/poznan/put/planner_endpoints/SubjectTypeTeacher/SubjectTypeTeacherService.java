@@ -24,10 +24,6 @@ public class SubjectTypeTeacherService {
         return subjectTypeTeacherRepository.findByTeacher(teacher);
     }
 
-    public List<SubjectTypeTeacher> findAllAssignedTeachers(){
-        return subjectTypeTeacherRepository.findAllAssignedTeachers();
-    }
-
     public List<Integer> findAllAssignedTeachersIds(){
         return subjectTypeTeacherRepository.findAllAssignedTeachersIds();
     }

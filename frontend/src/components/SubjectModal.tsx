@@ -20,6 +20,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import SaveIcon from '@mui/icons-material/Save';
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {fetchWithAuth} from "../app/fetchWithAuth.ts";
 
 
 interface SubjectModalProps {
@@ -50,7 +51,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({open, onClose, subject, isAd
 
     useEffect(() => {
         if (open) {
-            fetch(API_ENDPOINTS.SEMESTERS)
+            fetchWithAuth(API_ENDPOINTS.SEMESTERS)
                 .then(res => res.json())
                 .then((data: BackendSemester[]) => setSemesters(data))
                 .catch(err => {

@@ -80,17 +80,20 @@ public class PlanningDataAssemblingService {
         PlannerData plannerData = new PlannerData();
         plannerData.setGroups(getAllAssignedGroups(fieldOfStudyType, semesterType));
         plannerData.setTeachers(getAllAssignedTeachers(teacherToDegree, fieldOfStudyType, semesterType));
-        plannerData.setRooms(getAllAssignedClassrooms());
+        plannerData.setRooms(getAllAssignedClassrooms(fieldOfStudyType, semesterType));
         plannerData.setTimeSlots(getAllTimeSlots());
         plannerData.setTeachersLoad(getTeachersLoad(fieldOfStudyType, semesterType, teacherToSubjectTypeMaxGroups));
         plannerData.setSubjects(getAllSubjects(fieldOfStudyType, semesterType, teacherToSubjectTypeMaxGroups));
-        List<TeacherPreferences> teacherPreferences = getAllTeacherSlotPreferences();
-        plannerData.setTeacherPreferences(teacherPreferences);
         plannerData.setClassroomToSubjectTypes(getClassroomToSubjectTypes());
         plannerData.setGroupToSubjectTypes(getGroupToSubjectTypes());
         plannerData.setSubjectTypeToTeachers(getSubjectTypeToTeachers());
-        plannerData.setTeachersToSubjectTypes(getTeacherToSubjectTypes());
+
+        Map<String, Set<String>> teacherToSubjectTypes = getTeacherToSubjectTypes();
+        plannerData.setTeachersToSubjectTypes(teacherToSubjectTypes);
         plannerData.setSubjectTypeToGroup(getSubjectTypeToGroup());
+
+        List<TeacherPreferences> teacherPreferences = getAllTeacherSlotPreferences(teacherToSubjectTypes);
+        plannerData.setTeacherPreferences(teacherPreferences);
         plannerData.setTeachersWithPreferences(getTeachersWithPreferences(teacherPreferences));
         plannerData.setTeacherToDegree(teacherToDegree);
         return plannerData;
@@ -104,11 +107,13 @@ public class PlanningDataAssemblingService {
         List<SubjectTypeGroup> subjectTypeGroupList = subjectTypeGroupService.getAllSubjectTypeGroup();
         Map<String, Set<String>> subjectTypeToGroup = new HashMap<>();
         for(SubjectTypeGroup subjectTypeGroup: subjectTypeGroupList){
-            String subjectTypeId = subjectTypeGroup.subjectType.subjectTypeId.toString();
-            String groupId = subjectTypeGroup.group.id.toString();
-            subjectTypeToGroup
-                    .computeIfAbsent(subjectTypeId, k -> new HashSet<>())
-                    .add(groupId);
+            if(subjectTypeGroup.subjectType.subject.planned) {
+                String subjectTypeId = subjectTypeGroup.subjectType.subjectTypeId.toString();
+                String groupId = subjectTypeGroup.group.id.toString();
+                subjectTypeToGroup
+                        .computeIfAbsent(subjectTypeId, k -> new HashSet<>())
+                        .add(groupId);
+            }
         }
         return subjectTypeToGroup;
     }
@@ -117,11 +122,13 @@ public class PlanningDataAssemblingService {
         List<SubjectTypeTeacher> subjectTypeTeacherList = subjectTypeTeacherService.getAllSubjectTypeTeacher();
         Map<String, Set<String>> teachersToSubjectTypes = new HashMap<>();
         for(SubjectTypeTeacher subjectTypeTeacher: subjectTypeTeacherList){
-            String subjectTypeId = subjectTypeTeacher.subjectType.subjectTypeId.toString();
-            String teacherId = subjectTypeTeacher.teacher.id.toString();
-            teachersToSubjectTypes
-                    .computeIfAbsent(teacherId, k -> new HashSet<>())
-                    .add(subjectTypeId);
+            if(subjectTypeTeacher.subjectType.subject.planned) {
+                String subjectTypeId = subjectTypeTeacher.subjectType.subjectTypeId.toString();
+                String teacherId = subjectTypeTeacher.teacher.id.toString();
+                teachersToSubjectTypes
+                        .computeIfAbsent(teacherId, k -> new HashSet<>())
+                        .add(subjectTypeId);
+            }
         }
         return teachersToSubjectTypes;
     }
@@ -130,11 +137,13 @@ public class PlanningDataAssemblingService {
         List<SubjectTypeTeacher> subjectTypeTeacherList = subjectTypeTeacherService.getAllSubjectTypeTeacher();
         Map<String, Set<String>> subjectTypeToTeachers = new HashMap<>();
         for(SubjectTypeTeacher subjectTypeTeacher: subjectTypeTeacherList){
-            String subjectTypeId = subjectTypeTeacher.subjectType.subjectTypeId.toString();
-            String teacherId = subjectTypeTeacher.teacher.id.toString();
-            subjectTypeToTeachers
-                .computeIfAbsent(subjectTypeId, k -> new HashSet<>())
-                .add(teacherId);
+            if(subjectTypeTeacher.subjectType.subject.planned) {
+                String subjectTypeId = subjectTypeTeacher.subjectType.subjectTypeId.toString();
+                String teacherId = subjectTypeTeacher.teacher.id.toString();
+                subjectTypeToTeachers
+                        .computeIfAbsent(subjectTypeId, k -> new HashSet<>())
+                        .add(teacherId);
+            }
         }
         return subjectTypeToTeachers;
     }
@@ -143,11 +152,13 @@ public class PlanningDataAssemblingService {
         List<SubjectTypeGroup> subjectTypeGroupList = subjectTypeGroupService.getAllSubjectTypeGroup();
         Map<String, Set<String>> groupToSubjectTypes = new HashMap<>();
         for(SubjectTypeGroup subjectTypeGroup: subjectTypeGroupList){
-            String subjectTypeId = subjectTypeGroup.subjectType.subjectTypeId.toString();
-            String groupId = subjectTypeGroup.group.id.toString();
-            groupToSubjectTypes
-                    .computeIfAbsent(groupId, k -> new HashSet<>())
-                    .add(subjectTypeId);
+            if(subjectTypeGroup.subjectType.subject.planned) {
+                String subjectTypeId = subjectTypeGroup.subjectType.subjectTypeId.toString();
+                String groupId = subjectTypeGroup.group.id.toString();
+                groupToSubjectTypes
+                        .computeIfAbsent(groupId, k -> new HashSet<>())
+                        .add(subjectTypeId);
+            }
         }
         return groupToSubjectTypes;
     }
@@ -156,25 +167,28 @@ public class PlanningDataAssemblingService {
         List<ClassroomSubjectType> classroomSubjectTypeList = classroomSubjectTypeService.getAllClassroomSubjectType();
         Map<String, Set<String>> classroomToSubjectTypes = new HashMap<>();
         for(ClassroomSubjectType classroomSubjectType: classroomSubjectTypeList){
-            String subjectTypeId = classroomSubjectType.subjectType.subjectTypeId.toString();
-            String classroomId = classroomSubjectType.classroom.classroomID.toString();
-            classroomToSubjectTypes
-                    .computeIfAbsent(classroomId, k -> new HashSet<>())
-                    .add(subjectTypeId);
+            if(classroomSubjectType.subjectType.subject.planned) {
+                String subjectTypeId = classroomSubjectType.subjectType.subjectTypeId.toString();
+                String classroomId = classroomSubjectType.classroom.classroomID.toString();
+                classroomToSubjectTypes
+                        .computeIfAbsent(classroomId, k -> new HashSet<>())
+                        .add(subjectTypeId);
+            }
         }
         return classroomToSubjectTypes;
     }
 
     private List<TeacherLoad> getTeachersLoad(String fieldOfStudyType, String semesterType,
                                               Map<String, String> teacherToSubjectTypeMaxGroups){
-        List<Teacher> teachers = teacherService.getAllteachers();
+        List<Teacher> teachers = teacherService.getAllTeachers();
         List<TeacherLoad> result = new ArrayList<>();
         for(Teacher teacher: teachers){
             List<TeacherLoadSubject> teacherLoadSubjectList = new ArrayList<>();
 
             List<SubjectTypeTeacher> subjectTypeTeachers = subjectTypeTeacherService.findByTeacher(teacher);
             for(SubjectTypeTeacher subjectTypeTeacher: subjectTypeTeachers){
-                if(!Objects.equals(subjectTypeTeacher.subjectType.subject.semester.typ, semesterType) ||
+                if(!subjectTypeTeacher.subjectType.subject.planned ||
+                        !Objects.equals(subjectTypeTeacher.subjectType.subject.semester.typ, semesterType) ||
                         !Objects.equals(subjectTypeTeacher.subjectType.subject.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType))
                     continue;
                 List<String> groups = subjectTypeGroupService.findBySubjectType(subjectTypeTeacher.subjectType)
@@ -212,7 +226,8 @@ public class PlanningDataAssemblingService {
         List<PlannerClassType> result = new ArrayList<>();
         List<Subject> subjectList = subjectService.getAllSubject();
         for(Subject subject: subjectList){
-            if(Objects.equals(subject.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType)
+            if(subject.planned
+            && Objects.equals(subject.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType)
             && Objects.equals(subject.semester.typ, semesterType)){
 
                 List<SubjectType> subjectTypeList = subjectTypeService.getAllSubjectTypeBySubject(subject);
@@ -229,6 +244,7 @@ public class PlanningDataAssemblingService {
                     }
 
                     String subjectTypeId = subjectType.subjectTypeId.toString();
+                    String name = subjectType.subject.name;
                     List<String> assignedRooms = this.getAssignedRooms(subjectType);
                     List<String> assignedTeachers = this.getAssignedTeachers(subjectType);
                     Map<String, List<String>> groupMappings = this.getGroupMappings(subjectType);
@@ -249,6 +265,7 @@ public class PlanningDataAssemblingService {
                         PlannerClassType plannerClassType =
                                 new PlannerClassType(
                                         subjectTypeId,
+                                        name,
                                         subjectType.type.toString(),
                                         frequency,
                                         assignedRooms,
@@ -328,6 +345,7 @@ public class PlanningDataAssemblingService {
             PlannerClassType plannerClassType =
                 new PlannerClassType(
                     labSubjectType.getId(),
+                    labSubjectType.getName(),
                     labSubjectType.getType(),
                     frequency,
                     labSubjectType.getRooms(),
@@ -364,6 +382,7 @@ public class PlanningDataAssemblingService {
             PlannerClassType plannerClassType =
                 new PlannerClassType(
                     exeSubjectType.getId(),
+                    exeSubjectType.getName(),
                     exeSubjectType.getType(),
                     frequency,
                     exeSubjectType.getRooms(),
@@ -455,20 +474,31 @@ public class PlanningDataAssemblingService {
                 .collect(Collectors.toList());
     }
 
-    private List<String> getAllAssignedClassrooms(){
-        return classroomSubjectTypeService.getAllAssignedClassrooms().stream()
-                .map(String::valueOf)
-                .collect(Collectors.toList());
+    private List<String> getAllAssignedClassrooms(String fieldOfStudyType, String semesterType){
+        List<String> result = new ArrayList<>();
+
+        List<ClassroomSubjectType> assignedClassrooms = classroomSubjectTypeService.getAllClassroomSubjectType();
+        for(ClassroomSubjectType classroomSubjectType: assignedClassrooms){
+            if(classroomSubjectType.subjectType.subject.planned &&
+            Objects.equals(classroomSubjectType.subjectType.subject.semester.typ, semesterType) &&
+            Objects.equals(classroomSubjectType.subjectType.subject.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType) &&
+            !result.contains(classroomSubjectType.classroom.classroomID.toString())){
+                result.add(classroomSubjectType.classroom.classroomID.toString());
+            }
+        }
+        return result;
     }
 
     private List<String> getAllAssignedTeachers(Map<String, Degree> teacherToDegree, String fieldOfStudyType, String semesterType){
         List<String> result = new ArrayList<>();
 
-        List<SubjectTypeTeacher> assignedTeachers = subjectTypeTeacherService.findAllAssignedTeachers();
+        List<SubjectTypeTeacher> assignedTeachers = subjectTypeTeacherService.getAllSubjectTypeTeacher();
 
         for(SubjectTypeTeacher subjectTypeTeacher: assignedTeachers){
-            if(Objects.equals(subjectTypeTeacher.subjectType.subject.semester.typ, semesterType) &&
-            Objects.equals(subjectTypeTeacher.subjectType.subject.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType)){
+            if(subjectTypeTeacher.subjectType.subject.planned &&
+            Objects.equals(subjectTypeTeacher.subjectType.subject.semester.typ, semesterType) &&
+            Objects.equals(subjectTypeTeacher.subjectType.subject.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType) &&
+            !result.contains(subjectTypeTeacher.teacher.id.toString())){
                 teacherToDegree.put(String.valueOf(subjectTypeTeacher.teacher.id), subjectTypeTeacher.teacher.degree);
                 result.add(String.valueOf(subjectTypeTeacher.teacher.id));
             }
@@ -477,21 +507,24 @@ public class PlanningDataAssemblingService {
     }
 
     private List<String> getAllAssignedGroups(String fieldOfStudyType, String semesterType){
-        Set<Integer> assignedIds = subjectTypeGroupService.getAllAssignedGroups();
-        List<Group> groups = groupService.getAllGroup();
-        List<String> groupIds = new ArrayList<>();
-        for (Group group : groups) {
-            if (Objects.equals(group.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType) &&
-                    Objects.equals(group.semester.typ, semesterType) && assignedIds.contains(group.id)) {
-                groupIds.add(group.id.toString());
+        List<String> result = new ArrayList<>();
+        List<SubjectTypeGroup> assignedGroups = subjectTypeGroupService.getAllSubjectTypeGroup();
+
+        for (SubjectTypeGroup subjectTypeGroup : assignedGroups) {
+            if (subjectTypeGroup.subjectType.subject.planned &&
+                    Objects.equals(subjectTypeGroup.group.semester.specialisation.fieldOfStudy.typ, fieldOfStudyType) &&
+                    Objects.equals(subjectTypeGroup.group.semester.typ, semesterType) &&
+                    !result.contains(subjectTypeGroup.group.id.toString())) {
+                result.add(subjectTypeGroup.group.id.toString());
             }
         }
-        return groupIds;
+        return result;
     }
 
-    private List<TeacherPreferences> getAllTeacherSlotPreferences() {
+    private List<TeacherPreferences> getAllTeacherSlotPreferences(Map<String, Set<String>> teacherToSubjectTypes) {
         List<Teacher> teachers = teacherService.getAllTeachersWithPreferences();
         return teachers.stream()
+                .filter(teacher -> teacherToSubjectTypes.containsKey(teacher.id.toString()))
                 .map(teacher -> {
                     TeacherPreferences preferences = new TeacherPreferences();
                     preferences.setTeacherId(String.valueOf(teacher.id));

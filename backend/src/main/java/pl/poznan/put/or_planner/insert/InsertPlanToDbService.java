@@ -62,7 +62,7 @@ public class InsertPlanToDbService {
             generatedPlan.plan = plan;
             generatedPlan.slotsDay = slotsDayService.getSlotsDayByID(plannedSlot.getSlotDayId()).get();
             generatedPlan.group = groupService.getGroupByID(plannedSlot.getGroupId()).get();
-            generatedPlan.teacher = teacherService.getteacherByID(plannedSlot.getTeacherId()).get();
+            generatedPlan.teacher = teacherService.getTeacherByID(plannedSlot.getTeacherId()).get();
             generatedPlan.classroom = classroomService.getRoomByID(plannedSlot.getClassroomId()).get();
             generatedPlan.subjectType = subjectTypeService.getsubjectTypeByID(plannedSlot.getSubjectTypeId()).get();
             generatedPlan.isEvenWeek = plannedSlot.getEvenWeek();
@@ -75,9 +75,9 @@ public class InsertPlanToDbService {
     private Plan insertPlan(String planName){
         Plan plan = new Plan();
         LocalDateTime time = LocalDateTime.now();
-        plan.name = String.format("%s %s", planName, time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        plan.name = planName;
         plan.creationDate = time;
-        plan.published = true;
+        plan.published = false;
         planService.createPlan(plan);
         return plan;
     }

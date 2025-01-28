@@ -1,9 +1,10 @@
-const API_BASE = "http://localhost:8080";
+const API_BASE = "/api";
 
 export const API_ENDPOINTS = {
     BUILDINGS: `${API_BASE}/buildings`,
     CLASSROOMS: `${API_BASE}/classrooms`,
     TEACHERS: `${API_BASE}/teachers`,
+    TEACHERS_EMAIL: (email: string) => `${API_BASE}/teachers/email/${email}`,
     FIELD_OF_STUDIES: `${API_BASE}/fieldOfStudys`,
     SPECIALISATIONS: `${API_BASE}/specialisations`,
     SLOTS: `${API_BASE}/slots`,
@@ -15,10 +16,14 @@ export const API_ENDPOINTS = {
     GENERATED_PLAN: `${API_BASE}/generatedPlans`,
     PLANS: `${API_BASE}/plans`,
     START_PLANNING: `${API_BASE}/api/planner/startPlanningBasedOnDb`,
+    GENERATED_PLAN_ALL: (planId: number) => `${API_BASE}/generatedPlans/plans/${planId}`,
     GENERATED_PLAN_TEACHERS: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/teacher/${id}`,
     GENERATED_PLAN_CLASSROOM: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/classroom/${id}`,
     GENERATED_PLAN_SEMESTER: (id: number, planId: number) => `${API_BASE}/generatedPlans/${planId}/semester/${id}`,
     PLANNING_PROGRESS: (id: string) => `${API_BASE}/planningProgress/${id}`,
+    IMPORT_XML: `${API_BASE}/api/xml/importXml`,
+    IMPORT_INNER_ID: `${API_BASE}/api/excelToDb/importTeachersInnerId`,
+    IMPORT_LOAD_SHEET: `${API_BASE}/api/excelToDb/importLoadSheet`,
 };
 
 export default API_ENDPOINTS;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
 import Home from './Home';
 import Employees from './Teachers.tsx';
 import Layout from "./Layout.tsx";
@@ -12,22 +12,24 @@ import Specialisations from "./Specialisations.tsx";
 import Slots from "./Slots.tsx";
 import UserHome from "./UserHome.tsx";
 import ProtectedRoute from "./ProtectedRoute.tsx";
-import Login from "./Login.tsx";
 import SlotsDays from "./SlotsDays.tsx";
 import Semesters from "./Semesters.tsx";
 import Subjects from "./Subjects.tsx";
 import UserPlan from "./UserPlan.tsx";
 import Plans from "./Plans.tsx";
+import Login from "./Login.tsx";
+import Import from "./Import.tsx";
 
 const App: React.FC = () => {
+
     return (
         <Router>
             <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route element={<ProtectedRoute allowedRoles={['admin', 'user']} />}>
+                <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN', 'ROLE_TEACHER']} />}>
                     <Route element={<Layout />}>
-                        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                        <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
                             <Route path="/" element={<Home />} />
+                            <Route path="/import" element={<Import />} />
                             <Route path="/employees" element={<Employees />} />
                             <Route path="/classrooms" element={<Classrooms />} />
                             <Route path="/calendar" element={<Calendar/>} />
@@ -40,14 +42,15 @@ const App: React.FC = () => {
                             <Route path="/semesters" element={<Semesters />} />
                             <Route path="/subjects" element={<Subjects />} />
                         </Route>
-                        <Route element={<ProtectedRoute allowedRoles={['user']} />}>
+                        <Route element={<ProtectedRoute allowedRoles={['ROLE_TEACHER']} />}>
                             <Route path="/user" element={<UserHome />} />
                             <Route path="/user-calendar" element={<UserPlan />} />
                             <Route path="/user-desiderata" element={<UserDesiderata />} />
                         </Route>
                     </Route>
                 </Route>
-                <Route path="*" element={<Navigate to="/login" />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/" element={<Navigate to="/" />} />
             </Routes>
         </Router>
     );

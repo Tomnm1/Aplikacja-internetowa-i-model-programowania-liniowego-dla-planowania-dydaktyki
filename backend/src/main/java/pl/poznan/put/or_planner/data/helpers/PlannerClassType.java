@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class PlannerClassType {
     private String id;
+    private String name;
     private String type;
     private String frequency;
     private List<String> rooms;
@@ -12,14 +13,23 @@ public class PlannerClassType {
     private Map<String, List<String>> groupMappings;
 
     public PlannerClassType
-            (String id, String type, String frequency, List<String> rooms, List<String> teachers,
+            (String id, String name, String type, String frequency, List<String> rooms, List<String> teachers,
              Map<String, List<String>> groupMappings) {
         this.id = id;
+        this.name = name;
         this.type = type;
         this.frequency = frequency;
         this.rooms = rooms;
         this.teachers = teachers;
         this.groupMappings = groupMappings;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setId(String id) {

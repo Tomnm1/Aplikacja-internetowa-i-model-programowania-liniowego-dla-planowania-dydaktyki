@@ -1,15 +1,14 @@
 package pl.poznan.put.planner_endpoints.Teacher;
 
 import jakarta.transaction.Transactional;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import pl.poznan.put.planner_endpoints.JoinTables.SubjectType_Teacher.SubjectType_Teacher;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,134 +17,213 @@ import java.util.stream.Collectors;
  */
 @Service
 public class TeacherService {
+
     /**
-     * teachers repository
+     * Teachers repository
      */
     @Autowired
     private TeacherRepository teacherRepository;
+
+    /**
+     * Returns all teachers as DTOs
+     * @return list of TeacherDTO
+     */
+    @Transactional
+    public List<TeacherDTO> getAllTeachersDTO() {
+        List<Teacher> teachers = teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "lastName", "firstName"));
+        return teachers.stream()
+                .map(Teacher::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     /**
      * Returns all teachers
      * @return list of teachers
      */
     @Transactional
-    public List<TeacherDTO> getAllteachersDTO(){
-        return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "lastName", "firstName")).stream().map(Teacher::convertToDTO).toList();
-    }
-
-    @Transactional
-    public List<Teacher> getAllteachers(){
+    public List<Teacher> getAllTeachers() {
         return teacherRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
-    public List<Teacher> getAllTeachersWithPreferences(){
+    /**
+     * Returns all teachers with preferences
+     * @return list of teachers
+     */
+    @Transactional
+    public List<Teacher> getAllTeachersWithPreferences() {
         return teacherRepository.findAllTeachersWithPreferences();
     }
-
 
     /**
      * For pagination - returns teachers from given page
      * @param page number of page to return
-     * @param size total number of pages
-     * @return Page object containing all found teachers objects
+     * @param size size of the page
+     * @return Page object containing all found teachers
      */
-    public Page<Teacher> getteacherPage(Integer page, Integer size){
-        return teacherRepository.findAll(PageRequest.of(page,size));
+    public Page<Teacher> getTeacherPage(Integer page, Integer size) {
+        return teacherRepository.findAll(PageRequest.of(page, size));
     }
 
     /**
-     * Finds Subject by id or empty Optional
-     * @param id subject id
-     * @return Optional - empty or with Subject
+     * Finds Teacher by ID
+     * @param id teacher ID
+     * @return Optional containing Teacher if found
      */
-
-    public Optional<Teacher> getteacherByID(Integer id){
+    public Optional<Teacher> getTeacherByID(Integer id) {
         return teacherRepository.findById(id);
     }
 
+    /**
+     * Finds Teacher by ID and converts to DTO
+     * @param id teacher ID
+     * @return TeacherDTO
+     */
     @Transactional
-    public TeacherDTO getteacherDTOByID(Integer id){
-        Teacher teacher = teacherRepository.findById(id).orElseThrow();
-        return teacher.convertToDTO();
+    public TeacherDTO getTeacherDTOByID(Integer id) {
+        Optional<Teacher> teacherOpt = teacherRepository.findById(id);
+        if (teacherOpt.isPresent()) {
+            return teacherOpt.get().convertToDTO();
+        } else {
+            throw new RuntimeException("Teacher not found");
+        }
+    }
+
+    @Transactional
+    public Optional<Teacher> findByEmail(String email) {
+        return teacherRepository.findTeacherByEmail(email);
+    }
+
+    @Transactional
+    public TeacherDTO getTeacherDTOByEmail(String email) {
+        Optional<Teacher> teacherOpt = teacherRepository.findTeacherByEmail(email);
+        if (teacherOpt.isPresent()) {
+            return teacherOpt.get().convertToDTO();
+        } else {
+            throw new RuntimeException("Teacher not found");
+        }
     }
 
     /**
-     * Creates an Teacher
+     * Creates a Teacher
      * @param teacher object to be inserted into DB
      * @return saved Teacher
      */
-    public Teacher createteacher(Teacher teacher){
+    @Transactional
+    public Teacher createTeacher(Teacher teacher) {
         return teacherRepository.save(teacher);
     }
 
     /**
      * Updates existing Teacher if it exists
-     * @param id id
+     * @param id teacher ID
      * @param teacherParams new values in JSON format
-     * @return saved Teacher or null
+     * @return saved Teacher
      */
     @Transactional
-    public Teacher updateteacherByID(Integer id, Teacher teacherParams){
-        Optional<Teacher> teacher = teacherRepository.findById(id);
-        if (teacher.isPresent()) {
-            Teacher oldteacher = teacher.get();
-            oldteacher.firstName = teacherParams.firstName;
-            oldteacher.lastName = teacherParams.lastName;
-            oldteacher.degree = teacherParams.degree;
-            oldteacher.preferences = teacherParams.preferences;
-            oldteacher.secondName = teacherParams.secondName;
-            oldteacher.usosId = teacherParams.usosId;
-            oldteacher.innerId = teacherParams.innerId;
-//            oldteacher.subjectTypesList = teacherParams.subjectTypesList;
-            return teacherRepository.save(oldteacher);
+    public Teacher updateTeacherByID(Integer id, Teacher teacherParams) {
+        Optional<Teacher> teacherOpt = teacherRepository.findById(id);
+        if (teacherOpt.isPresent()) {
+            Teacher oldTeacher = teacherOpt.get();
+            oldTeacher.firstName = teacherParams.firstName;
+            oldTeacher.lastName = teacherParams.lastName;
+            oldTeacher.degree = teacherParams.degree;
+            oldTeacher.preferences = teacherParams.preferences;
+            oldTeacher.secondName = teacherParams.secondName;
+            oldTeacher.usosId = teacherParams.usosId;
+            oldTeacher.innerId = teacherParams.innerId;
+            oldTeacher.subjectTypesList = teacherParams.subjectTypesList;
+            return teacherRepository.save(oldTeacher);
         } else {
-            return null;
+            throw new RuntimeException("Teacher not found");
         }
     }
 
-    public Teacher updateteacherEmailByID(Integer id, String email){
-        Optional<Teacher> teacher = teacherRepository.findById(id);
-        if (teacher.isPresent()) {
-            Teacher oldteacher = teacher.get();
-            oldteacher.email = email;
-            return teacherRepository.save(oldteacher);
+    /**
+     * Updates specified teacher's email
+     * @param id teacher ID
+     * @param email new email
+     * @return updated Teacher
+     */
+    @Transactional
+    public Teacher updateTeacherEmailByID(Integer id, String email) {
+        Optional<Teacher> teacherOpt = teacherRepository.findById(id);
+        if (teacherOpt.isPresent()) {
+            Teacher teacher = teacherOpt.get();
+            teacher.email = (Objects.equals(email, "BRAK")) ?  "" : email;
+            return teacherRepository.save(teacher);
         } else {
-            return null;
+            throw new RuntimeException("Teacher not found");
         }
     }
 
     /**
      * Deletes Teacher by ID
-     * @param id id
+     * @param id teacher ID
      */
-    public void deleteteacherByID(Integer id){
-        teacherRepository.deleteById(id);
+    @Transactional
+    public void deleteTeacherByID(Integer id) {
+        if (teacherRepository.existsById(id)) {
+            teacherRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("Teacher not found");
+        }
     }
 
     /**
      * Deletes all teachers
      */
-    public void deleteAllteachers(){
+    @Transactional
+    public void deleteAllTeachers() {
         teacherRepository.deleteAll();
     }
 
-    public Teacher findByFirstNameAndLastNameAndSecondName(String firstName, String lastName, String secondName){
+    /**
+     * Finds Teacher by first name, last name, and second name
+     * @param firstName first name
+     * @param lastName last name
+     * @param secondName second name
+     * @return Teacher
+     */
+    public Teacher findByFirstNameAndLastNameAndSecondName(String firstName, String lastName, String secondName) {
         return teacherRepository.findByFirstNameAndLastNameAndSecondName(firstName, lastName, secondName);
     }
 
-    public Teacher findByFirstNameAndLastName(String firstName, String lastName){
+    /**
+     * Finds Teacher by first name and last name
+     * @param firstName first name
+     * @param lastName last name
+     * @return Teacher
+     */
+    public Teacher findByFirstNameAndLastName(String firstName, String lastName) {
         return teacherRepository.findByFirstNameAndLastName(firstName, lastName);
     }
 
-    public Teacher findByUsosId(int usosId){
+    /**
+     * Finds Teacher by usosId
+     * @param usosId usos ID
+     * @return Teacher
+     */
+    public Teacher findByUsosId(int usosId) {
         return teacherRepository.findByUsosId(usosId);
     }
 
-    public Teacher findRandomTeacher(){ return teacherRepository.findRandomTeacher(); }
 
-    public Teacher findByInnerId(int innerId){
+    /**
+     * Finds a random Teacher
+     * @return Teacher
+     */
+    public Teacher findRandomTeacher() {
+        return teacherRepository.findRandomTeacher();
+    }
+
+    /**
+     * Finds Teacher by innerId or returns a random Teacher if not found
+     * @param innerId inner ID
+     * @return Teacher
+     */
+    public Teacher findByInnerId(int innerId) {
         Teacher teacher = teacherRepository.findByInnerId(innerId);
-        if(teacher == null){
+        if (teacher == null) {
             System.err.println("Teacher with innerId: " + innerId + " does not exist!");
             teacher = teacherRepository.findRandomTeacher();
         }

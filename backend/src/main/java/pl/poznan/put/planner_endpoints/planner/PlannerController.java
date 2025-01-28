@@ -17,6 +17,8 @@ import pl.poznan.put.or_planner.insert.PlanToExcelExportService;
 import pl.poznan.put.or_planner.insert.PlannedSlot;
 import pl.poznan.put.planner_endpoints.Plan.Plan;
 import pl.poznan.put.planner_endpoints.Teacher.Degree;
+import pl.poznan.put.planner_endpoints.planner.error_message.ErrorMessage;
+import pl.poznan.put.planner_endpoints.planner.error_message.PlanningValidationException;
 import pl.poznan.put.planner_endpoints.planner.params.PlanningParams;
 import pl.poznan.put.planner_endpoints.planner.service.ClassroomAssignmentService;
 import pl.poznan.put.planner_endpoints.planner.service.PlanningDataAssemblingService;
@@ -106,9 +108,16 @@ public class PlannerController {
             try {
                 PlannerData plannerData = planningDataAssemblingService.startAssembling(planningParams);
                 logger.log(Level.INFO,"DataAssembling finished");
-                logger.log(Level.INFO,"DataValidation started");
 
-                planningDataValidationService.executeValidations(plannerData);
+                logger.log(Level.INFO,"DataValidation started");
+                List<ErrorMessage> errorMessagesList = new ArrayList<>();
+                boolean hasCriticalError = planningDataValidationService.executeValidations(plannerData, errorMessagesList);
+                if(hasCriticalError) {
+                    errorMessagesList.forEach(errorMessage -> {
+                        System.out.println(errorMessage.getErrorType() + " " + errorMessage.getMessage());
+                    });
+                    throw new PlanningValidationException("Planning critical error. Planning aborted", errorMessagesList);
+                }
                 logger.log(Level.INFO,"DataValidation finished");
 
                 planningProgressService.setProgress(jobId, 30, PlanningStatus.IN_PROGRESS);
@@ -126,11 +135,13 @@ public class PlannerController {
                 Map<String, Set<String>> teachersToSubjectTypes = plannerData.getTeachersToSubjectTypes();
                 Set<String> teachersWithPreferences = plannerData.getTeachersWithPreferences();
                 Map<String, Degree> teacherToDegree = plannerData.getTeacherToDegree();
+
+                //miejsce do zapiecia debuggerem i podejrzenia co leci.
                 ObjectMapper objectMapper = new ObjectMapper();
                 String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(plannerData);
 
                 planningProgressService.setProgress(jobId, 50, PlanningStatus.IN_PROGRESS);
-            planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences,
+                planner.initialize(groups, teachers, rooms, timeSlots, subjects, teachersLoad, teacherPreferences,
                     subjectTypeToTeachers, groupToSubjectTypes, classroomToSubjectTypes, teachersToSubjectTypes,
                     teachersWithPreferences, teacherToDegree);
 
@@ -143,12 +154,23 @@ public class PlannerController {
 
                 Plan plan = insertPlanToDbService.insertSlots(optimizedSchedule, planningParams.getPlanName());
 
+                logger.log(Level.INFO, "export to excel started");
                 planToExcelExportService.exportPlanToExcel(plan);
+                logger.log(Level.INFO, "export to excel finished");
 
                 planningProgressService.setProgress(jobId, 100, PlanningStatus.DONE);
 
-                System.out.println("done");
-            } catch (Exception e) {
+                logger.log(Level.INFO, "solving finished");
+
+            }
+            catch(PlanningValidationException planningValidationException){
+                System.out.println(planningValidationException.getMessage());
+                planningValidationException.getErrorMessages()
+                        .forEach(error -> System.out.println("Error: " + error));
+
+                planningProgressService.setProgress(jobId, 100, PlanningStatus.ERROR);
+            }
+            catch (Exception e) {
                 System.out.println(e.getMessage());
                 System.out.println(Arrays.toString(e.getStackTrace()));
                 planningProgressService.setProgress(jobId, 100, PlanningStatus.ERROR);

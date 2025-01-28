@@ -35,7 +35,7 @@ public class TeacherHandler {
             }
             Teacher teacher1 = teacherService.findByUsosId(teacher.usosId);
             if (teacher1 == null) {
-                teacherService.createteacher(teacher);
+                teacherService.createTeacher(teacher);
             } else {
                 System.out.println("Teacher with usosId: " + teacher.usosId + " already exists.");
             }

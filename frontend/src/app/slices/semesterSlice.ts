@@ -1,13 +1,14 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {API_ENDPOINTS} from '../urls';
 import {BackendSemester, Semester, SemesterState} from '../../utils/Interfaces';
+import {fetchWithAuth} from "../fetchWithAuth.ts";
 
 const initialState: SemesterState = {
     rows: [], loading: false, error: null,
 };
 
-export const fetchSemesters = createAsyncThunk<Semester[]>('semesters/fetchSemesters', async () => {
-    const response = await fetch(`${API_ENDPOINTS.SEMESTERS}/DTO`);
+export const fetchSemesters = createAsyncThunk<Semester[]>('semesters/fetchWithAuthSemesters', async () => {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SEMESTERS}/DTO`);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -26,7 +27,7 @@ export const fetchSemesters = createAsyncThunk<Semester[]>('semesters/fetchSemes
 });
 
 export const addSemester = createAsyncThunk<Semester, BackendSemester>('semesters/addSemester', async (semesterData) => {
-    const response = await fetch(`${API_ENDPOINTS.SEMESTERS}/DTO`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SEMESTERS}/DTO`, {
         method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(semesterData),
     });
     if (!response.ok) {
@@ -49,7 +50,7 @@ export const updateSemester = createAsyncThunk<Semester, BackendSemester>('semes
     if (!semesterData.semesterId) {
         throw new Error('SemesterId is required for updating');
     }
-    const response = await fetch(`${API_ENDPOINTS.SEMESTERS}/${semesterData.semesterId}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SEMESTERS}/${semesterData.semesterId}`, {
         method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(semesterData),
     });
     if (!response.ok) {
@@ -69,7 +70,7 @@ export const updateSemester = createAsyncThunk<Semester, BackendSemester>('semes
 });
 
 export const deleteSemester = createAsyncThunk<number, number>('semesters/deleteSemester', async (id) => {
-    const response = await fetch(`${API_ENDPOINTS.SEMESTERS}/${id}`, {method: 'DELETE'});
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SEMESTERS}/${id}`, {method: 'DELETE'});
     if (!response.ok) {
         throw new Error('Failed to delete semester');
     }
@@ -89,7 +90,7 @@ const semesterSlice = createSlice({
             })
             .addCase(fetchSemesters.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch semesters';
+                state.error = action.error.message || 'Failed to fetchWithAuth semesters';
             })
             .addCase(addSemester.fulfilled, (state, action) => {
                 state.rows.push(action.payload);

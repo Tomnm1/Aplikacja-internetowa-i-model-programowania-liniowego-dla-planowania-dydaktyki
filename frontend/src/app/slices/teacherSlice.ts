@@ -1,13 +1,14 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {API_ENDPOINTS} from '../urls';
 import {BackendTeacher, Teacher, TeachersState} from "../../utils/Interfaces";
+import {fetchWithAuth} from "../fetchWithAuth.ts";
 
 const initialState: TeachersState = {
     rows: [], loading: false, error: null, singleTeacher: null,
 };
 
-export const fetchTeachers = createAsyncThunk<Teacher[]>('teachers/fetchTeachers', async () => {
-    const response = await fetch(API_ENDPOINTS.TEACHERS);
+export const fetchTeachers = createAsyncThunk<Teacher[]>('teachers/fetchWithAuthTeachers', async () => {
+    const response = await fetchWithAuth(API_ENDPOINTS.TEACHERS);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -21,7 +22,7 @@ export const addTeacher = createAsyncThunk<Teacher, BackendTeacher>('teachers/ad
     const teacherData = {
         ...teacher, preferences: teacher.preferences || {},
     };
-    const response = await fetch(API_ENDPOINTS.TEACHERS, {
+    const response = await fetchWithAuth(API_ENDPOINTS.TEACHERS, {
         method: 'POST', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(teacherData),
@@ -30,6 +31,7 @@ export const addTeacher = createAsyncThunk<Teacher, BackendTeacher>('teachers/ad
         throw new Error('Failed to add teacher');
     }
     const data: BackendTeacher = await response.json();
+
     const adjustedTeacher: Teacher = {
         ...data, id: teacher.id!,
     };
@@ -37,7 +39,7 @@ export const addTeacher = createAsyncThunk<Teacher, BackendTeacher>('teachers/ad
 },);
 
 export const updateTeacher = createAsyncThunk<Teacher, BackendTeacher>('teachers/updateTeacher', async (teacherData) => {
-    const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${teacherData.id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS}/${teacherData.id}`, {
         method: 'PUT', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(teacherData),
@@ -53,10 +55,10 @@ export const updateTeacher = createAsyncThunk<Teacher, BackendTeacher>('teachers
 },);
 
 export const updateTeacherEmail = createAsyncThunk<Teacher, BackendTeacher>('teachers/updateTeacherEmail', async (teacherData) => {
-    const response = await fetch(`${API_ENDPOINTS.TEACHERS}/email/${teacherData.id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS}/email/${teacherData.id}`, {
         method: 'PUT', headers: {
             'Content-Type': 'application/json',
-        }, body: teacherData.email,
+        }, body: teacherData.email || 'BRAK',
     });
     if (!response.ok) {
         throw new Error('Failed to update teacher email');
@@ -69,7 +71,7 @@ export const updateTeacherEmail = createAsyncThunk<Teacher, BackendTeacher>('tea
 },);
 
 export const deleteTeacher = createAsyncThunk<number, number>('teachers/deleteTeacher', async (id: number) => {
-    const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS}/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
@@ -79,7 +81,7 @@ export const deleteTeacher = createAsyncThunk<number, number>('teachers/deleteTe
 },);
 
 export const getTeacher = createAsyncThunk<Teacher, number>('teachers/getTeacher', async (id: number) => {
-    const response = await fetch(`${API_ENDPOINTS.TEACHERS}/${id}`);
+    const response = await fetchWithAuth(`${API_ENDPOINTS.TEACHERS}/${id}`);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -103,7 +105,7 @@ const teacherSlice = createSlice({
             })
             .addCase(fetchTeachers.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch teachers';
+                state.error = action.error.message || 'Failed to fetchWithAuth teachers';
             })
             .addCase(addTeacher.fulfilled, (state, action) => {
                 state.rows.push(action.payload);
@@ -135,7 +137,7 @@ const teacherSlice = createSlice({
             })
             .addCase(getTeacher.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch teacher';
+                state.error = action.error.message || 'Failed to fetchWithAuth teacher';
             });
 
     },

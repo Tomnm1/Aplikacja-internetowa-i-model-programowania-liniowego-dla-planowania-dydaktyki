@@ -74,6 +74,7 @@ const Teachers: React.FC = () => {
             return oldRow;
         }
         if(newRow.email  !== oldRow.email){
+            console.log("NewEmail:"+newRow);
             dispatch(updateTeacherEmail(newRow)).unwrap()
                 .then(() => {
                     enqueueSnackbar('Mail został pomyślnie zedytowany', {variant: 'success'});

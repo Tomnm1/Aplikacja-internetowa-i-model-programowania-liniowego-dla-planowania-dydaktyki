@@ -1,13 +1,14 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {API_ENDPOINTS} from '../urls';
 import {BackendSlotsDay, SlotsDay, SlotsDayState} from '../../utils/Interfaces';
+import {fetchWithAuth} from "../fetchWithAuth.ts";
 
 const initialState: SlotsDayState = {
     rows: [], loading: false, error: null,
 };
 
-export const fetchSlotsDays = createAsyncThunk<SlotsDay[]>('slotsDays/fetchSlotsDays', async () => {
-    const response = await fetch(API_ENDPOINTS.SLOTS_DAYS);
+export const fetchSlotsDays = createAsyncThunk<SlotsDay[]>('slotsDays/fetchWithAuthSlotsDays', async () => {
+    const response = await fetchWithAuth(API_ENDPOINTS.SLOTS_DAYS);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -21,7 +22,7 @@ export const fetchSlotsDays = createAsyncThunk<SlotsDay[]>('slotsDays/fetchSlots
 });
 
 export const addSlotsDay = createAsyncThunk<SlotsDay, BackendSlotsDay>('slotsDays/addSlotsDay', async (slotsDayData) => {
-    const response = await fetch(API_ENDPOINTS.SLOTS_DAYS, {
+    const response = await fetchWithAuth(API_ENDPOINTS.SLOTS_DAYS, {
         method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(slotsDayData),
     });
     if (!response.ok) {
@@ -40,7 +41,7 @@ export const updateSlotsDay = createAsyncThunk<SlotsDay, BackendSlotsDay>('slots
     if (!slotsDayData.SlotsDayId) {
         throw new Error('SlotsDayId is required for updating');
     }
-    const response = await fetch(`${API_ENDPOINTS.SLOTS_DAYS}/${slotsDayData.SlotsDayId}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SLOTS_DAYS}/${slotsDayData.SlotsDayId}`, {
         method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(slotsDayData),
     });
     if (!response.ok) {
@@ -56,7 +57,7 @@ export const updateSlotsDay = createAsyncThunk<SlotsDay, BackendSlotsDay>('slots
 });
 
 export const deleteSlotsDay = createAsyncThunk<number, number>('slotsDays/deleteSlotsDay', async (id) => {
-    const response = await fetch(`${API_ENDPOINTS.SLOTS_DAYS}/${id}`, {method: 'DELETE'});
+    const response = await fetchWithAuth(`${API_ENDPOINTS.SLOTS_DAYS}/${id}`, {method: 'DELETE'});
     if (!response.ok) {
         throw new Error('Failed to delete SlotsDay');
     }
@@ -76,7 +77,7 @@ const slotsDaysSlice = createSlice({
             })
             .addCase(fetchSlotsDays.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch slotsDays';
+                state.error = action.error.message || 'Failed to fetchWithAuth slotsDays';
             })
             .addCase(addSlotsDay.fulfilled, (state, action) => {
                 state.rows.push(action.payload);
