@@ -2,13 +2,14 @@ import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {GridRowId, GridRowModesModel} from '@mui/x-data-grid';
 import {API_ENDPOINTS} from '../urls';
 import {BackendFieldOfStudies, FieldOfStudiesState, FieldOfStudy} from '../../utils/Interfaces';
+import {fetchWithAuth} from "../fetchWithAuth.ts";
 
 const initialState: FieldOfStudiesState = {
     rows: [], rowModesModel: {}, selectedRowId: null, selectedRowName: null, loading: false, error: null,
 };
 
-export const fetchFOS = createAsyncThunk<FieldOfStudy[]>('fos/fetchFOS', async () => {
-    const response = await fetch(API_ENDPOINTS.FIELD_OF_STUDIES);
+export const fetchFOS = createAsyncThunk<FieldOfStudy[]>('fos/fetchWithAuthFOS', async () => {
+    const response = await fetchWithAuth(API_ENDPOINTS.FIELD_OF_STUDIES);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -27,7 +28,7 @@ export const addFOS = createAsyncThunk<{
         name: fos.name,
         typ: fos.typ,
     };
-    const response = await fetch(API_ENDPOINTS.FIELD_OF_STUDIES, {
+    const response = await fetchWithAuth(API_ENDPOINTS.FIELD_OF_STUDIES, {
         method: 'POST', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(fosData),
@@ -47,7 +48,7 @@ export const updateFOS = createAsyncThunk<FieldOfStudy, FieldOfStudy>('fos/updat
         name: fos.name,
         typ: fos.typ,
     };
-    const response = await fetch(`${API_ENDPOINTS.FIELD_OF_STUDIES}/${fos.id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.FIELD_OF_STUDIES}/${fos.id}`, {
         method: 'PUT', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(fosData),
@@ -63,7 +64,7 @@ export const updateFOS = createAsyncThunk<FieldOfStudy, FieldOfStudy>('fos/updat
 });
 
 export const deleteFOS = createAsyncThunk<GridRowId, GridRowId>('fos/deleteFOS', async (id: GridRowId) => {
-    const response = await fetch(`${API_ENDPOINTS.FIELD_OF_STUDIES}/${id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.FIELD_OF_STUDIES}/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
@@ -99,7 +100,7 @@ const fieldOfStudySlice = createSlice({
             })
             .addCase(fetchFOS.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch field of studies';
+                state.error = action.error.message || 'Failed to fetchWithAuth field of studies';
             })
             .addCase(addFOS.fulfilled, (state, action) => {
                 const {tempId, fos} = action.payload;

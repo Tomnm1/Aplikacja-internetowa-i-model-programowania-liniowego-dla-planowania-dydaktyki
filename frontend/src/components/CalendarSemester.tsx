@@ -55,7 +55,7 @@ const CalendarSemester: FC<SemesterTableViewProps> = ({
         return Array.from(dayMap.keys()).sort((a, b) => dayToIndex[a] - dayToIndex[b]);
     }, [dayMap, dayToIndex]);
 
-    return (<Paper className="overflow-x-auto overflow-auto pt-2">
+    return (<Paper className="overflow-scroll custom-scrollbar pt-2">
         <Table
             stickyHeader
             className="table-fixed w-full"

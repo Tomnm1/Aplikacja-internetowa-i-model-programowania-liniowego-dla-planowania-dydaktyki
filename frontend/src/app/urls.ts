@@ -1,9 +1,10 @@
-const API_BASE = "http://localhost:8080";
+const API_BASE = "/api";
 
 export const API_ENDPOINTS = {
     BUILDINGS: `${API_BASE}/buildings`,
     CLASSROOMS: `${API_BASE}/classrooms`,
     TEACHERS: `${API_BASE}/teachers`,
+    TEACHERS_EMAIL: (email: string) => `${API_BASE}/teachers/email/${email}`,
     FIELD_OF_STUDIES: `${API_BASE}/fieldOfStudys`,
     SPECIALISATIONS: `${API_BASE}/specialisations`,
     SLOTS: `${API_BASE}/slots`,

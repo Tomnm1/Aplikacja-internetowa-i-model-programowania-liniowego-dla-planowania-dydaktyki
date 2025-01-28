@@ -25,6 +25,7 @@ import {useSnackbar} from 'notistack';
 import ActionButton from "../utils/ActionButton.tsx";
 import SaveIcon from "@mui/icons-material/Save";
 import ClearIcon from "@mui/icons-material/Clear";
+import {fetchWithAuth} from "../app/fetchWithAuth.ts";
 
 interface SlotsDayModalProps {
     open: boolean;
@@ -48,7 +49,7 @@ const SlotsDayModal: React.FC<SlotsDayModalProps> = ({open, onClose, slotsDay, i
 
     useEffect(() => {
         if (isAdding) {
-            fetch(API_ENDPOINTS.SLOTS)
+            fetchWithAuth(API_ENDPOINTS.SLOTS)
                 .then(res => res.json())
                 .then((data: BackendSlot[]) => setSlots(data))
                 .catch(err => {

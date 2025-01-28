@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import {useSnackbar} from 'notistack';
 import API_ENDPOINTS from '../app/urls.ts';
+import { fetchWithAuth } from '../app/fetchWithAuth.ts';
 
 interface PlanningProgress {
     progress: number;
@@ -49,7 +50,7 @@ const Home: React.FC = () => {
 
     const checkProgress = useCallback(async (currentJobId: string) => {
         try {
-            const res = await fetch(API_ENDPOINTS.PLANNING_PROGRESS(currentJobId), {
+            const res = await fetchWithAuth(API_ENDPOINTS.PLANNING_PROGRESS(currentJobId), {
                 method: 'GET', headers: {'Content-Type': 'application/json'}
             });
             console.log(res);
@@ -96,7 +97,7 @@ const Home: React.FC = () => {
     const startPlanning = async () => {
         setLoading(true);
         try {
-            const res = await fetch(API_ENDPOINTS.START_PLANNING, {
+            const res = await fetchWithAuth(API_ENDPOINTS.START_PLANNING, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({fieldOfStudyType, semesterType, planName})

@@ -24,6 +24,7 @@ import {RootState} from "../app/store.ts";
 import CalendarSemester from './CalendarSemester.tsx';
 import ClassroomTable from "./CalendarClassroom.tsx";
 import CalendarTeacher from "./CalendarTeacher.tsx";
+import {fetchWithAuth} from "../app/fetchWithAuth.ts";
 
 type ContextType = 'teacher' | 'semester' | 'classroom';
 
@@ -45,7 +46,7 @@ const colorPalette = ["#fbb4ae", "#b3cde3", "#ccebc5", "#decbe4", "#fed9a6", "#f
 
 const Timetable = () => {
     const [context, setContext] = useState<ContextType>('teacher');
-    const {userId, role} = useAppSelector((state: RootState) => state.auth);
+    const {user, role} = useAppSelector((state: RootState) => state.auth);
     const [selectedItem, setSelectedItem] = useState<{ id: number | undefined; label: string } | null>({
         id: undefined,
         label: ""
@@ -81,22 +82,22 @@ const Timetable = () => {
 
     useEffect(() => {
         setLoading(true);
-        Promise.all([fetch(API_ENDPOINTS.TEACHERS)
+        Promise.all([fetchWithAuth(API_ENDPOINTS.TEACHERS)
             .then((res) => res.json())
             .catch((error) => {
                 enqueueSnackbar(`Błąd podczas pobierania nauczycieli: ${error.message}`, {variant: 'error'});
                 return [];
-            }), fetch(API_ENDPOINTS.SEMESTERS)
+            }), fetchWithAuth(API_ENDPOINTS.SEMESTERS)
             .then((res) => res.json())
             .catch((error) => {
                 enqueueSnackbar(`Błąd podczas pobierania semestrow: ${error.message}`, {variant: 'error'});
                 return [];
-            }), fetch(API_ENDPOINTS.CLASSROOMS)
+            }), fetchWithAuth(API_ENDPOINTS.CLASSROOMS)
             .then((res) => res.json())
             .catch((error) => {
                 enqueueSnackbar(`Błąd podczas pobierania sal: ${error.message}`, {variant: 'error'});
                 return [];
-            }), fetch(API_ENDPOINTS.PLANS)
+            }), fetchWithAuth(API_ENDPOINTS.PLANS)
             .then((res) => res.json())
             .catch((error) => {
                 enqueueSnackbar(`Błąd podczas pobierania planów: ${error.message}`, {variant: 'error'});
@@ -118,17 +119,17 @@ const Timetable = () => {
     }, [enqueueSnackbar]);
 
     useEffect(() => {
-        if (role === 'user') {
+        if (role === 'ROLE_TEACHER') {
             setContext('teacher');
-            const foundTeacher = contextItems.teacher.find((teacher) => teacher.id!.toString() === userId);
+            const foundTeacher = contextItems.teacher.find((teacher) => teacher.id! === user!.id!);
             if (foundTeacher) {
                 setSelectedItem(foundTeacher);
             }
         }
-    }, [role, contextItems, userId]);
+    }, [role, contextItems, user]);
 
     useEffect(() => {
-        if (role === 'admin') {
+        if (role === 'ROLE_ADMIN') {
             console.log(selectedItem)
             if (contextItems[context] && contextItems[context].length > 0) {
                 setSelectedItem(contextItems[context][0]);
@@ -139,7 +140,7 @@ const Timetable = () => {
 
             setEvents([]);
         }
-    }, [context, contextItems, role, userId, plans, selectedPlan, selectedEvent]);
+    }, [context, contextItems, role, user, plans, selectedPlan, selectedEvent]);
 
     useEffect(() => {
         console.log(selectedItem)
@@ -177,7 +178,7 @@ const Timetable = () => {
                 if (selectedItem!.id === 0) {
                     endpoint = API_ENDPOINTS.GENERATED_PLAN_ALL(selectedPlan);
                 } else {
-                    endpoint = API_ENDPOINTS.GENERATED_PLAN_TEACHERS(selectedItem.id!, selectedPlan);
+                    endpoint = API_ENDPOINTS.GENERATED_PLAN_TEACHERS(role === "ROLE_ADMIN" ?  selectedItem.id! : user!.id!, selectedPlan);
                 }
                 break;
             case 'semester':
@@ -195,7 +196,7 @@ const Timetable = () => {
         }
 
         if (endpoint) {
-            fetch(endpoint)
+            fetchWithAuth(endpoint)
                 .then((res) => res.json())
                 .then((data: GeneratedPlanDTO[]) => {
                     const initialGroupedData: { [key: string]: any } = {};
@@ -516,7 +517,7 @@ const Timetable = () => {
 
 
     return (<div className={'py-8 px-2 w-full h-full'}>
-        {role === 'admin' && (<div className={'flex gap-2 w-full items-center'}>
+        {role === 'ROLE_ADMIN' && (<div className={'flex gap-2 w-full items-center'}>
             <FormControl sx={{width: 300}} disabled={loading}>
                 <InputLabel id="plan-label">Plan</InputLabel>
                 <Select

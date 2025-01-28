@@ -122,7 +122,7 @@ public class PlanningDataValidationService {
         if(teachers.isEmpty())
             return "Dla przedmiotu: " + subject.getName() + "_" + subject.getType() + " nie przypisano grup.";
         else{
-            Teacher teacher = teacherService.getteacherByID(Integer.parseInt(teachers.get(0))).get();
+            Teacher teacher = teacherService.getTeacherByID(Integer.parseInt(teachers.get(0))).get();
             return "Przypisanie " + teacher.firstName + " " + teacher.lastName + "dla przedmiotu: " + subject.getName()
                     + "_" + subject.getType() + " jest prawodpodobnie nadmiarowe. Proszę nie stosować nadmiarowych " +
                     "przypisań w całym systemie!";

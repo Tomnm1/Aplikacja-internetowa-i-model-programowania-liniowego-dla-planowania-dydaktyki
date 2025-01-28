@@ -2,13 +2,14 @@ import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {GridRowId, GridRowModesModel} from '@mui/x-data-grid';
 import {API_ENDPOINTS} from '../urls';
 import {Plan, PlanState} from '../../utils/Interfaces';
+import {fetchWithAuth} from "../fetchWithAuth.ts";
 
 const initialState: PlanState = {
     rows: [], rowModesModel: {}, selectedRowId: null, selectedRowCode: null, loading: false, error: null,
 };
 
-export const fetchPlans = createAsyncThunk<Plan[]>('plans/fetchPlans', async () => {
-    const response = await fetch(API_ENDPOINTS.PLANS);
+export const fetchPlans = createAsyncThunk<Plan[]>('plans/fetchWithAuthPlans', async () => {
+    const response = await fetchWithAuth(API_ENDPOINTS.PLANS);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -21,7 +22,7 @@ export const updatePlan = createAsyncThunk<Plan, Plan>('plans/updatePlan', async
         name: plan.name,
         published: plan.published,
     };
-    const response = await fetch(`${API_ENDPOINTS.PLANS}/${plan.planId}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.PLANS}/${plan.planId}`, {
         method: 'PUT', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(planData),
@@ -34,7 +35,7 @@ export const updatePlan = createAsyncThunk<Plan, Plan>('plans/updatePlan', async
 });
 
 export const deletePlan = createAsyncThunk<GridRowId, GridRowId>('plans/deletePlan', async (id: GridRowId) => {
-    const response = await fetch(`${API_ENDPOINTS.PLANS}/${id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.PLANS}/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) {

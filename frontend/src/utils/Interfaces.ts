@@ -64,27 +64,29 @@ export const typeMapping: { [key in Type]: string } = {
 export interface BackendTeacher {
     id?: number;
     firstName: string;
-    secondName: string;
+    secondName?: string;
     lastName: string;
     email?: string;
     degree: string;
+    isAdmin?: boolean;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
-    usosId: number;
-    innerId: number;
+    usosId?: number;
+    innerId?: number;
 }
 
 export interface Teacher {
     id: number;
     firstName: string;
-    secondName: string;
+    secondName?: string;
     lastName: string;
     email?: string;
     degree: string;
+    isAdmin?: boolean;
     preferences: { [key: string]: string };
     subjectTypesList: SubjectType[];
-    usosId: number;
-    innerId: number;
+    usosId?: number;
+    innerId?: number;
 }
 
 export interface TeachersState {
@@ -236,7 +238,7 @@ export interface Semester {
     cycle?: Cycle;
     fieldOfStudyTyp?: string;
     groupCount?: number;
-    typ: string;
+    typ?: string;
 }
 
 export interface BackendSemester {

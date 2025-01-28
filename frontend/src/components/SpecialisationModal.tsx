@@ -26,6 +26,7 @@ import {useSnackbar} from 'notistack';
 import ActionButton from "../utils/ActionButton.tsx";
 import SaveIcon from "@mui/icons-material/Save";
 import ClearIcon from "@mui/icons-material/Clear";
+import {fetchWithAuth} from "../app/fetchWithAuth.ts";
 
 interface SpecialisationModalProps {
     open: boolean;
@@ -52,7 +53,7 @@ const SpecialisationModal: React.FC<SpecialisationModalProps> = ({open, onClose,
     const [success, setSuccess] = useState<boolean>(false);
 
     useEffect(() => {
-        fetch(API_ENDPOINTS.FIELD_OF_STUDIES)
+        fetchWithAuth(API_ENDPOINTS.FIELD_OF_STUDIES)
             .then((res) => res.json())
             .then((data: BackendFieldOfStudies[]) => {
                 setFieldOfStudies(data);

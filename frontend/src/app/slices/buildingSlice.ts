@@ -2,13 +2,14 @@ import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {GridRowId, GridRowModesModel} from '@mui/x-data-grid';
 import {API_ENDPOINTS} from '../urls';
 import {BackendBuilding, Building, BuildingsState} from '../../utils/Interfaces';
+import {fetchWithAuth} from "../fetchWithAuth.ts";
 
 const initialState: BuildingsState = {
     rows: [], rowModesModel: {}, selectedRowId: null, selectedRowCode: null, loading: false, error: null,
 };
 
-export const fetchBuildings = createAsyncThunk<Building[]>('buildings/fetchBuildings', async () => {
-    const response = await fetch(API_ENDPOINTS.BUILDINGS);
+export const fetchBuildings = createAsyncThunk<Building[]>('buildings/fetchWithAuthBuildings', async () => {
+    const response = await fetchWithAuth(API_ENDPOINTS.BUILDINGS);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
@@ -26,7 +27,7 @@ export const addBuilding = createAsyncThunk<{
     const buildingData = {
         code: building.code,
     };
-    const response = await fetch(API_ENDPOINTS.BUILDINGS, {
+    const response = await fetchWithAuth(API_ENDPOINTS.BUILDINGS, {
         method: 'POST', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(buildingData),
@@ -45,7 +46,7 @@ export const updateBuilding = createAsyncThunk<Building, Building>('buildings/up
     const buildingData = {
         code: building.code,
     };
-    const response = await fetch(`${API_ENDPOINTS.BUILDINGS}/${building.id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.BUILDINGS}/${building.id}`, {
         method: 'PUT', headers: {
             'Content-Type': 'application/json',
         }, body: JSON.stringify(buildingData),
@@ -61,7 +62,7 @@ export const updateBuilding = createAsyncThunk<Building, Building>('buildings/up
 });
 
 export const deleteBuilding = createAsyncThunk<GridRowId, GridRowId>('buildings/deleteBuilding', async (id: GridRowId) => {
-    const response = await fetch(`${API_ENDPOINTS.BUILDINGS}/${id}`, {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.BUILDINGS}/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
@@ -97,7 +98,7 @@ const buildingSlice = createSlice({
             })
             .addCase(fetchBuildings.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || 'Failed to fetch buildings';
+                state.error = action.error.message || 'Failed to fetchWithAuth buildings';
             })
             .addCase(addBuilding.fulfilled, (state, action) => {
                 const {tempId, building} = action.payload;
