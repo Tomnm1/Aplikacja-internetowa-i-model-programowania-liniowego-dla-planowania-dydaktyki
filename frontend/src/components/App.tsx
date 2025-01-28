@@ -18,6 +18,7 @@ import Subjects from "./Subjects.tsx";
 import UserPlan from "./UserPlan.tsx";
 import Plans from "./Plans.tsx";
 import Login from "./Login.tsx";
+import Import from "./Import.tsx";
 
 const App: React.FC = () => {
 

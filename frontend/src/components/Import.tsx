@@ -6,6 +6,7 @@ import {useSnackbar} from 'notistack';
 import {MuiFileInput} from 'mui-file-input';
 import API_ENDPOINTS from '../app/urls.ts';
 import CloseIcon from '@mui/icons-material/Close';
+import {sendFile} from "../app/sendFile.ts";
 
 const Import: React.FC = () => {
     const {enqueueSnackbar} = useSnackbar();
@@ -55,7 +56,7 @@ const Import: React.FC = () => {
             formData.append('file', file);
 
             enqueueSnackbar('Rozpoczęto import pliku.', {variant: 'info'});
-            const res = await fetch(url, {
+            const res = await sendFile(url, {
                 method: 'POST', body: formData,
             });
 
